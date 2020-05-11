@@ -49,16 +49,13 @@ class DeleteGame extends base_1.BaseGame {
     }
 }
 exports.DeleteGame = DeleteGame;
-function runDeleteGame(nvim) {
+function runGame(game) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const bufferOutOfMyMind = yield nvim.buffer;
-            const state = base_1.newGameState(bufferOutOfMyMind);
-            const game = new DeleteGame(nvim, state);
             for (let i = 0; i < 3; ++i) {
                 yield game.debugTitle("Game is starting in", String(3 - i), "...");
             }
-            yield game.setTitle("Game Started: ", state.currentCount + 1, "/", state.ending.count);
+            yield game.setTitle("Game Started: ", game.state.currentCount + 1, "/", game.state.ending.count);
             yield game.clear();
             yield game.run();
             let start = Date.now();
@@ -80,20 +77,20 @@ function runDeleteGame(nvim) {
                     }
                     used = true;
                     try {
-                        if (!(yield game.checkForWin(state))) {
+                        if (!(yield game.checkForWin(game.state))) {
                             reset();
                             return;
                         }
-                        state.results.push(startOfFunction - start);
-                        if (state.currentCount >= state.ending.count) {
-                            yield game.setTitle(`Average!: ${state.results.reduce((x, y) => x + y, 0) / state.results.length}`);
+                        game.state.results.push(startOfFunction - start);
+                        if (game.state.currentCount >= game.state.ending.count) {
+                            yield game.setTitle(`Average!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`);
                             game.finish();
                             return;
                         }
                         else {
-                            yield game.setTitle(`Round ${state.currentCount + 1} / ${state.ending.count}`);
+                            yield game.setTitle(`Round ${game.state.currentCount + 1} / ${game.state.ending.count}`);
                         }
-                        state.currentCount++;
+                        game.state.currentCount++;
                         yield game.clear();
                         yield game.run();
                         start = Date.now();
@@ -107,18 +104,18 @@ function runDeleteGame(nvim) {
             game.onLines(onLineEvent);
         }
         catch (err) {
-            yield nvim.outWrite(`Failure ${err}\n`);
+            yield game.nvim.outWrite(`Failure ${err}\n`);
         }
     });
 }
-exports.runDeleteGame = runDeleteGame;
+exports.runGame = runGame;
 const availableGames = ["relative"];
 function default_1(plugin) {
     plugin.setOptions({
         dev: true,
         alwaysInit: true,
     });
-    plugin.registerCommand("VimBeGood", (args) => __awaiter(this, void 0, void 0, function* () {
+    plugin.registerCommand("VimBeGood2", (args) => __awaiter(this, void 0, void 0, function* () {
         try {
             const buffer = yield plugin.nvim.buffer;
             const length = yield buffer.length;
@@ -132,12 +129,18 @@ function default_1(plugin) {
                 plugin.nvim.errWriteLine("Your file is not empty.");
                 return;
             }
+            const bufferOutOfMyMind = yield plugin.nvim.buffer;
+            const state = base_1.newGameState(bufferOutOfMyMind);
+            let game;
             if (args[0] === "relative") {
-                yield runDeleteGame(plugin.nvim);
+                game = new DeleteGame(plugin.nvim, state);
             }
+            // TODO: ci?
             else {
-                yield plugin.nvim.outWrite("Available Games: " + availableGames.join() + "\n");
+                yield plugin.nvim.outWrite("VimBeGood: <gameName>  -- Available Games: " + availableGames.join() + "\n");
+                return;
             }
+            runGame(game);
         }
         catch (e) {
             yield plugin.nvim.outWrite("Error#" + args + " " + e.message);

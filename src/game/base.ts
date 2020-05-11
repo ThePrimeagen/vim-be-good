@@ -1,5 +1,6 @@
-import { Neovim, Buffer } from 'neovim';
+import * as fs from 'fs'
 
+import { Neovim, Buffer } from 'neovim';
 import { GameState } from './types';
 import wait from '../wait';
 import { join } from '../log';
@@ -17,8 +18,8 @@ export function newGameState(buffer: Buffer): GameState {
 
 export type LinesCallback = (args: any[]) => void;
 export abstract class BaseGame {
-    protected state: GameState;
-    protected nvim: Neovim;
+    public state: GameState;
+    public nvim: Neovim;
 
     private linesCallback?: LinesCallback;
     private listenLines: LinesCallback;
@@ -41,6 +42,7 @@ export abstract class BaseGame {
     }
 
     public finish() {
+        fs.writeFileSync("/tmp/relative-" + Date.now(), this.state.results.map(x => x + "\n").join(','));
         this.linesCallback = undefined;
         this.state.buffer.off("lines", this.listenLines);
     }

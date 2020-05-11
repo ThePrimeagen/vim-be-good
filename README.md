@@ -23,3 +23,18 @@ Ok, you are in an empty file, so first execute the following.
 This will echo out the available set of games.  Each game can take a set of
 options to change how it is played, the above help menu should include each game.
 
+## Future Games
+### cw, cf, ci(, ci{
+You would get displayed a set of txt where you have to replace FOO with BAR
+
+#### Example
+```
+do {
+
+    if (true) {
+        console.log(42);
+    }
+
+} while (fooFOOBar);
+```
+

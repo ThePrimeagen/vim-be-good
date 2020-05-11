@@ -3,6 +3,7 @@ import wait from './wait';
 import { GameState } from './game/types';
 import { BaseGame, newGameState } from './game/base';
 
+
 export class DeleteGame extends BaseGame {
     constructor(nvim: Neovim, state: GameState) {
         super(nvim, state);
@@ -41,21 +42,19 @@ export class DeleteGame extends BaseGame {
     }
 }
 
-export async function runDeleteGame(nvim: Neovim) {
+export async function runGame(game: BaseGame) {
     try {
-        const bufferOutOfMyMind = await nvim.buffer;
-        const state = newGameState(bufferOutOfMyMind);
-        const game = new DeleteGame(nvim, state);
-
         for (let i = 0; i < 3; ++i) {
             await game.debugTitle("Game is starting in", String(3 - i), "...");
         }
 
-        await game.setTitle("Game Started: ", state.currentCount + 1, "/", state.ending.count);
+        await game.setTitle("Game Started: ",
+                            game.state.currentCount + 1,
+                            "/", game.state.ending.count);
         await game.clear();
         await game.run();
-        let start = Date.now();
 
+        let start = Date.now();
         let missingCount = 0;
         let used = false;
         function reset() {
@@ -77,22 +76,22 @@ export async function runDeleteGame(nvim: Neovim) {
             used = true;
 
             try {
-                if (!(await game.checkForWin(state))) {
+                if (!(await game.checkForWin(game.state))) {
                     reset();
                     return;
                 }
 
-                state.results.push(startOfFunction - start);
-                if (state.currentCount >= state.ending.count) {
-                    await game.setTitle(`Average!: ${state.results.reduce((x, y) => x + y, 0) / state.results.length}`);
+                game.state.results.push(startOfFunction - start);
+                if (game.state.currentCount >= game.state.ending.count) {
+                    await game.setTitle(`Average!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`);
                     game.finish();
                     return;
                 }
                 else {
-                    await game.setTitle(`Round ${state.currentCount + 1} / ${state.ending.count}`);
+                    await game.setTitle(`Round ${game.state.currentCount + 1} / ${game.state.ending.count}`);
                 }
 
-                state.currentCount++;
+                game.state.currentCount++;
 
                 await game.clear();
                 await game.run();
@@ -105,7 +104,7 @@ export async function runDeleteGame(nvim: Neovim) {
 
         game.onLines(onLineEvent);
     } catch (err) {
-        await nvim.outWrite(`Failure ${err}\n`);
+        await game.nvim.outWrite(`Failure ${err}\n`);
     }
 }
 
@@ -116,7 +115,7 @@ export default function(plugin: NvimPlugin) {
         alwaysInit: true,
     });
 
-    plugin.registerCommand("VimBeGood", async (args: string[]) => {
+    plugin.registerCommand("VimBeGood2", async (args: string[]) => {
         try {
             const buffer = await plugin.nvim.buffer;
             const length = await buffer.length;
@@ -133,12 +132,22 @@ export default function(plugin: NvimPlugin) {
                 return;
             }
 
+            const bufferOutOfMyMind = await plugin.nvim.buffer;
+            const state = newGameState(bufferOutOfMyMind);
+            let game: BaseGame;
+
             if (args[0] === "relative") {
-                await runDeleteGame(plugin.nvim);
+                game = new DeleteGame(plugin.nvim, state);
             }
+
+            // TODO: ci?
             else {
-                await plugin.nvim.outWrite("Available Games: " + availableGames.join() + "\n");
+                await plugin.nvim.outWrite("VimBeGood: <gameName>  -- Available Games: " + availableGames.join() + "\n");
+                return;
             }
+
+            runGame(game);
+
         } catch (e) {
             await plugin.nvim.outWrite("Error#" + args + " " + e.message);
         }
