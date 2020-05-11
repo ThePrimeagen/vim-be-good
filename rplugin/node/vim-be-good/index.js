@@ -8,32 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const wait_1 = __importDefault(require("./wait"));
-function log(nvim, ...args) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield nvim.outWrite(join(...args));
-    });
-}
-exports.log = log;
-class DeleteGame {
+const base_1 = require("./game/base");
+class DeleteGame extends base_1.BaseGame {
     constructor(nvim, state) {
-        this.state = state;
-        this.nvim = nvim;
-    }
-    pickRandomLine() {
-        return ~~(this.state.lineRange.start + Math.random() * this.state.lineLength);
-    }
-    midPointRandomPoint(midPoint, high) {
-        let line;
-        do {
-            line = this.pickRandomLine();
-        } while (high && line > midPoint ||
-            !high && line < midPoint);
-        return line;
+        super(nvim, state);
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -57,11 +36,6 @@ class DeleteGame {
             yield this.state.buffer.insert(new Array(this.state.lineRange.end).fill(''), 0);
         });
     }
-    write(...args) {
-        return __awaiter(this, void 0, void 0, function* () {
-            log(this.nvim, ...args);
-        });
-    }
     checkForWin(state) {
         return __awaiter(this, void 0, void 0, function* () {
             const lines = yield state.buffer.getLines({
@@ -75,49 +49,16 @@ class DeleteGame {
     }
 }
 exports.DeleteGame = DeleteGame;
-function join(...args) {
-    return args.
-        map(x => typeof x === 'object' ? JSON.stringify(x) : x).
-        join(' ');
-}
-exports.join = join;
-function debugTitle(state, ...title) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield setTitle(state, ...title);
-        yield wait_1.default(1000);
-    });
-}
-function setTitle(state, ...title) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield state.buffer.
-            setLines(join(...title), {
-            start: 0,
-            end: 1
-        });
-    });
-}
-function newGameState(buffer) {
-    return {
-        buffer,
-        ending: { count: 10 },
-        currentCount: 0,
-        lineRange: { start: 2, end: 22 },
-        lineLength: 20,
-        results: [],
-    };
-}
-exports.newGameState = newGameState;
 function runDeleteGame(nvim) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield log(nvim, "Does this work?");
             const bufferOutOfMyMind = yield nvim.buffer;
-            const state = newGameState(bufferOutOfMyMind);
-            for (let i = 0; i < 3; ++i) {
-                yield debugTitle(state, "Game is starting in", String(3 - i), "...");
-            }
+            const state = base_1.newGameState(bufferOutOfMyMind);
             const game = new DeleteGame(nvim, state);
-            yield setTitle(state, "Game Started: ", state.currentCount + 1, "/", state.ending.count);
+            for (let i = 0; i < 3; ++i) {
+                yield game.debugTitle("Game is starting in", String(3 - i), "...");
+            }
+            yield game.setTitle("Game Started: ", state.currentCount + 1, "/", state.ending.count);
             yield game.clear();
             yield game.run();
             let start = Date.now();
@@ -145,15 +86,12 @@ function runDeleteGame(nvim) {
                         }
                         state.results.push(startOfFunction - start);
                         if (state.currentCount >= state.ending.count) {
-                            console.log("Results");
-                            state.results.forEach(x => console.log(x));
-                            yield setTitle(state, `Average!: ${state.results.reduce((x, y) => x + y, 0) / state.results.length}`);
-                            bufferOutOfMyMind.off("lines", onLineEvent);
+                            yield game.setTitle(`Average!: ${state.results.reduce((x, y) => x + y, 0) / state.results.length}`);
+                            game.finish();
                             return;
                         }
                         else {
-                            console.log("setTitle", `Round ${state.currentCount + 1} / ${state.ending.count}`);
-                            yield setTitle(state, `Round ${state.currentCount + 1} / ${state.ending.count}`);
+                            yield game.setTitle(`Round ${state.currentCount + 1} / ${state.ending.count}`);
                         }
                         state.currentCount++;
                         yield game.clear();
@@ -161,12 +99,12 @@ function runDeleteGame(nvim) {
                         start = Date.now();
                     }
                     catch (e) {
-                        debugTitle(state, "onLineEvent#error", e.message);
+                        game.debugTitle("onLineEvent#error", e.message);
                     }
                     reset();
                 });
             }
-            bufferOutOfMyMind.listen("lines", onLineEvent);
+            game.onLines(onLineEvent);
         }
         catch (err) {
             yield nvim.outWrite(`Failure ${err}\n`);
@@ -174,31 +112,37 @@ function runDeleteGame(nvim) {
     });
 }
 exports.runDeleteGame = runDeleteGame;
-function setRepl() {
-    return __awaiter(this, void 0, void 0, function* () {
-        //@ts-ignore
-        require('neovim/scripts/nvim').then((n) => global.nvim = n);
-    });
-}
-exports.setRepl = setRepl;
-module.exports = (plugin) => {
+const availableGames = ["relative"];
+function default_1(plugin) {
     plugin.setOptions({
         dev: true,
         alwaysInit: true,
     });
-    plugin.registerCommand('VimBeGood2', (args) => __awaiter(void 0, void 0, void 0, function* () {
+    plugin.registerCommand("VimBeGood", (args) => __awaiter(this, void 0, void 0, function* () {
         try {
+            const buffer = yield plugin.nvim.buffer;
+            const length = yield buffer.length;
+            const lines = yield buffer.getLines({
+                start: 0,
+                end: length,
+                strictIndexing: true
+            });
+            const lengthOfLines = lines.reduce((acc, x) => acc + x, "").trim().length;
+            if (lengthOfLines > 0) {
+                plugin.nvim.errWriteLine("Your file is not empty.");
+                return;
+            }
             if (args[0] === "relative") {
-                runDeleteGame(plugin.nvim);
+                yield runDeleteGame(plugin.nvim);
             }
             else {
-                yield plugin.nvim.outWrite('You did not do anything ' + args + '\n');
-                yield wait_1.default(1000);
-                yield plugin.nvim.outWrite('type of args = ' + typeof args + '\n');
+                yield plugin.nvim.outWrite("Available Games: " + availableGames.join() + "\n");
             }
         }
         catch (e) {
             yield plugin.nvim.outWrite("Error#" + args + " " + e.message);
         }
     }), { sync: false, nargs: "*" });
-};
+}
+exports.default = default_1;
+;
