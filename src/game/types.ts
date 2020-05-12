@@ -1,5 +1,6 @@
 import { Buffer } from 'neovim';
 
+// This comment is important
 export enum GameDifficulty {
     Easy = 'easy',
     Medium = 'medium',
@@ -7,10 +8,13 @@ export enum GameDifficulty {
     Nightmare = 'nightmare',
 }
 
+
+// This comment is not imporant
 export type GameOptions = {
     difficulty: GameDifficulty;
 };
 
+// this comment must be kept
 export function parseGameDifficulty(
     diff: string, defaultValue = GameDifficulty.Easy): GameDifficulty {
 
