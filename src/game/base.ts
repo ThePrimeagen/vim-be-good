@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 
 import { Neovim, Buffer } from 'neovim';
-import { GameState } from './types';
+import { GameState, GameOptions, GameDifficulty } from './types';
 import wait from '../wait';
 import { join } from '../log';
 
@@ -16,7 +16,41 @@ export function newGameState(buffer: Buffer): GameState {
     }
 }
 
+export const extraWords = [
+    "aar",
+    "bar",
+    "car",
+    "dar",
+    "ear",
+    "far",
+    "gar",
+    "har",
+    "iar",
+    "jar",
+    "kar",
+    "lar",
+    "mar",
+    "nar",
+    "oar",
+    "par",
+    "qar",
+    "rar",
+    "sar",
+    "tar",
+    "uar",
+    "var",
+    "war",
+    "xar",
+    "yar",
+    "zar",
+];
+
+export function getRandomWord() {
+    return extraWords[Math.floor(Math.random() * extraWords.length)];
+}
+
 export type LinesCallback = (args: any[]) => void;
+
 export abstract class BaseGame {
     public state: GameState;
     public nvim: Neovim;
@@ -24,7 +58,10 @@ export abstract class BaseGame {
     private linesCallback?: LinesCallback;
     private listenLines: LinesCallback;
 
-    constructor(nvim: Neovim, state: GameState) {
+    constructor(nvim: Neovim, state: GameState, opts: GameOptions = {
+        difficulty: GameDifficulty.Easy
+    }) {
+
         this.state = state;
         this.nvim = nvim;
 
@@ -51,18 +88,18 @@ export abstract class BaseGame {
         return ~~(this.state.lineRange.start + Math.random() * this.state.lineLength);
     }
 
-    protected midPointRandomPoint(midPoint: number, high: boolean) {
+    protected midPointRandomPoint(midPoint: number, high: boolean, padding = 0) {
         let line: number;
         do {
             line = this.pickRandomLine();
-        } while (high && line > midPoint ||
-                 !high && line < midPoint);
+        } while (high && (line + padding) > midPoint ||
+                 !high && (line + padding) < midPoint);
         return line;
     }
 
     abstract run(): Promise<void>;
     abstract clear(): Promise<void>;
-    abstract checkForWin(state: GameState): Promise<boolean>;
+    abstract checkForWin(): Promise<boolean>;
 
     async debugTitle(...title: any[]) {
         await this.setTitle(...title);

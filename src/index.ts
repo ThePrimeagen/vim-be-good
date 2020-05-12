@@ -1,21 +1,45 @@
 import { Neovim, NvimPlugin, Buffer } from 'neovim';
 import wait from './wait';
-import { GameState, GameOptions } from './game/types';
-import { BaseGame, newGameState } from './game/base';
+import { GameState, GameOptions, parseGameDifficulty } from './game/types';
+import { BaseGame, newGameState, getRandomWord } from './game/base';
+import { DeleteGame } from './game/delete';
 
-export class DeleteGame extends BaseGame {
-    constructor(nvim: Neovim, state: GameState, opts: GameOptions = {
-        difficulty: 'easy'
-    }) {
-        super(nvim, state);
+
+export class CfGame extends BaseGame {
+    private currentRandomWord: string;
+    private ifStatment: boolean;
+    constructor(nvim: Neovim, state: GameState, opts?: GameOptions) {
+        super(nvim, state, opts);
+        this.currentRandomWord = "";
     }
 
     async run() {
         const high = Math.random() > 0.5;
         const midPoint = this.state.lineLength / 2 + this.state.lineRange.start;
-        const line = this.midPointRandomPoint(midPoint, high);
+        const line = this.midPointRandomPoint(midPoint, high, 6);
+
         const lines = new Array(this.state.lineLength).fill('');
-        lines[line] = "                              DELETE ME";
+
+        this.currentRandomWord = getRandomWord();
+
+        this.ifStatment = false;
+        if (Math.random() > 0.5) {
+            lines[line] = `if (${this.currentRandomWord}) {`;
+            lines[line + 1] = ``;
+            lines[line + 2] = `    if (${getRandomWord()}) { `;
+            lines[line + 3] = `        ${getRandomWord()}`;
+            lines[line + 4] = `    }`;
+            lines[line + 5] = `}`;
+            this.ifStatment = true;
+        }
+        else {
+            lines[line] = `[`;
+            lines[line + 1] = `    ${getRandomWord()},`;
+            lines[line + 2] = `    ${getRandomWord()},`;
+            lines[line + 3] = `    ${getRandomWord()},`;
+            lines[line + 4] = `    ${getRandomWord()},`;
+            lines[line + 5] = `]`;
+        }
 
         await this.nvim.command(`:${String(this.midPointRandomPoint(midPoint, !high))}`);
         await this.state.buffer.setLines(lines, {
@@ -29,17 +53,20 @@ export class DeleteGame extends BaseGame {
         const len = await this.state.buffer.length;
         await this.state.buffer.remove(0, len, true);
         await this.state.buffer.insert(new Array(this.state.lineRange.end).fill(''), 0);
+        await this.nvim.command("normal!<C-[>");
     }
 
-    async checkForWin(state: GameState): Promise<boolean> {
-        const lines = await state.buffer.getLines({
-            start: state.lineRange.start,
-            end: await state.buffer.length,
+    async checkForWin(): Promise<boolean> {
+        const lines = await this.state.buffer.getLines({
+            start: this.state.lineRange.start,
+            end: await this.state.buffer.length,
             strictIndexing: false
         });
 
-        const length = lines.map(l => l.trim()).join('').length;
-        return length === 0;
+        const contents = lines.map(l => l.trim()).join('');
+
+        return this.ifStatment && contents.toLowerCase() === `if (${this.currentRandomWord}) {bar}` ||
+            contents.toLowerCase() === `[bar]`;
     }
 }
 
@@ -77,7 +104,7 @@ export async function runGame(game: BaseGame) {
             used = true;
 
             try {
-                if (!(await game.checkForWin(game.state))) {
+                if (!(await game.checkForWin())) {
                     reset();
                     return;
                 }
@@ -109,7 +136,7 @@ export async function runGame(game: BaseGame) {
     }
 }
 
-const availableGames = ["relative"];
+const availableGames = ["relative", "ci{"];
 export default function(plugin: NvimPlugin) {
     plugin.setOptions({
         dev: true,
@@ -135,10 +162,15 @@ export default function(plugin: NvimPlugin) {
 
             const bufferOutOfMyMind = await plugin.nvim.buffer;
             const state = newGameState(bufferOutOfMyMind);
+            const difficulty = parseGameDifficulty(args[1]);
+
             let game: BaseGame;
 
             if (args[0] === "relative") {
-                game = new DeleteGame(plugin.nvim, state);
+                game = new DeleteGame(plugin.nvim, state, {difficulty});
+            }
+            else if (args[0] === "ci{") {
+                game = new CfGame(plugin.nvim, state, {difficulty});
             }
 
             // TODO: ci?

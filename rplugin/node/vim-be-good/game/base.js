@@ -20,6 +20,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
+const types_1 = require("./types");
 const wait_1 = __importDefault(require("../wait"));
 const log_1 = require("../log");
 function newGameState(buffer) {
@@ -33,8 +34,42 @@ function newGameState(buffer) {
     };
 }
 exports.newGameState = newGameState;
+exports.extraWords = [
+    "aar",
+    "bar",
+    "car",
+    "dar",
+    "ear",
+    "far",
+    "gar",
+    "har",
+    "iar",
+    "jar",
+    "kar",
+    "lar",
+    "mar",
+    "nar",
+    "oar",
+    "par",
+    "qar",
+    "rar",
+    "sar",
+    "tar",
+    "uar",
+    "var",
+    "war",
+    "xar",
+    "yar",
+    "zar",
+];
+function getRandomWord() {
+    return exports.extraWords[Math.floor(Math.random() * exports.extraWords.length)];
+}
+exports.getRandomWord = getRandomWord;
 class BaseGame {
-    constructor(nvim, state) {
+    constructor(nvim, state, opts = {
+        difficulty: types_1.GameDifficulty.Easy
+    }) {
         this.state = state;
         this.nvim = nvim;
         this.listenLines = (args) => {
@@ -55,12 +90,12 @@ class BaseGame {
     pickRandomLine() {
         return ~~(this.state.lineRange.start + Math.random() * this.state.lineLength);
     }
-    midPointRandomPoint(midPoint, high) {
+    midPointRandomPoint(midPoint, high, padding = 0) {
         let line;
         do {
             line = this.pickRandomLine();
-        } while (high && line > midPoint ||
-            !high && line < midPoint);
+        } while (high && (line + padding) > midPoint ||
+            !high && (line + padding) < midPoint);
         return line;
     }
     debugTitle(...title) {

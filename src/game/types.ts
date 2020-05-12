@@ -1,8 +1,37 @@
 import { Buffer } from 'neovim';
 
-export type OptionsGame = {
-    difficulty: 'easy' | 'medium' | 'hard' | 'nightmare';
+export enum GameDifficulty {
+    Easy = 'easy',
+    Medium = 'medium',
+    Hard = 'hard',
+    Nightmare = 'nightmare',
+}
+
+export type GameOptions = {
+    difficulty: GameDifficulty;
 };
+
+export function parseGameDifficulty(
+    diff: string, defaultValue = GameDifficulty.Easy): GameDifficulty {
+
+    let difficulty = defaultValue;
+    switch (diff) {
+        case 'easy':
+            difficulty = GameDifficulty.Easy;
+            break;
+        case 'medium':
+            difficulty = GameDifficulty.Medium;
+            break;
+        case 'hard':
+            difficulty = GameDifficulty.Hard;
+            break;
+        case 'nightmare':
+            difficulty = GameDifficulty.Nightmare;
+            break;
+    }
+
+    return difficulty;
+}
 
 export type GameState = {
     buffer: Buffer;

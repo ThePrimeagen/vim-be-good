@@ -10,6 +10,8 @@ vim.
 Plug 'ThePrimeagen/vim-be-good'
 ```
 
+Then execute `:UpdateRemotePlugins` to finish the installation process.
+
 ## Playing the games.
 Before doing ANYTHING at all, make sure you are in an empty file.  If the file
 you are in is not empty, VimBeGood will throw an error.

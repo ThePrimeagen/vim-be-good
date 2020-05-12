@@ -9,18 +9,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const types_1 = require("./game/types");
 const base_1 = require("./game/base");
-class DeleteGame extends base_1.BaseGame {
-    constructor(nvim, state) {
-        super(nvim, state);
+const delete_1 = require("./game/delete");
+class CfGame extends base_1.BaseGame {
+    constructor(nvim, state, opts) {
+        super(nvim, state, opts);
+        this.currentRandomWord = "";
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             const high = Math.random() > 0.5;
             const midPoint = this.state.lineLength / 2 + this.state.lineRange.start;
-            const line = this.midPointRandomPoint(midPoint, high);
+            const line = this.midPointRandomPoint(midPoint, high, 6);
             const lines = new Array(this.state.lineLength).fill('');
-            lines[line] = "                              DELETE ME";
+            this.currentRandomWord = base_1.getRandomWord();
+            this.ifStatment = false;
+            if (Math.random() > 0.5) {
+                lines[line] = `if (${this.currentRandomWord}) {`;
+                lines[line + 1] = ``;
+                lines[line + 2] = `    if (${base_1.getRandomWord()}) { `;
+                lines[line + 3] = `        ${base_1.getRandomWord()}`;
+                lines[line + 4] = `    }`;
+                lines[line + 5] = `}`;
+                this.ifStatment = true;
+            }
+            else {
+                lines[line] = `[`;
+                lines[line + 1] = `    ${base_1.getRandomWord()},`;
+                lines[line + 2] = `    ${base_1.getRandomWord()},`;
+                lines[line + 3] = `    ${base_1.getRandomWord()},`;
+                lines[line + 4] = `    ${base_1.getRandomWord()},`;
+                lines[line + 5] = `]`;
+            }
             yield this.nvim.command(`:${String(this.midPointRandomPoint(midPoint, !high))}`);
             yield this.state.buffer.setLines(lines, {
                 start: this.state.lineRange.start,
@@ -34,21 +55,23 @@ class DeleteGame extends base_1.BaseGame {
             const len = yield this.state.buffer.length;
             yield this.state.buffer.remove(0, len, true);
             yield this.state.buffer.insert(new Array(this.state.lineRange.end).fill(''), 0);
+            yield this.nvim.command("normal!<C-[>");
         });
     }
-    checkForWin(state) {
+    checkForWin() {
         return __awaiter(this, void 0, void 0, function* () {
-            const lines = yield state.buffer.getLines({
-                start: state.lineRange.start,
-                end: yield state.buffer.length,
+            const lines = yield this.state.buffer.getLines({
+                start: this.state.lineRange.start,
+                end: yield this.state.buffer.length,
                 strictIndexing: false
             });
-            const length = lines.map(l => l.trim()).join('').length;
-            return length === 0;
+            const contents = lines.map(l => l.trim()).join('');
+            return this.ifStatment && contents.toLowerCase() === `if (${this.currentRandomWord}) {bar}` ||
+                contents.toLowerCase() === `[bar]`;
         });
     }
 }
-exports.DeleteGame = DeleteGame;
+exports.CfGame = CfGame;
 function runGame(game) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -77,7 +100,7 @@ function runGame(game) {
                     }
                     used = true;
                     try {
-                        if (!(yield game.checkForWin(game.state))) {
+                        if (!(yield game.checkForWin())) {
                             reset();
                             return;
                         }
@@ -109,7 +132,7 @@ function runGame(game) {
     });
 }
 exports.runGame = runGame;
-const availableGames = ["relative"];
+const availableGames = ["relative", "ci{"];
 function default_1(plugin) {
     plugin.setOptions({
         dev: true,
@@ -131,9 +154,13 @@ function default_1(plugin) {
             }
             const bufferOutOfMyMind = yield plugin.nvim.buffer;
             const state = base_1.newGameState(bufferOutOfMyMind);
+            const difficulty = types_1.parseGameDifficulty(args[1]);
             let game;
             if (args[0] === "relative") {
-                game = new DeleteGame(plugin.nvim, state);
+                game = new delete_1.DeleteGame(plugin.nvim, state, { difficulty });
+            }
+            else if (args[0] === "ci{") {
+                game = new CfGame(plugin.nvim, state, { difficulty });
             }
             // TODO: ci?
             else {
