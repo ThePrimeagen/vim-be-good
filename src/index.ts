@@ -1,11 +1,12 @@
 import { Neovim, NvimPlugin, Buffer } from 'neovim';
 import wait from './wait';
-import { GameState } from './game/types';
+import { GameState, GameOptions } from './game/types';
 import { BaseGame, newGameState } from './game/base';
 
-
 export class DeleteGame extends BaseGame {
-    constructor(nvim: Neovim, state: GameState) {
+    constructor(nvim: Neovim, state: GameState, opts: GameOptions = {
+        difficulty: 'easy'
+    }) {
         super(nvim, state);
     }
 
