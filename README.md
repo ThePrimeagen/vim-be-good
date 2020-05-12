@@ -2,6 +2,16 @@
 Vim be good is a plugin designed to make you better at vim by creating a game
 to practice basic movements in.
 
+## Warning no instructions on games currently
+Working on that next or one of these days.
+
+To play `relative` you need to delete the line that
+says `DELETE ME`.  Use relative jumps
+
+To play `ci{` you need to replace the contents
+inside the _first_ { or [ with bar.  HINT, use ci[
+or ci{ and type bar.
+
 ## Installation
 Use your favorite plugin manager to install!  Only works on Nvim, the one true
 vim.
