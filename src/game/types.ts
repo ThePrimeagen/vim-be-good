@@ -1,6 +1,6 @@
 import { Buffer } from 'neovim';
 
-export type GameOptions = {
+export type GameGameOptions = {
     difficulty: 'easy' | 'medium' | 'hard' | 'nightmare';
 };
 
