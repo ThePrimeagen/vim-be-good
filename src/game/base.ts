@@ -5,6 +5,7 @@ import { GameState, GameOptions, GameDifficulty } from './types';
 import wait from '../wait';
 import { join } from '../log';
 
+// this is a comment
 export function newGameState(buffer: Buffer): GameState {
     return {
         buffer,

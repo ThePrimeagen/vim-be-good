@@ -2,6 +2,7 @@ import { Neovim } from 'neovim';
 import { GameState, GameOptions } from './types';
 import { BaseGame } from './base';
 
+// this is a comment
 export class DeleteGame extends BaseGame {
     constructor(nvim: Neovim, state: GameState, opts?: GameOptions) {
         super(nvim, state, opts);

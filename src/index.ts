@@ -4,7 +4,7 @@ import { GameState, GameOptions, parseGameDifficulty } from './game/types';
 import { BaseGame, newGameState, getRandomWord } from './game/base';
 import { DeleteGame } from './game/delete';
 
-
+// this is a comment
 export class CfGame extends BaseGame {
     private currentRandomWord: string;
     private ifStatment: boolean;
