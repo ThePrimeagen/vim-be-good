@@ -12,6 +12,10 @@ To play `ci{` you need to replace the contents
 inside the _first_ { or [ with bar.  HINT, use ci[
 or ci{ and type bar.
 
+To play `whackamole` you need to navigate to the character with the caret under
+it as fast as possible. Once you have reached the character, flip the
+character's case to complete the round.
+
 ## Installation
 Use your favorite plugin manager to install!  Only works on Nvim, the one true
 vim.
