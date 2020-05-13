@@ -23,6 +23,7 @@ const fs = __importStar(require("fs"));
 const types_1 = require("./types");
 const wait_1 = __importDefault(require("../wait"));
 const log_1 = require("../log");
+// this is a comment
 function newGameState(buffer) {
     return {
         buffer,

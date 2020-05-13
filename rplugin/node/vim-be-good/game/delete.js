@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const base_1 = require("./base");
+// this is a comment
 class DeleteGame extends base_1.BaseGame {
     constructor(nvim, state, opts) {
         super(nvim, state, opts);
