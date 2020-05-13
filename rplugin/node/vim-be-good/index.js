@@ -12,10 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("./game/types");
 const base_1 = require("./game/base");
 const delete_1 = require("./game/delete");
+const whackamole_1 = require("./game/whackamole");
 class CfGame extends base_1.BaseGame {
     constructor(nvim, state, opts) {
         super(nvim, state, opts);
         this.currentRandomWord = "";
+        this.ifStatment = false;
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -106,6 +108,7 @@ function runGame(game) {
                         }
                         game.state.results.push(startOfFunction - start);
                         if (game.state.currentCount >= game.state.ending.count) {
+                            yield game.gameOver();
                             yield game.setTitle(`Average!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`);
                             game.finish();
                             return;
@@ -132,7 +135,7 @@ function runGame(game) {
     });
 }
 exports.runGame = runGame;
-const availableGames = ["relative", "ci{"];
+const availableGames = ["relative", "ci{", "whackamole"];
 function default_1(plugin) {
     plugin.setOptions({
         dev: true,
@@ -153,7 +156,8 @@ function default_1(plugin) {
                 return;
             }
             const bufferOutOfMyMind = yield plugin.nvim.buffer;
-            const state = base_1.newGameState(bufferOutOfMyMind);
+            const windowIntoPrimesMind = yield plugin.nvim.window;
+            const state = base_1.newGameState(bufferOutOfMyMind, windowIntoPrimesMind);
             const difficulty = types_1.parseGameDifficulty(args[1]);
             let game;
             if (args[0] === "relative") {
@@ -161,6 +165,9 @@ function default_1(plugin) {
             }
             else if (args[0] === "ci{") {
                 game = new CfGame(plugin.nvim, state, { difficulty });
+            }
+            else if (args[0] === "whackamole") {
+                game = new whackamole_1.WhackAMoleGame(plugin.nvim, state, { difficulty });
             }
             // TODO: ci?
             else {

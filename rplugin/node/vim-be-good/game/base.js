@@ -23,9 +23,10 @@ const fs = __importStar(require("fs"));
 const types_1 = require("./types");
 const wait_1 = __importDefault(require("../wait"));
 const log_1 = require("../log");
-function newGameState(buffer) {
+function newGameState(buffer, window) {
     return {
         buffer,
+        window,
         ending: { count: 10 },
         currentCount: 0,
         lineRange: { start: 2, end: 22 },
@@ -62,10 +63,24 @@ exports.extraWords = [
     "yar",
     "zar",
 ];
+exports.extraSentences = [
+    "One is the best Prime Number",
+    "Primeagen is the best One",
+    "I Twitch when I think about the Discord",
+    "My dog is also my dawg",
+    "The internet is an amazing place full of interesting facts",
+    "Did you know the internet crosses continental boundaries using a wire?!",
+    "I am out of interesting facts to type here",
+    "Others should contribute more sentences to be used in the game"
+];
 function getRandomWord() {
     return exports.extraWords[Math.floor(Math.random() * exports.extraWords.length)];
 }
 exports.getRandomWord = getRandomWord;
+function getRandomSentence() {
+    return exports.extraSentences[Math.floor(Math.random() * exports.extraSentences.length)];
+}
+exports.getRandomSentence = getRandomSentence;
 class BaseGame {
     constructor(nvim, state, opts = {
         difficulty: types_1.GameDifficulty.Easy
@@ -86,6 +101,11 @@ class BaseGame {
         fs.writeFileSync("/tmp/relative-" + Date.now(), this.state.results.map(x => x + "\n").join(','));
         this.linesCallback = undefined;
         this.state.buffer.off("lines", this.listenLines);
+    }
+    gameOver() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // no op which can be optionally utilized by subclasses
+        });
     }
     pickRandomLine() {
         return ~~(this.state.lineRange.start + Math.random() * this.state.lineLength);
