@@ -13,10 +13,12 @@ const types_1 = require("./game/types");
 const base_1 = require("./game/base");
 const delete_1 = require("./game/delete");
 const whackamole_1 = require("./game/whackamole");
+const menu_1 = require("./menu");
 // this is a comment
 class CfGame extends base_1.BaseGame {
     constructor(nvim, state, opts) {
         super(nvim, state, opts);
+        this.ifStatment = false;
         this.currentRandomWord = "";
         this.ifStatment = false;
     }
@@ -136,7 +138,24 @@ function runGame(game) {
     });
 }
 exports.runGame = runGame;
+function initializeGame(name, difficulty, plugin, state) {
+    let game = null;
+    if (name === "relative") {
+        game = new delete_1.DeleteGame(plugin.nvim, state, { difficulty });
+    }
+    else if (name === "ci{") {
+        game = new CfGame(plugin.nvim, state, { difficulty });
+    }
+    else if (name === "whackamole") {
+        game = new whackamole_1.WhackAMoleGame(plugin.nvim, state, { difficulty });
+    }
+    if (game) {
+        runGame(game);
+    }
+    ;
+}
 const availableGames = ["relative", "ci{", "whackamole"];
+const availableDifficulties = ["easy", "medium", "hard", "nightmare"];
 function default_1(plugin) {
     plugin.setOptions({
         dev: true,
@@ -159,23 +178,22 @@ function default_1(plugin) {
             const bufferOutOfMyMind = yield plugin.nvim.buffer;
             const windowIntoPrimesMind = yield plugin.nvim.window;
             const state = base_1.newGameState(bufferOutOfMyMind, windowIntoPrimesMind);
-            const difficulty = types_1.parseGameDifficulty(args[1]);
-            let game;
-            if (args[0] === "relative") {
-                game = new delete_1.DeleteGame(plugin.nvim, state, { difficulty });
-            }
-            else if (args[0] === "ci{") {
-                game = new CfGame(plugin.nvim, state, { difficulty });
-            }
-            else if (args[0] === "whackamole") {
-                game = new whackamole_1.WhackAMoleGame(plugin.nvim, state, { difficulty });
+            let difficulty = types_1.parseGameDifficulty(args[1]);
+            if (availableGames.indexOf(args[0]) >= 0) {
+                initializeGame(args[0], difficulty, plugin, state);
             }
             // TODO: ci?
             else {
-                yield plugin.nvim.outWrite("VimBeGood: <gameName>  -- Available Games: " + availableGames.join() + "\n");
+                const menu = yield menu_1.Menu.build(plugin, availableGames, availableDifficulties, difficulty);
+                menu.onGameSelection((gameName) => {
+                    initializeGame(gameName, difficulty, plugin, state);
+                });
+                menu.onDifficultySelection((newDifficulty) => {
+                    difficulty = types_1.parseGameDifficulty(newDifficulty);
+                });
+                menu.render();
                 return;
             }
-            runGame(game);
         }
         catch (e) {
             yield plugin.nvim.outWrite("Error#" + args + " " + e.message);

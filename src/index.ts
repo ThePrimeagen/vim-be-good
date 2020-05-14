@@ -1,14 +1,15 @@
 import { Neovim, NvimPlugin, Buffer } from 'neovim';
 import wait from './wait';
-import { GameState, GameOptions, parseGameDifficulty } from './game/types';
+import { GameDifficulty, GameState, GameOptions, parseGameDifficulty } from './game/types';
 import { BaseGame, newGameState, getRandomWord } from './game/base';
 import { DeleteGame } from './game/delete';
 import { WhackAMoleGame } from './game/whackamole';
+import { Menu } from './menu';
 
 // this is a comment
 export class CfGame extends BaseGame {
     private currentRandomWord: string;
-    private ifStatment: boolean;
+    private ifStatment: boolean = false;
     constructor(nvim: Neovim, state: GameState, opts?: GameOptions) {
         super(nvim, state, opts);
         this.currentRandomWord = "";
@@ -140,7 +141,28 @@ export async function runGame(game: BaseGame) {
     }
 }
 
+function initializeGame(name: string, difficulty: GameDifficulty,
+                        plugin: NvimPlugin, state: GameState) {
+    let game: BaseGame | null = null;
+
+    if (name === "relative") {
+        game = new DeleteGame(plugin.nvim, state, {difficulty});
+    }
+    else if (name === "ci{") {
+        game = new CfGame(plugin.nvim, state, {difficulty});
+    }
+    else if (name === "whackamole") {
+        game = new WhackAMoleGame(plugin.nvim, state, {difficulty});
+    }
+
+    if (game) {
+        runGame(game);
+    };
+}
+
 const availableGames = ["relative", "ci{", "whackamole"];
+const availableDifficulties = ["easy", "medium", "hard", "nightmare"];
+
 export default function(plugin: NvimPlugin) {
     plugin.setOptions({
         dev: true,
@@ -167,28 +189,26 @@ export default function(plugin: NvimPlugin) {
             const bufferOutOfMyMind = await plugin.nvim.buffer;
             const windowIntoPrimesMind = await plugin.nvim.window;
             const state = newGameState(bufferOutOfMyMind, windowIntoPrimesMind);
-            const difficulty = parseGameDifficulty(args[1]);
+            let difficulty = parseGameDifficulty(args[1]);
 
-            let game: BaseGame;
-
-            if (args[0] === "relative") {
-                game = new DeleteGame(plugin.nvim, state, {difficulty});
-            }
-            else if (args[0] === "ci{") {
-                game = new CfGame(plugin.nvim, state, {difficulty});
-            }
-            else if (args[0] === "whackamole") {
-                game = new WhackAMoleGame(plugin.nvim, state, {difficulty});
+            if (availableGames.indexOf(args[0]) >= 0) {
+                initializeGame(args[0], difficulty, plugin, state);
             }
 
             // TODO: ci?
             else {
-                await plugin.nvim.outWrite("VimBeGood: <gameName>  -- Available Games: " + availableGames.join() + "\n");
+                const menu = await Menu.build(plugin, availableGames,
+                                              availableDifficulties, difficulty);
+                menu.onGameSelection((gameName) => {
+                    initializeGame(gameName, difficulty, plugin, state);
+                });
+                menu.onDifficultySelection((newDifficulty) => {
+                    difficulty = parseGameDifficulty(newDifficulty);
+                })
+                menu.render();
+
                 return;
             }
-
-            runGame(game);
-
         } catch (e) {
             await plugin.nvim.outWrite("Error#" + args + " " + e.message);
         }
