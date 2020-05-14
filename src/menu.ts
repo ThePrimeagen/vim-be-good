@@ -30,6 +30,7 @@ export class Menu {
         "",
         "",
         "Created by ThePrimeagen",
+        "           Brandoncc",
         "https://github.com/ThePrimeagen/vim-be-good"
     ];
     private fullMenu: string[] = [];
@@ -163,11 +164,11 @@ export class Menu {
             ...this.difficultyLines,
             ...this.footer
         ];
-        this.firstGameLineIndex = 
+        this.firstGameLineIndex =
             this.headerLines.length +
             this.gameInstructions.length +
             1;
-        this.firstDifficultyLineIndex = 
+        this.firstDifficultyLineIndex =
             this.headerLines.length +
             this.gameInstructions.length +
             this.gameList.length +

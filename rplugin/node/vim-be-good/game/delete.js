@@ -14,33 +14,32 @@ const base_1 = require("./base");
 class DeleteGame extends base_1.BaseGame {
     constructor(nvim, state, opts) {
         super(nvim, state, opts);
+        this.setInstructions([
+            "When you see a \"DELETE ME\", relative jump to it",
+            "as fast as possible and delete it.",
+            "",
+            "",
+        ]);
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             const high = Math.random() > 0.5;
-            const midPoint = this.state.lineLength / 2 + this.state.lineRange.start;
-            const line = this.midPointRandomPoint(midPoint, high);
+            const line = this.midPointRandomPoint(high);
             const lines = new Array(this.state.lineLength).fill('');
             lines[line] = "                              DELETE ME";
-            yield this.nvim.command(`:${String(this.midPointRandomPoint(midPoint, !high))}`);
-            yield this.state.buffer.setLines(lines, {
-                start: this.state.lineRange.start,
-                end: this.state.lineRange.end,
-                strictIndexing: true
-            });
+            yield this.nvim.command(`:${String(this.midPointRandomPoint(!high))}`);
+            yield this.render(lines);
         });
     }
     clear() {
         return __awaiter(this, void 0, void 0, function* () {
-            const len = yield this.state.buffer.length;
-            yield this.state.buffer.remove(0, len, true);
-            yield this.state.buffer.insert(new Array(this.state.lineRange.end).fill(''), 0);
+            yield this.render(base_1.getEmptyLines(this.state.lineLength));
         });
     }
     checkForWin() {
         return __awaiter(this, void 0, void 0, function* () {
             const lines = yield this.state.buffer.getLines({
-                start: this.state.lineRange.start,
+                start: this.getInstructionOffset(),
                 end: yield this.state.buffer.length,
                 strictIndexing: false
             });

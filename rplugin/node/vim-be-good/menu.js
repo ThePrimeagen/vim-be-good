@@ -32,6 +32,7 @@ class Menu {
             "",
             "",
             "Created by ThePrimeagen",
+            "           Brandoncc",
             "https://github.com/ThePrimeagen/vim-be-good"
         ];
         this.fullMenu = [];

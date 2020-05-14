@@ -23,6 +23,10 @@ const fs = __importStar(require("fs"));
 const types_1 = require("./types");
 const wait_1 = __importDefault(require("../wait"));
 const log_1 = require("../log");
+function getEmptyLines(len) {
+    return new Array(len).fill("");
+}
+exports.getEmptyLines = getEmptyLines;
 // this is a comment
 function newGameState(buffer, window) {
     return {
@@ -66,7 +70,7 @@ exports.extraWords = [
 ];
 exports.extraSentences = [
     "One is the best Prime Number",
-    "Primeagen is the best One",
+    "Brandon is the best One",
     "I Twitch when I think about the Discord",
     "My dog is also my dawg",
     "The internet is an amazing place full of interesting facts",
@@ -88,6 +92,7 @@ class BaseGame {
     }) {
         this.state = state;
         this.nvim = nvim;
+        this.instructions = [];
         this.listenLines = (args) => {
             if (this.linesCallback) {
                 this.linesCallback(args);
@@ -97,6 +102,38 @@ class BaseGame {
     }
     onLines(cb) {
         this.linesCallback = cb;
+    }
+    getTotalLength(lines) {
+        return lines.length +
+            // + 1 = SETtITLE
+            (this.instructions && this.instructions.length || 0) + 1;
+    }
+    getInstructionOffset() {
+        return 1 + this.instructions.length;
+    }
+    setInstructions(instr) {
+        this.instructions = instr;
+    }
+    render(lines) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const len = yield this.state.buffer.length;
+            const expectedLen = this.getTotalLength(lines);
+            if (len < expectedLen + 1) {
+                yield this.debugTitle(`Base#Render growing input`);
+                yield this.state.buffer.insert(new Array(expectedLen - len).fill(''), len);
+            }
+            const toRender = [
+                ...this.instructions,
+                ...lines,
+            ].filter(x => x != null);
+            yield this.nvim.outWrite(JSON.stringify(toRender) + "\n");
+            yield this.debugTitle(`Base#Render rendering`);
+            yield this.state.buffer.setLines(toRender, {
+                start: 1,
+                end: expectedLen,
+                strictIndexing: true
+            });
+        });
     }
     finish() {
         fs.writeFileSync("/tmp/relative-" + Date.now(), this.state.results.map(x => x + "\n").join(','));
@@ -108,14 +145,20 @@ class BaseGame {
             // no op which can be optionally utilized by subclasses
         });
     }
-    pickRandomLine() {
-        return ~~(this.state.lineRange.start + Math.random() * this.state.lineLength);
+    getMidpoint() {
+        // TODO: Brandon? Games should define their own lengths that they need
+        return this.getInstructionOffset() +
+            Math.floor(this.state.lineLength / 2);
     }
-    midPointRandomPoint(midPoint, high, padding = 0) {
+    pickRandomLine() {
+        return ~~(this.getInstructionOffset() + Math.random() * this.state.lineLength);
+    }
+    midPointRandomPoint(high, padding = 0) {
+        const midPoint = this.getMidpoint();
         let line;
         do {
             line = this.pickRandomLine();
-        } while (high && (line + padding) > midPoint ||
+        } while (high && (line - padding) > midPoint ||
             !high && (line + padding) < midPoint);
         return line;
     }

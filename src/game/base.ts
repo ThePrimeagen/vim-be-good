@@ -5,6 +5,10 @@ import { GameState, GameOptions, GameDifficulty } from './types';
 import wait from '../wait';
 import { join } from '../log';
 
+export function getEmptyLines(len: number): string[] {
+    return new Array(len).fill("");
+}
+
 // this is a comment
 export function newGameState(buffer: Buffer, window: Window): GameState {
     return {
@@ -49,7 +53,7 @@ export const extraWords = [
 
 export const extraSentences = [
     "One is the best Prime Number",
-    "Primeagen is the best One",
+    "Brandon is the best One",
     "I Twitch when I think about the Discord",
     "My dog is also my dawg",
     "The internet is an amazing place full of interesting facts",
@@ -58,7 +62,7 @@ export const extraSentences = [
     "Others should contribute more sentences to be used in the game"
 ];
 
-export function getRandomWord() {
+export function getRandomWord(): string {
     return extraWords[Math.floor(Math.random() * extraWords.length)];
 }
 
@@ -74,6 +78,7 @@ export abstract class BaseGame {
 
     private linesCallback?: LinesCallback;
     private listenLines: LinesCallback;
+    private instructions: string[];
 
     constructor(nvim: Neovim, state: GameState, opts: GameOptions = {
         difficulty: GameDifficulty.Easy
@@ -81,6 +86,7 @@ export abstract class BaseGame {
 
         this.state = state;
         this.nvim = nvim;
+        this.instructions = [];
 
         this.listenLines = (args: any[]) => {
             if (this.linesCallback) {
@@ -95,6 +101,39 @@ export abstract class BaseGame {
         this.linesCallback = cb;
     }
 
+    protected getTotalLength(lines: string[]): number {
+        return lines.length +
+            // + 1 = SETtITLE
+            (this.instructions && this.instructions.length || 0) + 1;
+    }
+
+    protected getInstructionOffset() {
+        return 1 + this.instructions.length;
+    }
+
+    protected setInstructions(instr: string[]): void {
+        this.instructions = instr;
+    }
+
+    protected async render(lines: string[]) {
+        const len = await this.state.buffer.length;
+        const expectedLen = this.getTotalLength(lines);
+        if (len < expectedLen + 1) {
+            await this.state.buffer.insert(new Array(expectedLen - len).fill(''), len);
+        }
+
+        const toRender = [
+            ...this.instructions,
+            ...lines,
+        ].filter(x => x !== null && x !== undefined);
+
+        await this.state.buffer.setLines(toRender, {
+            start: 1,
+            end: expectedLen,
+            strictIndexing: true
+        });
+    }
+
     public finish() {
         fs.writeFileSync("/tmp/relative-" + Date.now(), this.state.results.map(x => x + "\n").join(','));
         this.linesCallback = undefined;
@@ -105,15 +144,22 @@ export abstract class BaseGame {
         // no op which can be optionally utilized by subclasses
     }
 
-    protected pickRandomLine(): number {
-        return ~~(this.state.lineRange.start + Math.random() * this.state.lineLength);
+    protected getMidpoint(): number {
+        // TODO: Brandon? Games should define their own lengths that they need
+        return this.getInstructionOffset() +
+            Math.floor(this.state.lineLength / 2);
     }
 
-    protected midPointRandomPoint(midPoint: number, high: boolean, padding = 0) {
+    protected pickRandomLine(): number {
+        return ~~(this.getInstructionOffset() + Math.random() * this.state.lineLength);
+    }
+
+    protected midPointRandomPoint(high: boolean, padding = 0) {
+        const midPoint = this.getMidpoint();
         let line: number;
         do {
             line = this.pickRandomLine();
-        } while (high && (line + padding) > midPoint ||
+        } while (high && (line - padding) > midPoint ||
                  !high && (line + padding) < midPoint);
         return line;
     }
@@ -136,4 +182,3 @@ export abstract class BaseGame {
                 });
     }
 }
-
