@@ -53,7 +53,7 @@ class CiGame extends base_1.BaseGame {
                 lines[line + 5] = `]`;
             }
             const jumpPoint = this.midPointRandomPoint(!high);
-            this.state.window.cursor = [jumpPoint, 0];
+            this.state.window.cursor = [this.getInstructionOffset() + jumpPoint, 0];
             this.render(lines);
         });
     }

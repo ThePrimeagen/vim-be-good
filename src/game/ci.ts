@@ -49,7 +49,7 @@ export class CiGame extends BaseGame {
         }
 
         const jumpPoint = this.midPointRandomPoint(!high);
-        this.state.window.cursor = [jumpPoint, 0];
+        this.state.window.cursor = [this.getInstructionOffset() + jumpPoint, 0];
         this.render(lines);
     }
 
