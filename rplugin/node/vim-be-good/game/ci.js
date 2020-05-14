@@ -32,7 +32,6 @@ class CiGame extends base_1.BaseGame {
         return __awaiter(this, void 0, void 0, function* () {
             const high = Math.random() > 0.5;
             const line = this.midPointRandomPoint(high, 6);
-            yield this.debugTitle(`Choosing line ${this.getMidpoint()} - ${line}`);
             const lines = new Array(this.state.lineLength).fill("");
             this.currentRandomWord = base_1.getRandomWord();
             this.ifStatment = false;
@@ -54,7 +53,6 @@ class CiGame extends base_1.BaseGame {
                 lines[line + 5] = `]`;
             }
             const jumpPoint = this.midPointRandomPoint(!high);
-            yield this.debugTitle(`Choosing jump point ${this.getMidpoint()} - ${jumpPoint}`);
             this.state.window.cursor = [jumpPoint, 0];
             this.render(lines);
         });

@@ -119,15 +119,12 @@ class BaseGame {
             const len = yield this.state.buffer.length;
             const expectedLen = this.getTotalLength(lines);
             if (len < expectedLen + 1) {
-                yield this.debugTitle(`Base#Render growing input`);
                 yield this.state.buffer.insert(new Array(expectedLen - len).fill(''), len);
             }
             const toRender = [
                 ...this.instructions,
                 ...lines,
-            ].filter(x => x != null);
-            yield this.nvim.outWrite(JSON.stringify(toRender) + "\n");
-            yield this.debugTitle(`Base#Render rendering`);
+            ];
             yield this.state.buffer.setLines(toRender, {
                 start: 1,
                 end: expectedLen,
