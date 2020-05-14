@@ -124,7 +124,7 @@ class BaseGame {
             const toRender = [
                 ...this.instructions,
                 ...lines,
-            ];
+            ].filter(x => x !== null && x !== undefined);
             yield this.state.buffer.setLines(toRender, {
                 start: 1,
                 end: expectedLen,

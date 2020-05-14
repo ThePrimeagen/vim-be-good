@@ -108,7 +108,7 @@ export default function(plugin: NvimPlugin) {
         alwaysInit: true,
     });
 
-    plugin.registerCommand("VimBeGood2", async (args: string[]) => {
+    plugin.registerCommand("VimBeGood", async (args: string[]) => {
         try {
             const buffer = await plugin.nvim.buffer;
             const length = await buffer.length;

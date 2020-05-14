@@ -107,7 +107,7 @@ function default_1(plugin) {
         dev: true,
         alwaysInit: true,
     });
-    plugin.registerCommand("VimBeGood2", (args) => __awaiter(this, void 0, void 0, function* () {
+    plugin.registerCommand("VimBeGood", (args) => __awaiter(this, void 0, void 0, function* () {
         try {
             const buffer = yield plugin.nvim.buffer;
             const length = yield buffer.length;
