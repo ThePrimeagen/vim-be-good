@@ -147,11 +147,10 @@ class BaseGame {
     }
     getMidpoint() {
         // TODO: Brandon? Games should define their own lengths that they need
-        return this.getInstructionOffset() +
-            Math.floor(this.state.lineLength / 2);
+        return Math.floor(this.state.lineLength / 2);
     }
     pickRandomLine() {
-        return ~~(this.getInstructionOffset() + Math.random() * this.state.lineLength);
+        return ~~(Math.random() * this.state.lineLength);
     }
     midPointRandomPoint(high, padding = 0) {
         const midPoint = this.getMidpoint();
