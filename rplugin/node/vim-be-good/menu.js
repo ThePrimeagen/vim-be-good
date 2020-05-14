@@ -23,7 +23,7 @@ class Menu {
         this.difficultyInstructions = [
             "",
             "Select a Difficulty (delete from the list to select)",
-            "----------------------------------------------"
+            "----------------------------------------------------"
         ];
         this.difficultyLines = [];
         this.footer = [

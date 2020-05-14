@@ -19,7 +19,7 @@ export class Menu {
     private difficultyInstructions = [
         "",
         "Select a Difficulty (delete from the list to select)",
-        "----------------------------------------------"
+        "----------------------------------------------------"
     ];
     private gameList: string[];
     private difficultyList: string[];
