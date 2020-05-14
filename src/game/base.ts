@@ -13,13 +13,14 @@ export function getEmptyLines(len: number): string[] {
 export function newGameState(buffer: Buffer, window: Window): GameState {
     return {
         buffer,
+        name: "",
         window,
         ending: { count: 10 },
         currentCount: 0,
         lineRange: {start: 2, end: 22},
         lineLength: 20,
         results: [],
-    }
+    };
 }
 
 export const extraWords = [
@@ -135,7 +136,9 @@ export abstract class BaseGame {
     }
 
     public finish() {
-        fs.writeFileSync("/tmp/relative-" + Date.now(), this.state.results.map(x => x + "\n").join(','));
+        const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
+        fs.writeFileSync(fName, this.state.results.map(x => x + "").join(",\n"));
+
         this.linesCallback = undefined;
         this.state.buffer.off("lines", this.listenLines);
     }

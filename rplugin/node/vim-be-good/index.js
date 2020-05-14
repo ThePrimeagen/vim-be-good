@@ -121,17 +121,19 @@ function default_1(plugin) {
                 plugin.nvim.errWriteLine("Your file is not empty.");
                 return;
             }
-            const state = yield getGameState(plugin.nvim);
             let difficulty = types_1.parseGameDifficulty(args[1]);
+            const state = yield getGameState(plugin.nvim);
             if (availableGames.indexOf(args[0]) >= 0) {
+                state.name = args[0];
                 initializeGame(args[0], difficulty, plugin.nvim, state);
             }
             // TODO: ci?
             else {
                 const menu = yield menu_1.Menu.build(plugin, availableGames, availableDifficulties, difficulty);
-                menu.onGameSelection((gameName) => {
+                menu.onGameSelection((gameName) => __awaiter(this, void 0, void 0, function* () {
+                    state.name = gameName;
                     initializeGame(gameName, difficulty, plugin.nvim, state);
-                });
+                }));
                 menu.onDifficultySelection((newDifficulty) => {
                     difficulty = types_1.parseGameDifficulty(newDifficulty);
                 });

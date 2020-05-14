@@ -31,6 +31,7 @@ exports.getEmptyLines = getEmptyLines;
 function newGameState(buffer, window) {
     return {
         buffer,
+        name: "",
         window,
         ending: { count: 10 },
         currentCount: 0,
@@ -133,7 +134,8 @@ class BaseGame {
         });
     }
     finish() {
-        fs.writeFileSync("/tmp/relative-" + Date.now(), this.state.results.map(x => x + "\n").join(','));
+        const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
+        fs.writeFileSync(fName, this.state.results.map(x => x + "").join(",\n"));
         this.linesCallback = undefined;
         this.state.buffer.off("lines", this.listenLines);
     }

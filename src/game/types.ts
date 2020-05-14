@@ -36,6 +36,7 @@ export function parseGameDifficulty(
 export type GameState = {
     buffer: Buffer;
     window: Window;
+    name: string;
     ending: {count: number};
     currentCount: number;
     lineRange: {

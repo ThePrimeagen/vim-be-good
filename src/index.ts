@@ -125,10 +125,11 @@ export default function(plugin: NvimPlugin) {
                 return;
             }
 
-            const state = await getGameState(plugin.nvim);
             let difficulty = parseGameDifficulty(args[1]);
+            const state = await getGameState(plugin.nvim);
 
             if (availableGames.indexOf(args[0]) >= 0) {
+                state.name = args[0];
                 initializeGame(args[0], difficulty, plugin.nvim, state);
             }
 
@@ -136,7 +137,9 @@ export default function(plugin: NvimPlugin) {
             else {
                 const menu = await Menu.build(plugin, availableGames,
                                               availableDifficulties, difficulty);
-                menu.onGameSelection((gameName) => {
+
+                menu.onGameSelection(async gameName => {
+                    state.name = gameName;
                     initializeGame(gameName, difficulty, plugin.nvim, state);
                 });
                 menu.onDifficultySelection((newDifficulty) => {
