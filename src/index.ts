@@ -12,6 +12,7 @@ export class CfGame extends BaseGame {
     constructor(nvim: Neovim, state: GameState, opts?: GameOptions) {
         super(nvim, state, opts);
         this.currentRandomWord = "";
+        this.ifStatment = false;
     }
 
     async run() {
@@ -112,6 +113,8 @@ export async function runGame(game: BaseGame) {
 
                 game.state.results.push(startOfFunction - start);
                 if (game.state.currentCount >= game.state.ending.count) {
+                    await game.gameOver();
+
                     await game.setTitle(`Average!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`);
                     game.finish();
                     return;
@@ -153,7 +156,7 @@ function initializeGame(name: string, difficulty: GameDifficulty,
     };
 }
 
-const availableGames = ["relative", "ci{"];
+const availableGames = ["relative", "ci{", "whackamole"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare"];
 
 export default function(plugin: NvimPlugin) {
@@ -180,7 +183,8 @@ export default function(plugin: NvimPlugin) {
             }
 
             const bufferOutOfMyMind = await plugin.nvim.buffer;
-            const state = newGameState(bufferOutOfMyMind);
+            const windowIntoPrimesMind = await plugin.nvim.window;
+            const state = newGameState(bufferOutOfMyMind, windowIntoPrimesMind);
             let difficulty = parseGameDifficulty(args[1]);
 
             if (availableGames.indexOf(args[0]) >= 0) {

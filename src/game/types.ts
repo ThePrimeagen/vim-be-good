@@ -1,4 +1,4 @@
-import { Buffer } from 'neovim';
+import { Buffer, Window } from 'neovim';
 
 export enum GameDifficulty {
     Easy = 'easy',
@@ -35,6 +35,7 @@ export function parseGameDifficulty(
 
 export type GameState = {
     buffer: Buffer;
+    window: Window;
     ending: {count: number};
     currentCount: number;
     lineRange: {
