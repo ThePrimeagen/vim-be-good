@@ -3,6 +3,7 @@ import wait from './wait';
 import { GameDifficulty, GameState, GameOptions, parseGameDifficulty } from './game/types';
 import { BaseGame, newGameState, getRandomWord } from './game/base';
 import { DeleteGame } from './game/delete';
+import { WhackAMoleGame } from './game/whackamole';
 import { Menu } from './menu';
 
 // this is a comment
@@ -149,6 +150,9 @@ function initializeGame(name: string, difficulty: GameDifficulty,
     }
     else if (name === "ci{") {
         game = new CfGame(plugin.nvim, state, {difficulty});
+    }
+    else if (name === "whackamole") {
+        game = new WhackAMoleGame(plugin.nvim, state, {difficulty});
     }
 
     if (game) {

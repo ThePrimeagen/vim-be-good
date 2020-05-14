@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("./game/types");
 const base_1 = require("./game/base");
 const delete_1 = require("./game/delete");
+const whackamole_1 = require("./game/whackamole");
 const menu_1 = require("./menu");
 // this is a comment
 class CfGame extends base_1.BaseGame {
@@ -144,6 +145,9 @@ function initializeGame(name, difficulty, plugin, state) {
     }
     else if (name === "ci{") {
         game = new CfGame(plugin.nvim, state, { difficulty });
+    }
+    else if (name === "whackamole") {
+        game = new whackamole_1.WhackAMoleGame(plugin.nvim, state, { difficulty });
     }
     if (game) {
         runGame(game);
