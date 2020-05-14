@@ -55,7 +55,7 @@ class CiGame extends base_1.BaseGame {
             }
             const jumpPoint = this.midPointRandomPoint(!high);
             yield this.debugTitle(`Choosing jump point ${this.getMidpoint()} - ${jumpPoint}`);
-            yield this.nvim.command(`:${String(jumpPoint)}`);
+            this.state.window.cursor = [jumpPoint, 0];
             this.render(lines);
         });
     }
