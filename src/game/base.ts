@@ -146,12 +146,11 @@ export abstract class BaseGame {
 
     protected getMidpoint(): number {
         // TODO: Brandon? Games should define their own lengths that they need
-        return this.getInstructionOffset() +
-            Math.floor(this.state.lineLength / 2);
+        return Math.floor(this.state.lineLength / 2);
     }
 
     protected pickRandomLine(): number {
-        return ~~(this.getInstructionOffset() + Math.random() * this.state.lineLength);
+        return ~~(Math.random() * this.state.lineLength);
     }
 
     protected midPointRandomPoint(high: boolean, padding = 0) {

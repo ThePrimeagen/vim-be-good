@@ -119,15 +119,12 @@ class BaseGame {
             const len = yield this.state.buffer.length;
             const expectedLen = this.getTotalLength(lines);
             if (len < expectedLen + 1) {
-                yield this.debugTitle(`Base#Render growing input`);
                 yield this.state.buffer.insert(new Array(expectedLen - len).fill(''), len);
             }
             const toRender = [
                 ...this.instructions,
                 ...lines,
-            ].filter(x => x != null);
-            yield this.nvim.outWrite(JSON.stringify(toRender) + "\n");
-            yield this.debugTitle(`Base#Render rendering`);
+            ];
             yield this.state.buffer.setLines(toRender, {
                 start: 1,
                 end: expectedLen,
@@ -147,11 +144,10 @@ class BaseGame {
     }
     getMidpoint() {
         // TODO: Brandon? Games should define their own lengths that they need
-        return this.getInstructionOffset() +
-            Math.floor(this.state.lineLength / 2);
+        return Math.floor(this.state.lineLength / 2);
     }
     pickRandomLine() {
-        return ~~(this.getInstructionOffset() + Math.random() * this.state.lineLength);
+        return ~~(Math.random() * this.state.lineLength);
     }
     midPointRandomPoint(high, padding = 0) {
         const midPoint = this.getMidpoint();

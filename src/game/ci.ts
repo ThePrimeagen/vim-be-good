@@ -49,7 +49,7 @@ export class CiGame extends BaseGame {
         }
 
         const jumpPoint = this.midPointRandomPoint(!high);
-        await this.nvim.command(`:${String(jumpPoint)}`);
+        this.state.window.cursor = [this.getInstructionOffset() + jumpPoint, 0];
         this.render(lines);
     }
 
