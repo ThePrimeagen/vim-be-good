@@ -83,11 +83,8 @@ class Menu {
     onGameSelection(cb) {
         this.gameSelectionCallback = cb;
     }
-    onDifficultySelection(cb) {
-        this.difficultySelectionCallback = cb;
-    }
     lineEventHandler(buffer, _changedTick, _firstLine, lastLine, _newData, _more) {
-        var _a, _b;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (!this.window) {
@@ -101,13 +98,12 @@ class Menu {
                     if (selectedGame) {
                         this.stopHandlingLineEvents();
                         yield this.clearScreen();
-                        (_a = this.gameSelectionCallback) === null || _a === void 0 ? void 0 : _a.call(this, selectedGame);
+                        (_a = this.gameSelectionCallback) === null || _a === void 0 ? void 0 : _a.call(this, selectedGame, this.selectedDifficulty);
                     }
                     else if (selectedDifficulty) {
                         this.selectedDifficulty = selectedDifficulty;
                         this.stopHandlingLineEvents();
                         this.generateMenuLines();
-                        (_b = this.difficultySelectionCallback) === null || _b === void 0 ? void 0 : _b.call(this, selectedDifficulty);
                         yield this.render();
                     }
                     else {
@@ -119,7 +115,7 @@ class Menu {
                 }
             }
             catch (e) {
-                yield this.plugin.nvim.outWrite("Error while handling line: " + e.message);
+                yield this.plugin.nvim.outWrite("Error while handling line: " + e.message + "\n");
             }
         });
     }

@@ -19,6 +19,11 @@ export class WhackAMoleGame extends BaseGame {
         this.winLine = "";
     }
 
+    // I think I could make this all abstract...
+    async hasFailed() {
+        return false;
+    }
+
     async run() {
         const sentence = getRandomSentence();
         let chosenLocation;

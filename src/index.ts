@@ -27,11 +27,11 @@ export async function runGame(game: BaseGame) {
             used = false;
             if (missingCount > 0) {
                 missingCount = 0;
-                onLineEvent([]);
+                onLineEvent();
             }
         }
 
-        async function onLineEvent(...args: any[]) {
+        async function onLineEvent() {
             const startOfFunction = Date.now();
 
             if (used) {
@@ -47,11 +47,30 @@ export async function runGame(game: BaseGame) {
                     return;
                 }
 
-                game.state.results.push(startOfFunction - start);
+                const failed = await game.hasFailed();
+
+                if (!failed) {
+                    game.state.results.push(startOfFunction - start);
+                }
+
                 if (game.state.currentCount >= game.state.ending.count) {
                     await game.gameOver();
 
-                    await game.setTitle(`Average!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`);
+                    const gameCount = game.state.ending.count;
+                    const title = [
+                        `Success: ${gameCount - game.state.failureCount} / ${gameCount}`,
+                    ];
+
+                    if (game.state.results.length > 0) {
+                        title.push(
+                            `Average Success Time!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`
+                        );
+                    }
+                    else {
+                        title.push(`You didn't even have one success, maybe you should lower the difficulty...`);
+                    }
+
+                    await game.setTitle(title.join(' '));
                     game.finish();
                     return;
                 }
@@ -71,6 +90,11 @@ export async function runGame(game: BaseGame) {
         }
 
         game.onLines(onLineEvent);
+        game.onTimerExpired(() => {
+            console.log("Index#onTimerExpired!");
+            onLineEvent();
+        });
+
     } catch (err) {
         await game.nvim.outWrite(`Failure ${err}\n`);
     }
@@ -96,7 +120,17 @@ export function initializeGame(name: string, difficulty: GameDifficulty,
 }
 
 const availableGames = ["relative", "ci{", "whackamole"];
-const availableDifficulties = ["easy", "medium", "hard", "nightmare"];
+const availableDifficulties = [
+    "easy", "medium", "hard", "nightmare", "tpope"
+];
+
+const stringToDiff = {
+    easy: GameDifficulty.Easy,
+    medium: GameDifficulty.Medium,
+    hard: GameDifficulty.Hard,
+    nightmare: GameDifficulty.Nightmare,
+    tpope: GameDifficulty.TPope,
+};
 
 export async function getGameState(nvim: Neovim): Promise<GameState> {
     return newGameState(await nvim.buffer, await nvim.window);
@@ -138,13 +172,12 @@ export default function(plugin: NvimPlugin) {
                 const menu = await Menu.build(plugin, availableGames,
                                               availableDifficulties, difficulty);
 
-                menu.onGameSelection(async gameName => {
+                menu.onGameSelection(async (gameName: string, difficulty: string) => {
                     state.name = gameName;
-                    initializeGame(gameName, difficulty, plugin.nvim, state);
+                    initializeGame(
+                        gameName, stringToDiff[difficulty], plugin.nvim, state);
                 });
-                menu.onDifficultySelection((newDifficulty) => {
-                    difficulty = parseGameDifficulty(newDifficulty);
-                })
+
                 menu.render();
 
                 return;

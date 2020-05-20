@@ -14,12 +14,23 @@ const base_1 = require("./base");
 class DeleteGame extends base_1.BaseGame {
     constructor(nvim, state, opts) {
         super(nvim, state, opts);
+        this.failed = false;
         this.setInstructions([
             "When you see a \"DELETE ME\", relative jump to it",
             "as fast as possible and delete it.",
             "",
             "",
         ]);
+        this.onTimerExpired(() => __awaiter(this, void 0, void 0, function* () {
+            console.log("DeleteGame#onTimerExpired!");
+            this.state.failureCount++;
+            this.failed = true;
+        }));
+    }
+    hasFailed() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.failed;
+        });
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -29,15 +40,21 @@ class DeleteGame extends base_1.BaseGame {
             lines[line] = "                              DELETE ME";
             yield this.nvim.command(`:${String(this.midPointRandomPoint(!high))}`);
             yield this.render(lines);
+            this.startTimer();
         });
     }
     clear() {
         return __awaiter(this, void 0, void 0, function* () {
+            this.failed = false;
+            this.clearTimer();
             yield this.render(base_1.getEmptyLines(this.state.lineLength));
         });
     }
     checkForWin() {
         return __awaiter(this, void 0, void 0, function* () {
+            if (this.failed) {
+                return true;
+            }
             const lines = yield this.state.buffer.getLines({
                 start: this.getInstructionOffset(),
                 end: yield this.state.buffer.length,

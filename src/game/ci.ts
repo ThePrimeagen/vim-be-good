@@ -22,6 +22,11 @@ export class CiGame extends BaseGame {
         ]);
     }
 
+    // I think I could make this all abstract...
+    async hasFailed() {
+        return false;
+    }
+
     async run() {
         const high = Math.random() > 0.5;
         const line = this.midPointRandomPoint(high, 6);

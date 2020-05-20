@@ -32,6 +32,7 @@ function newGameState(buffer, window) {
     return {
         buffer,
         name: "",
+        failureCount: 0,
         window,
         ending: { count: 10 },
         currentCount: 0,
@@ -92,8 +93,10 @@ class BaseGame {
         difficulty: types_1.GameDifficulty.Easy
     }) {
         this.state = state;
+        this.onExpired = [];
         this.nvim = nvim;
         this.instructions = [];
+        this.difficulty = opts.difficulty;
         this.listenLines = (args) => {
             if (this.linesCallback) {
                 this.linesCallback(args);
@@ -159,6 +162,27 @@ class BaseGame {
         } while (high && (line - padding) > midPoint ||
             !high && (line + padding) < midPoint);
         return line;
+    }
+    startTimer() {
+        this.timerId = setTimeout(() => {
+            this.onExpired.forEach(cb => cb());
+            // @ts-ignore I HATE YOU TYPESCRIPT
+            this.timerId = 0;
+        }, types_1.difficultyToTime(this.difficulty));
+    }
+    clearTimer() {
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+        }
+    }
+    onTimerExpired(cb) {
+        this.onExpired.push(cb);
+    }
+    clearBoard() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const len = yield this.state.buffer.length;
+            this.render(getEmptyLines(len));
+        });
     }
     debugTitle(...title) {
         return __awaiter(this, void 0, void 0, function* () {

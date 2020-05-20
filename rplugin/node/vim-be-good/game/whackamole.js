@@ -23,6 +23,12 @@ class WhackAMoleGame extends base_1.BaseGame {
         this.outputStartRow = 2;
         this.winLine = "";
     }
+    // I think I could make this all abstract...
+    hasFailed() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return false;
+        });
+    }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             const sentence = base_1.getRandomSentence();

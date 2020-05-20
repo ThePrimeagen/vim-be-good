@@ -6,7 +6,27 @@ var GameDifficulty;
     GameDifficulty["Medium"] = "medium";
     GameDifficulty["Hard"] = "hard";
     GameDifficulty["Nightmare"] = "nightmare";
+    GameDifficulty["TPope"] = "tpope";
 })(GameDifficulty = exports.GameDifficulty || (exports.GameDifficulty = {}));
+function difficultyToTime(diff) {
+    let out = 1000;
+    switch (diff) {
+        case GameDifficulty.Easy:
+            out = 5000;
+            break;
+        case GameDifficulty.Medium:
+            out = 3500;
+            break;
+        case GameDifficulty.Hard:
+            out = 2500;
+            break;
+        case GameDifficulty.Nightmare:
+            out = 1600;
+            break;
+    }
+    return out;
+}
+exports.difficultyToTime = difficultyToTime;
 function parseGameDifficulty(diff, defaultValue = GameDifficulty.Easy) {
     let difficulty = defaultValue;
     switch (diff) {

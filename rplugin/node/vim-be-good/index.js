@@ -32,10 +32,10 @@ function runGame(game) {
                 used = false;
                 if (missingCount > 0) {
                     missingCount = 0;
-                    onLineEvent([]);
+                    onLineEvent();
                 }
             }
-            function onLineEvent(...args) {
+            function onLineEvent() {
                 return __awaiter(this, void 0, void 0, function* () {
                     const startOfFunction = Date.now();
                     if (used) {
@@ -48,10 +48,23 @@ function runGame(game) {
                             reset();
                             return;
                         }
-                        game.state.results.push(startOfFunction - start);
+                        const failed = yield game.hasFailed();
+                        if (!failed) {
+                            game.state.results.push(startOfFunction - start);
+                        }
                         if (game.state.currentCount >= game.state.ending.count) {
                             yield game.gameOver();
-                            yield game.setTitle(`Average!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`);
+                            const gameCount = game.state.ending.count;
+                            const title = [
+                                `Success: ${gameCount - game.state.failureCount} / ${gameCount}`,
+                            ];
+                            if (game.state.results.length > 0) {
+                                title.push(`Average Success Time!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`);
+                            }
+                            else {
+                                title.push(`You didn't even have one success, maybe you should lower the difficulty...`);
+                            }
+                            yield game.setTitle(title.join(' '));
                             game.finish();
                             return;
                         }
@@ -70,6 +83,10 @@ function runGame(game) {
                 });
             }
             game.onLines(onLineEvent);
+            game.onTimerExpired(() => {
+                console.log("Index#onTimerExpired!");
+                onLineEvent();
+            });
         }
         catch (err) {
             yield game.nvim.outWrite(`Failure ${err}\n`);
@@ -95,7 +112,16 @@ function initializeGame(name, difficulty, nvim, state) {
 }
 exports.initializeGame = initializeGame;
 const availableGames = ["relative", "ci{", "whackamole"];
-const availableDifficulties = ["easy", "medium", "hard", "nightmare"];
+const availableDifficulties = [
+    "easy", "medium", "hard", "nightmare", "tpope"
+];
+const stringToDiff = {
+    easy: types_1.GameDifficulty.Easy,
+    medium: types_1.GameDifficulty.Medium,
+    hard: types_1.GameDifficulty.Hard,
+    nightmare: types_1.GameDifficulty.Nightmare,
+    tpope: types_1.GameDifficulty.TPope,
+};
 function getGameState(nvim) {
     return __awaiter(this, void 0, void 0, function* () {
         return base_1.newGameState(yield nvim.buffer, yield nvim.window);
@@ -130,13 +156,10 @@ function default_1(plugin) {
             // TODO: ci?
             else {
                 const menu = yield menu_1.Menu.build(plugin, availableGames, availableDifficulties, difficulty);
-                menu.onGameSelection((gameName) => __awaiter(this, void 0, void 0, function* () {
+                menu.onGameSelection((gameName, difficulty) => __awaiter(this, void 0, void 0, function* () {
                     state.name = gameName;
-                    initializeGame(gameName, difficulty, plugin.nvim, state);
+                    initializeGame(gameName, stringToDiff[difficulty], plugin.nvim, state);
                 }));
-                menu.onDifficultySelection((newDifficulty) => {
-                    difficulty = types_1.parseGameDifficulty(newDifficulty);
-                });
                 menu.render();
                 return;
             }

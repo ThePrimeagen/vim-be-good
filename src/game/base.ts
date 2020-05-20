@@ -1,7 +1,6 @@
 import * as fs from 'fs'
-
 import { Neovim, Buffer, Window } from 'neovim';
-import { GameState, GameOptions, GameDifficulty } from './types';
+import { GameState, GameOptions, GameDifficulty, difficultyToTime } from './types';
 import wait from '../wait';
 import { join } from '../log';
 
@@ -14,6 +13,7 @@ export function newGameState(buffer: Buffer, window: Window): GameState {
     return {
         buffer,
         name: "",
+        failureCount: 0,
         window,
         ending: { count: 10 },
         currentCount: 0,
@@ -80,14 +80,19 @@ export abstract class BaseGame {
     private linesCallback?: LinesCallback;
     private listenLines: LinesCallback;
     private instructions: string[];
+    private difficulty: GameDifficulty;
+    private timerId?: ReturnType<typeof setTimeout>;
+    private onExpired: (() => void)[];
 
     constructor(nvim: Neovim, state: GameState, opts: GameOptions = {
         difficulty: GameDifficulty.Easy
     }) {
 
         this.state = state;
+        this.onExpired = [];
         this.nvim = nvim;
         this.instructions = [];
+        this.difficulty = opts.difficulty;
 
         this.listenLines = (args: any[]) => {
             if (this.linesCallback) {
@@ -166,6 +171,33 @@ export abstract class BaseGame {
         return line;
     }
 
+    protected startTimer() {
+        this.timerId = setTimeout(() => {
+            this.onExpired.forEach(cb => cb());
+
+            // @ts-ignore I HATE YOU TYPESCRIPT
+            this.timerId = 0;
+
+        }, difficultyToTime(this.difficulty));
+    }
+
+    protected clearTimer() {
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+        }
+    }
+
+    public onTimerExpired(cb: () => void) {
+        this.onExpired.push(cb);
+    }
+
+    protected async clearBoard() {
+        const len = await this.state.buffer.length;
+
+        this.render(getEmptyLines(len));
+    }
+
+    abstract hasFailed(): Promise<boolean>;
     abstract run(): Promise<void>;
     abstract clear(): Promise<void>;
     abstract checkForWin(): Promise<boolean>;

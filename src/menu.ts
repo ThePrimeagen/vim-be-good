@@ -5,7 +5,6 @@ export class Menu {
     private plugin: NvimPlugin;
     private window?: Window;
     private gameSelectionCallback?: Function;
-    private difficultySelectionCallback?: Function;
     private headerLines = [
         "VimBeGood is a collection of small games for neovim which are",
         "intended to help you improve your vim proficiency.",
@@ -17,6 +16,7 @@ export class Menu {
     ];
 
     private difficultyInstructions = [
+
         "",
         "Select a Difficulty (delete from the list to select)",
         "----------------------------------------------------"
@@ -36,10 +36,10 @@ export class Menu {
     private fullMenu: string[] = [];
     private firstGameLineIndex: number = -1;
     private firstDifficultyLineIndex: number = -1;
-    private selectedDifficulty;
+    private selectedDifficulty: string;
 
 
-    constructor(plugin, games, difficulties, selectedDifficulty, __allowCreation) {
+    constructor(plugin: NvimPlugin, games, difficulties, selectedDifficulty, __allowCreation) {
         if (!__allowCreation) {
             throw new Error("Menu cannot be instantiated, you must use the builder");
         }
@@ -52,7 +52,7 @@ export class Menu {
         this.generateMenuLines();
     }
 
-    static async build(plugin, availableGames, availableDifficulties, selectedDifficulty) {
+    static async build(plugin: NvimPlugin, availableGames: string[], availableDifficulties: string[], selectedDifficulty) {
         const menu = new Menu(plugin, availableGames, availableDifficulties,
                               selectedDifficulty, true);
 
@@ -90,10 +90,6 @@ export class Menu {
         this.gameSelectionCallback = cb;
     }
 
-    public onDifficultySelection(cb) {
-        this.difficultySelectionCallback = cb;
-    }
-
     private async lineEventHandler(buffer, _changedTick, _firstLine, lastLine, _newData, _more) {
         try {
             if (!this.window) {
@@ -117,12 +113,11 @@ export class Menu {
 
                     await this.clearScreen();
 
-                    this.gameSelectionCallback?.(selectedGame);
+                    this.gameSelectionCallback?.(selectedGame, this.selectedDifficulty);
                 } else if (selectedDifficulty) {
                     this.selectedDifficulty = selectedDifficulty;
                     this.stopHandlingLineEvents();
                     this.generateMenuLines();
-                    this.difficultySelectionCallback?.(selectedDifficulty);
 
                     await this.render();
                 } else {
@@ -132,7 +127,7 @@ export class Menu {
                 await this.render();
             }
         } catch (e) {
-            await this.plugin.nvim.outWrite("Error while handling line: " + e.message);
+            await this.plugin.nvim.outWrite("Error while handling line: " + e.message + "\n");
         }
     }
 
