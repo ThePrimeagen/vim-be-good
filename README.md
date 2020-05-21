@@ -32,14 +32,17 @@ it as fast as possible. Once you have reached the character, flip the
 character's case to complete the round.
 
 ## Installation
-Use your favorite plugin manager to install!  Only works on Nvim, the one true
+
+1. Use your favorite plugin manager to install!  Only works on Nvim, the one true
 vim.
 
 ```viml
 Plug 'ThePrimeagen/vim-be-good'
 ```
 
-Then execute `:UpdateRemotePlugins` to finish the installation process.
+2. Then execute `:UpdateRemotePlugins` to finish the installation process.
+
+If you in into any problems when running the `:UpdateRemotePlugins` run `:checkhealth` to check if your vim is python ready.
 
 ## Playing the games.
 Before doing ANYTHING at all, make sure you are in an empty file.  If the file
