@@ -58,3 +58,6 @@ options to change how it is played, the above help menu should include each game
 Please make an issue if you have a command you wish to practice and i'll make
 it into game!!
 
+## Live on Stream
+Everything you see here has been developed on stream at [ThePrimeagen](https://twitch.tv/ThePrimeagen).  
+Stop by and troll away.  Helpful troll hints would be to complement the size of my hands.
