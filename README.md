@@ -42,7 +42,13 @@ Plug 'ThePrimeagen/vim-be-good'
 
 2. Then execute `:UpdateRemotePlugins` to finish the installation process.
 
-If you in into any problems when running the `:UpdateRemotePlugins` run `:checkhealth` to check if your vim is python ready.
+If you in into any problems when running the `:UpdateRemotePlugins` run `:checkhealth` to check if your vim is node ready.
+
+3. If healthcheck fails node ready you need to install neovim.
+```
+# I am sorry for the global install
+npm install -g neovim
+```
 
 ## Playing the games.
 Before doing ANYTHING at all, make sure you are in an empty file.  If the file
