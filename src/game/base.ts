@@ -1,8 +1,13 @@
-import * as fs from 'fs'
-import { Neovim, Buffer, Window } from 'neovim';
-import { GameState, GameOptions, GameDifficulty, difficultyToTime } from './types';
-import wait from '../wait';
-import { join } from '../log';
+import * as fs from "fs";
+import { Neovim, Buffer, Window } from "neovim";
+import {
+    GameState,
+    GameOptions,
+    GameDifficulty,
+    difficultyToTime
+} from "./types";
+import wait from "../wait";
+import { join } from "../log";
 
 export function getEmptyLines(len: number): string[] {
     return new Array(len).fill("");
@@ -17,9 +22,9 @@ export function newGameState(buffer: Buffer, window: Window): GameState {
         window,
         ending: { count: 10 },
         currentCount: 0,
-        lineRange: {start: 2, end: 22},
+        lineRange: { start: 2, end: 22 },
         lineLength: 20,
-        results: [],
+        results: []
     };
 }
 
@@ -49,7 +54,7 @@ export const extraWords = [
     "war",
     "xar",
     "yar",
-    "zar",
+    "zar"
 ];
 
 export const extraSentences = [
@@ -67,7 +72,7 @@ export function getRandomWord(): string {
     return extraWords[Math.floor(Math.random() * extraWords.length)];
 }
 
-export function getRandomSentence() {
+export function getRandomSentence(): string {
     return extraSentences[Math.floor(Math.random() * extraSentences.length)];
 }
 
@@ -84,10 +89,13 @@ export abstract class BaseGame {
     private timerId?: ReturnType<typeof setTimeout>;
     private onExpired: (() => void)[];
 
-    constructor(nvim: Neovim, state: GameState, opts: GameOptions = {
-        difficulty: GameDifficulty.Easy
-    }) {
-
+    constructor(
+        nvim: Neovim,
+        state: GameState,
+        opts: GameOptions = {
+            difficulty: GameDifficulty.Easy
+        }
+    ) {
         this.state = state;
         this.onExpired = [];
         this.nvim = nvim;
@@ -98,22 +106,25 @@ export abstract class BaseGame {
             if (this.linesCallback) {
                 this.linesCallback(args);
             }
-        }
+        };
 
         this.state.buffer.listen("lines", this.listenLines);
     }
 
-    public onLines(cb: LinesCallback) {
+    public onLines(cb: LinesCallback): void {
         this.linesCallback = cb;
     }
 
     protected getTotalLength(lines: string[]): number {
-        return lines.length +
+        return (
+            lines.length +
             // + 1 = SETtITLE
-            (this.instructions && this.instructions.length || 0) + 1;
+            ((this.instructions && this.instructions.length) || 0) +
+            1
+        );
     }
 
-    protected getInstructionOffset() {
+    protected getInstructionOffset(): number {
         return 1 + this.instructions.length;
     }
 
@@ -121,17 +132,19 @@ export abstract class BaseGame {
         this.instructions = instr;
     }
 
-    protected async render(lines: string[]) {
+    protected async render(lines: string[]): Promise<void> {
         const len = await this.state.buffer.length;
         const expectedLen = this.getTotalLength(lines);
         if (len < expectedLen + 1) {
-            await this.state.buffer.insert(new Array(expectedLen - len).fill(''), len);
+            await this.state.buffer.insert(
+                new Array(expectedLen - len).fill(""),
+                len
+            );
         }
 
-        const toRender = [
-            ...this.instructions,
-            ...lines,
-        ].filter(x => x !== null && x !== undefined);
+        const toRender = [...this.instructions, ...lines].filter(
+            x => x !== null && x !== undefined
+        );
 
         await this.state.buffer.setLines(toRender, {
             start: 1,
@@ -140,15 +153,18 @@ export abstract class BaseGame {
         });
     }
 
-    public finish() {
+    public finish(): void {
         const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
-        fs.writeFileSync(fName, this.state.results.map(x => x + "").join(",\n"));
+        fs.writeFileSync(
+            fName,
+            this.state.results.map(x => x + "").join(",\n")
+        );
 
         this.linesCallback = undefined;
         this.state.buffer.off("lines", this.listenLines);
     }
 
-    public async gameOver() {
+    public async gameOver(): Promise<void> {
         // no op which can be optionally utilized by subclasses
     }
 
@@ -161,37 +177,39 @@ export abstract class BaseGame {
         return ~~(Math.random() * this.state.lineLength);
     }
 
-    protected midPointRandomPoint(high: boolean, padding = 0) {
+    protected midPointRandomPoint(high: boolean, padding = 0): number {
         const midPoint = this.getMidpoint();
         let line: number;
         do {
             line = this.pickRandomLine();
-        } while (high && (line - padding) > midPoint ||
-                 !high && (line + padding) < midPoint);
+        } while (
+            (high && line - padding > midPoint) ||
+            (!high && line + padding < midPoint)
+        );
         return line;
     }
 
-    protected startTimer() {
+    protected startTimer(): void {
         this.timerId = setTimeout(() => {
             this.onExpired.forEach(cb => cb());
 
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore I HATE YOU TYPESCRIPT
             this.timerId = 0;
-
         }, difficultyToTime(this.difficulty));
     }
 
-    protected clearTimer() {
+    protected clearTimer(): void {
         if (this.timerId) {
             clearTimeout(this.timerId);
         }
     }
 
-    public onTimerExpired(cb: () => void) {
+    public onTimerExpired(cb: () => void): void {
         this.onExpired.push(cb);
     }
 
-    protected async clearBoard() {
+    protected async clearBoard(): void {
         const len = await this.state.buffer.length;
 
         this.render(getEmptyLines(len));
@@ -202,17 +220,15 @@ export abstract class BaseGame {
     abstract clear(): Promise<void>;
     abstract checkForWin(): Promise<boolean>;
 
-    async debugTitle(...title: any[]) {
+    async debugTitle(...title: any[]): Promise<void> {
         await this.setTitle(...title);
         await wait(1000);
     }
 
-    async setTitle(...title: any[]) {
-        await this.state.buffer.
-            setLines(
-                join(...title), {
-                    start: 0,
-                    end: 1
-                });
+    async setTitle(...title: any[]): Promise<void> {
+        await this.state.buffer.setLines(join(...title), {
+            start: 0,
+            end: 1
+        });
     }
 }

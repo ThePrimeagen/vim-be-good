@@ -1,6 +1,6 @@
-import { Neovim } from 'neovim';
-import { GameState, GameOptions } from './types';
-import { BaseGame, getRandomSentence } from './base';
+import { Neovim } from "neovim";
+import { GameState, GameOptions } from "./types";
+import { BaseGame, getRandomSentence } from "./base";
 
 export class WhackAMoleGame extends BaseGame {
     private instructionLines = [
@@ -9,7 +9,7 @@ export class WhackAMoleGame extends BaseGame {
         "",
         "Use vim movements to locate the character with the arrow under it as ",
         "quickly as possible. Then invert the character's case to win."
-    ]
+    ];
     private winLine: string;
     private outputStartRow = 2;
 
@@ -20,13 +20,13 @@ export class WhackAMoleGame extends BaseGame {
     }
 
     // I think I could make this all abstract...
-    async hasFailed() {
+    async hasFailed(): Promise<boolean> {
         return false;
     }
 
-    async run() {
+    async run(): Promise<void> {
         const sentence = getRandomSentence();
-        let chosenLocation;
+        let chosenLocation: number;
 
         do {
             const location = Math.floor(Math.random() * sentence.length);
@@ -37,21 +37,19 @@ export class WhackAMoleGame extends BaseGame {
         } while (!chosenLocation);
 
         const pointerLine = sentence
-            .split('')
-            .map((_, index) => index === chosenLocation ? '^' : ' ')
-            .join('');
+            .split("")
+            .map((_, index) => (index === chosenLocation ? "^" : " "))
+            .join("");
 
         this.winLine = this.createWinLine(sentence, chosenLocation);
 
-        await this.state.buffer.setLines([
-            ...this.instructionLines,
-            "",
-            sentence,
-            pointerLine
-        ], {
-            start: this.outputStartRow,
-            strictIndexing: true
-        });
+        await this.state.buffer.setLines(
+            [...this.instructionLines, "", sentence, pointerLine],
+            {
+                start: this.outputStartRow,
+                strictIndexing: true
+            }
+        );
 
         this.state.window.cursor = [
             this.instructionLines.length + this.outputStartRow + 1,
@@ -59,13 +57,16 @@ export class WhackAMoleGame extends BaseGame {
         ];
     }
 
-    async clear() {
+    async clear(): Promise<void> {
         const len = await this.state.buffer.length;
         await this.state.buffer.remove(0, len, true);
-        await this.state.buffer.insert(new Array(this.state.lineRange.end).fill(''), 0);
+        await this.state.buffer.insert(
+            new Array(this.state.lineRange.end).fill(""),
+            0
+        );
     }
 
-    async gameOver() {
+    async gameOver(): Promise<void> {
         await this.clear();
     }
 
@@ -85,12 +86,11 @@ export class WhackAMoleGame extends BaseGame {
         let targetChar = sentence[targetColumn];
 
         if (/[a-z]/.test(targetChar)) {
-            targetChar = targetChar.toUpperCase()
+            targetChar = targetChar.toUpperCase();
         } else {
-            targetChar = targetChar.toLowerCase()
+            targetChar = targetChar.toLowerCase();
         }
 
         return preTargetChar + targetChar + postTargetChar;
     }
 }
-
