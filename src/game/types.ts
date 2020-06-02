@@ -1,11 +1,11 @@
-import { Buffer, Window } from 'neovim';
+import { Buffer, Window } from "neovim";
 
 export enum GameDifficulty {
-    Easy = 'easy',
-    Medium = 'medium',
-    Hard = 'hard',
-    Nightmare = 'nightmare',
-    TPope = 'tpope',
+    Easy = "easy",
+    Medium = "medium",
+    Hard = "hard",
+    Nightmare = "nightmare",
+    TPope = "tpope"
 }
 
 export type GameOptions = {
@@ -13,7 +13,7 @@ export type GameOptions = {
 };
 
 export function difficultyToTime(diff: GameDifficulty): number {
-    let out: number = 1000;
+    let out = 1000;
     switch (diff) {
         case GameDifficulty.Easy:
             out = 5000;
@@ -33,20 +33,21 @@ export function difficultyToTime(diff: GameDifficulty): number {
 }
 
 export function parseGameDifficulty(
-    diff: string, defaultValue = GameDifficulty.Easy): GameDifficulty {
-
+    diff: string,
+    defaultValue = GameDifficulty.Easy
+): GameDifficulty {
     let difficulty = defaultValue;
     switch (diff) {
-        case 'easy':
+        case "easy":
             difficulty = GameDifficulty.Easy;
             break;
-        case 'medium':
+        case "medium":
             difficulty = GameDifficulty.Medium;
             break;
-        case 'hard':
+        case "hard":
             difficulty = GameDifficulty.Hard;
             break;
-        case 'nightmare':
+        case "nightmare":
             difficulty = GameDifficulty.Nightmare;
             break;
     }
@@ -59,14 +60,12 @@ export type GameState = {
     window: Window;
     failureCount: number;
     name: string;
-    ending: {count: number};
+    ending: { count: number };
     currentCount: number;
     lineRange: {
-        start: number,
-        end: number
+        start: number;
+        end: number;
     };
     lineLength: number;
     results: number[];
-}
-
-
+};

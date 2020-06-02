@@ -4,6 +4,7 @@ export class Menu {
     private buffer?: Buffer;
     private plugin: NvimPlugin;
     private window?: Window;
+    //eslint-disable-next-line @typescript-eslint/ban-types
     private gameSelectionCallback?: Function;
     private headerLines = [
         "VimBeGood is a collection of small games for neovim which are",
@@ -16,7 +17,6 @@ export class Menu {
     ];
 
     private difficultyInstructions = [
-
         "",
         "Select a Difficulty (delete from the list to select)",
         "----------------------------------------------------"
@@ -34,14 +34,23 @@ export class Menu {
         "https://github.com/ThePrimeagen/vim-be-good"
     ];
     private fullMenu: string[] = [];
+    //eslint-disable-next-line @typescript-eslint/no-inferrable-types
     private firstGameLineIndex: number = -1;
+    //eslint-disable-next-line @typescript-eslint/no-inferrable-types
     private firstDifficultyLineIndex: number = -1;
     private selectedDifficulty: string;
 
-
-    constructor(plugin: NvimPlugin, games, difficulties, selectedDifficulty, __allowCreation) {
+    constructor(
+        plugin: NvimPlugin,
+        games,
+        difficulties,
+        selectedDifficulty,
+        __allowCreation
+    ) {
         if (!__allowCreation) {
-            throw new Error("Menu cannot be instantiated, you must use the builder");
+            throw new Error(
+                "Menu cannot be instantiated, you must use the builder"
+            );
         }
 
         this.plugin = plugin;
@@ -52,9 +61,19 @@ export class Menu {
         this.generateMenuLines();
     }
 
-    static async build(plugin: NvimPlugin, availableGames: string[], availableDifficulties: string[], selectedDifficulty) {
-        const menu = new Menu(plugin, availableGames, availableDifficulties,
-                              selectedDifficulty, true);
+    static async build(
+        plugin: NvimPlugin,
+        availableGames: string[],
+        availableDifficulties: string[],
+        selectedDifficulty
+    ) {
+        const menu = new Menu(
+            plugin,
+            availableGames,
+            availableDifficulties,
+            selectedDifficulty,
+            true
+        );
 
         await menu.setup();
 
@@ -67,11 +86,7 @@ export class Menu {
     }
 
     public async clearScreen() {
-        await this.buffer?.remove(
-            0,
-            await this.buffer?.length,
-            true
-        );
+        await this.buffer?.remove(0, await this.buffer?.length, true);
     }
 
     public async render() {
@@ -90,7 +105,14 @@ export class Menu {
         this.gameSelectionCallback = cb;
     }
 
-    private async lineEventHandler(buffer, _changedTick, _firstLine, lastLine, _newData, _more) {
+    private async lineEventHandler(
+        buffer,
+        _changedTick,
+        _firstLine,
+        lastLine,
+        _newData,
+        _more
+    ) {
         try {
             if (!this.window) {
                 return;
@@ -113,7 +135,10 @@ export class Menu {
 
                     await this.clearScreen();
 
-                    this.gameSelectionCallback?.(selectedGame, this.selectedDifficulty);
+                    this.gameSelectionCallback?.(
+                        selectedGame,
+                        this.selectedDifficulty
+                    );
                 } else if (selectedDifficulty) {
                     this.selectedDifficulty = selectedDifficulty;
                     this.stopHandlingLineEvents();
@@ -127,7 +152,9 @@ export class Menu {
                 await this.render();
             }
         } catch (e) {
-            await this.plugin.nvim.outWrite("Error while handling line: " + e.message + "\n");
+            await this.plugin.nvim.outWrite(
+                "Error while handling line: " + e.message + "\n"
+            );
         }
     }
 
@@ -146,7 +173,7 @@ export class Menu {
             } else {
                 return `[ ] ${diff}`;
             }
-        })
+        });
     }
 
     private generateMenuLines() {
@@ -160,9 +187,7 @@ export class Menu {
             ...this.footer
         ];
         this.firstGameLineIndex =
-            this.headerLines.length +
-            this.gameInstructions.length +
-            1;
+            this.headerLines.length + this.gameInstructions.length + 1;
         this.firstDifficultyLineIndex =
             this.headerLines.length +
             this.gameInstructions.length +

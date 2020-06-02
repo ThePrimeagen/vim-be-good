@@ -1,6 +1,6 @@
-import { Neovim } from 'neovim';
-import { GameState, GameOptions } from './types';
-import { getEmptyLines, BaseGame } from './base';
+import { Neovim } from "neovim";
+import { GameState, GameOptions } from "./types";
+import { getEmptyLines, BaseGame } from "./base";
 
 // this is a comment
 export class DeleteGame extends BaseGame {
@@ -11,10 +11,10 @@ export class DeleteGame extends BaseGame {
         this.failed = false;
 
         this.setInstructions([
-            "When you see a \"DELETE ME\", relative jump to it",
+            'When you see a "DELETE ME", relative jump to it',
             "as fast as possible and delete it.",
             "",
-            "",
+            ""
         ]);
 
         this.onTimerExpired(async () => {
@@ -24,15 +24,15 @@ export class DeleteGame extends BaseGame {
         });
     }
 
-    async hasFailed() {
+    async hasFailed(): Promise<boolean> {
         return this.failed;
     }
 
-    async run() {
+    async run(): Promise<void> {
         const high = Math.random() > 0.5;
         const line = this.midPointRandomPoint(high);
 
-        const lines = new Array(this.state.lineLength).fill('');
+        const lines = new Array(this.state.lineLength).fill("");
         lines[line] = "                              DELETE ME";
 
         await this.nvim.command(`:${String(this.midPointRandomPoint(!high))}`);
@@ -40,7 +40,7 @@ export class DeleteGame extends BaseGame {
         this.startTimer();
     }
 
-    async clear() {
+    async clear(): Promise<void> {
         this.failed = false;
         this.clearTimer();
         await this.render(getEmptyLines(this.state.lineLength));
@@ -57,8 +57,7 @@ export class DeleteGame extends BaseGame {
             strictIndexing: false
         });
 
-        const length = lines.map(l => l.trim()).join('').length;
+        const length = lines.map(l => l.trim()).join("").length;
         return length === 0;
     }
 }
-
