@@ -11,8 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const base_1 = require("./base");
 class WhackAMoleGame extends base_1.BaseGame {
-    constructor(nvim, state, opts) {
-        super(nvim, state, opts);
+    constructor(nvim, buffer, state, opts) {
+        super(nvim, buffer, state, opts);
         this.instructionLines = [
             "How to Play:",
             "------------",
@@ -32,24 +32,13 @@ class WhackAMoleGame extends base_1.BaseGame {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             const sentence = base_1.getRandomSentence();
-            let chosenLocation;
-            do {
-                const location = Math.floor(Math.random() * sentence.length);
-                if (location > 0 && /[A-Za-z]/.test(sentence[location])) {
-                    chosenLocation = location;
-                }
-            } while (!chosenLocation);
+            const chosenLocation = Math.floor(Math.random() * sentence.length);
             const pointerLine = sentence
-                .split('')
-                .map((_, index) => index === chosenLocation ? '^' : ' ')
-                .join('');
+                .split("")
+                .map((_, index) => (index === chosenLocation ? "^" : " "))
+                .join("");
             this.winLine = this.createWinLine(sentence, chosenLocation);
-            yield this.state.buffer.setLines([
-                ...this.instructionLines,
-                "",
-                sentence,
-                pointerLine
-            ], {
+            yield this.state.buffer.setLines([...this.instructionLines, "", sentence, pointerLine], {
                 start: this.outputStartRow,
                 strictIndexing: true
             });
@@ -63,7 +52,7 @@ class WhackAMoleGame extends base_1.BaseGame {
         return __awaiter(this, void 0, void 0, function* () {
             const len = yield this.state.buffer.length;
             yield this.state.buffer.remove(0, len, true);
-            yield this.state.buffer.insert(new Array(this.state.lineRange.end).fill(''), 0);
+            yield this.state.buffer.insert(new Array(this.state.lineRange.end).fill(""), 0);
         });
     }
     gameOver() {

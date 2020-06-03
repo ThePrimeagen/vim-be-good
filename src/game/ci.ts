@@ -1,15 +1,16 @@
 import { Neovim } from "neovim";
+import { GameBuffer } from "../game-buffer";
 import { GameState, GameOptions } from "./types";
 import { getRandomWord, BaseGame } from "./base";
 
 export class CiGame extends BaseGame {
     private currentRandomWord: string;
     private ifStatment = false;
-    constructor(nvim: Neovim, state: GameState, opts?: GameOptions) {
-        super(nvim, state, opts);
+    constructor(nvim: Neovim, buffer: GameBuffer, state: GameState, opts?: GameOptions) {
+        super(nvim, buffer, state, opts);
         this.currentRandomWord = "";
         this.ifStatment = false;
-        this.setInstructions([
+        this.gameBuffer.setInstructions([
             'Replace the outer container (if (...) { ... } or [ ... ]) with "bar"',
             "",
             "e.g.:",
@@ -29,7 +30,7 @@ export class CiGame extends BaseGame {
 
     async run(): Promise<void> {
         const high = Math.random() > 0.5;
-        const line = this.midPointRandomPoint(high, 6);
+        const line = this.gameBuffer.midPointRandomPoint(high, 6);
         const lines = new Array(this.state.lineLength).fill("");
 
         this.currentRandomWord = getRandomWord();
@@ -52,8 +53,8 @@ export class CiGame extends BaseGame {
             lines[line + 5] = `]`;
         }
 
-        const jumpPoint = this.midPointRandomPoint(!high);
-        this.state.window.cursor = [this.getInstructionOffset() + jumpPoint, 0];
+        const jumpPoint = this.gameBuffer.midPointRandomPoint(!high);
+        this.state.window.cursor = [this.gameBuffer.getInstructionOffset() + jumpPoint, 0];
         this.render(lines);
     }
 
@@ -68,12 +69,7 @@ export class CiGame extends BaseGame {
     }
 
     async checkForWin(): Promise<boolean> {
-        const lines = await this.state.buffer.getLines({
-            start: this.getInstructionOffset(),
-            end: await this.state.buffer.length,
-            strictIndexing: false
-        });
-
+        const lines = await this.gameBuffer.getGameLines();
         const contents = lines.map(l => l.trim()).join("");
 
         return (

@@ -12,22 +12,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("./game/types");
 const base_1 = require("./game/base");
 const delete_1 = require("./game/delete");
+const game_buffer_1 = require("./game-buffer");
 const ci_1 = require("./game/ci");
 const whackamole_1 = require("./game/whackamole");
 const menu_1 = require("./menu");
 // this is a comment
-function runGame(game) {
+function runGame(nvim, game) {
     return __awaiter(this, void 0, void 0, function* () {
+        const buffer = game.gameBuffer;
         try {
             for (let i = 0; i < 3; ++i) {
-                yield game.debugTitle("Game is starting in", String(3 - i), "...");
+                yield buffer.debugTitle("Game is starting in", String(3 - i), "...");
             }
-            yield game.setTitle("Game Started: ", game.state.currentCount + 1, "/", game.state.ending.count);
+            // TODO: this should stop here.  this seems all sorts of wrong
+            yield buffer.setTitle("Game Started: ", game.state.currentCount + 1, "/", game.state.ending.count);
             yield game.clear();
             yield game.run();
             let start = Date.now();
             let missingCount = 0;
             let used = false;
+            // eslint-disable-next-line no-inner-declarations
             function reset() {
                 used = false;
                 if (missingCount > 0) {
@@ -35,6 +39,7 @@ function runGame(game) {
                     onLineEvent();
                 }
             }
+            // eslint-disable-next-line no-inner-declarations
             function onLineEvent() {
                 return __awaiter(this, void 0, void 0, function* () {
                     const startOfFunction = Date.now();
@@ -56,20 +61,21 @@ function runGame(game) {
                             yield game.gameOver();
                             const gameCount = game.state.ending.count;
                             const title = [
-                                `Success: ${gameCount - game.state.failureCount} / ${gameCount}`,
+                                `Success: ${gameCount - game.state.failureCount} / ${gameCount}`
                             ];
                             if (game.state.results.length > 0) {
-                                title.push(`Average Success Time!: ${game.state.results.reduce((x, y) => x + y, 0) / game.state.results.length}`);
+                                title.push(`Average Success Time!: ${game.state.results.reduce((x, y) => x + y, 0) /
+                                    game.state.results.length}`);
                             }
                             else {
                                 title.push(`You didn't even have one success, maybe you should lower the difficulty...`);
                             }
-                            yield game.setTitle(title.join(' '));
+                            yield buffer.setTitle(title.join(" "));
                             game.finish();
                             return;
                         }
                         else {
-                            yield game.setTitle(`Round ${game.state.currentCount + 1} / ${game.state.ending.count}`);
+                            yield buffer.setTitle(`Round ${game.state.currentCount + 1} / ${game.state.ending.count}`);
                         }
                         game.state.currentCount++;
                         yield game.clear();
@@ -77,50 +83,50 @@ function runGame(game) {
                         start = Date.now();
                     }
                     catch (e) {
-                        game.debugTitle("onLineEvent#error", e.message);
+                        buffer.debugTitle("onLineEvent#error", e.message);
                     }
                     reset();
                 });
             }
-            game.onLines(onLineEvent);
+            buffer.onLines(onLineEvent);
             game.onTimerExpired(() => {
                 console.log("Index#onTimerExpired!");
                 onLineEvent();
             });
         }
         catch (err) {
-            yield game.nvim.outWrite(`Failure ${err}\n`);
+            yield nvim.outWrite(`Failure ${err}\n`);
         }
     });
 }
 exports.runGame = runGame;
 function initializeGame(name, difficulty, nvim, state) {
-    let game = null;
-    if (name === "relative") {
-        game = new delete_1.DeleteGame(nvim, state, { difficulty });
-    }
-    else if (name === "ci{") {
-        game = new ci_1.CiGame(nvim, state, { difficulty });
-    }
-    else if (name === "whackamole") {
-        game = new whackamole_1.WhackAMoleGame(nvim, state, { difficulty });
-    }
-    if (game) {
-        runGame(game);
-    }
-    ;
+    return __awaiter(this, void 0, void 0, function* () {
+        let game = null;
+        let buffer = new game_buffer_1.GameBuffer(yield nvim.buffer, state.lineLength);
+        if (name === "relative") {
+            game = new delete_1.DeleteGame(nvim, buffer, state, { difficulty });
+        }
+        else if (name === "ci{") {
+            game = new ci_1.CiGame(nvim, buffer, state, { difficulty });
+        }
+        else if (name === "whackamole") {
+            game = new whackamole_1.WhackAMoleGame(nvim, buffer, state, { difficulty });
+        }
+        if (game) {
+            runGame(nvim, game);
+        }
+    });
 }
 exports.initializeGame = initializeGame;
 const availableGames = ["relative", "ci{", "whackamole"];
-const availableDifficulties = [
-    "easy", "medium", "hard", "nightmare", "tpope"
-];
+const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 const stringToDiff = {
     easy: types_1.GameDifficulty.Easy,
     medium: types_1.GameDifficulty.Medium,
     hard: types_1.GameDifficulty.Hard,
     nightmare: types_1.GameDifficulty.Nightmare,
-    tpope: types_1.GameDifficulty.TPope,
+    tpope: types_1.GameDifficulty.TPope
 };
 function getGameState(nvim) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -128,10 +134,10 @@ function getGameState(nvim) {
     });
 }
 exports.getGameState = getGameState;
-function default_1(plugin) {
+function createPlugin(plugin) {
     plugin.setOptions({
         dev: true,
-        alwaysInit: true,
+        alwaysInit: true
     });
     plugin.registerCommand("VimBeGood", (args) => __awaiter(this, void 0, void 0, function* () {
         try {
@@ -142,23 +148,25 @@ function default_1(plugin) {
                 end: length,
                 strictIndexing: true
             });
-            const lengthOfLines = lines.reduce((acc, x) => acc + x, "").trim().length;
+            const lengthOfLines = lines
+                .reduce((acc, x) => acc + x, "")
+                .trim().length;
             if (lengthOfLines > 0) {
                 plugin.nvim.errWriteLine("Your file is not empty.");
                 return;
             }
-            let difficulty = types_1.parseGameDifficulty(args[1]);
+            const difficulty = types_1.parseGameDifficulty(args[1]);
             const state = yield getGameState(plugin.nvim);
             if (availableGames.indexOf(args[0]) >= 0) {
                 state.name = args[0];
-                initializeGame(args[0], difficulty, plugin.nvim, state);
+                yield initializeGame(args[0], difficulty, plugin.nvim, state);
             }
             // TODO: ci?
             else {
                 const menu = yield menu_1.Menu.build(plugin, availableGames, availableDifficulties, difficulty);
                 menu.onGameSelection((gameName, difficulty) => __awaiter(this, void 0, void 0, function* () {
                     state.name = gameName;
-                    initializeGame(gameName, stringToDiff[difficulty], plugin.nvim, state);
+                    yield initializeGame(gameName, stringToDiff[difficulty], plugin.nvim, state);
                 }));
                 menu.render();
                 return;
@@ -169,5 +177,4 @@ function default_1(plugin) {
         }
     }), { sync: false, nargs: "*" });
 }
-exports.default = default_1;
-;
+exports.default = createPlugin;

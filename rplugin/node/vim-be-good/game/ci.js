@@ -11,13 +11,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const base_1 = require("./base");
 class CiGame extends base_1.BaseGame {
-    constructor(nvim, state, opts) {
-        super(nvim, state, opts);
+    constructor(nvim, buffer, state, opts) {
+        super(nvim, buffer, state, opts);
         this.ifStatment = false;
         this.currentRandomWord = "";
         this.ifStatment = false;
-        this.setInstructions([
-            "Replace the outer container (if (...) { ... } or [ ... ]) with \"bar\"",
+        this.gameBuffer.setInstructions([
+            'Replace the outer container (if (...) { ... } or [ ... ]) with "bar"',
             "",
             "e.g.:",
             "[                    [",
@@ -25,7 +25,7 @@ class CiGame extends base_1.BaseGame {
             "   item1,       ->   ]",
             "   item1,",
             "   item1,",
-            "]",
+            "]"
         ]);
     }
     // I think I could make this all abstract...
@@ -37,7 +37,7 @@ class CiGame extends base_1.BaseGame {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             const high = Math.random() > 0.5;
-            const line = this.midPointRandomPoint(high, 6);
+            const line = this.gameBuffer.midPointRandomPoint(high, 6);
             const lines = new Array(this.state.lineLength).fill("");
             this.currentRandomWord = base_1.getRandomWord();
             this.ifStatment = false;
@@ -58,8 +58,8 @@ class CiGame extends base_1.BaseGame {
                 lines[line + 4] = `    ${base_1.getRandomWord()},`;
                 lines[line + 5] = `]`;
             }
-            const jumpPoint = this.midPointRandomPoint(!high);
-            this.state.window.cursor = [this.getInstructionOffset() + jumpPoint, 0];
+            const jumpPoint = this.gameBuffer.midPointRandomPoint(!high);
+            this.state.window.cursor = [this.gameBuffer.getInstructionOffset() + jumpPoint, 0];
             this.render(lines);
         });
     }
@@ -73,14 +73,12 @@ class CiGame extends base_1.BaseGame {
     }
     checkForWin() {
         return __awaiter(this, void 0, void 0, function* () {
-            const lines = yield this.state.buffer.getLines({
-                start: this.getInstructionOffset(),
-                end: yield this.state.buffer.length,
-                strictIndexing: false
-            });
+            const lines = yield this.gameBuffer.getGameLines();
             const contents = lines.map(l => l.trim()).join("");
-            return this.ifStatment && contents.toLowerCase() === `if (${this.currentRandomWord}) {bar}` ||
-                contents.toLowerCase() === `[bar]`;
+            return ((this.ifStatment &&
+                contents.toLowerCase() ===
+                    `if (${this.currentRandomWord}) {bar}`) ||
+                contents.toLowerCase() === `[bar]`);
         });
     }
 }

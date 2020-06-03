@@ -77,8 +77,9 @@ export abstract class BaseGame {
     private onExpired: (() => void)[];
 
     constructor(
+        protected nvim: Neovim,
         public gameBuffer: GameBuffer,
-        private state: GameState,
+        public state: GameState,
         opts: GameOptions = {
             difficulty: GameDifficulty.Easy
         }

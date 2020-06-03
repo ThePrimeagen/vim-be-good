@@ -2,23 +2,27 @@ import { Neovim, NvimPlugin } from "neovim";
 import { GameDifficulty, GameState, parseGameDifficulty } from "./game/types";
 import { BaseGame, newGameState } from "./game/base";
 import { DeleteGame } from "./game/delete";
+import { GameBuffer } from "./game-buffer";
 import { CiGame } from "./game/ci";
 import { WhackAMoleGame } from "./game/whackamole";
 import { Menu } from "./menu";
 
 // this is a comment
-export async function runGame(game: BaseGame): Promise<void> {
+export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
+    const buffer: GameBuffer = game.gameBuffer;
     try {
         for (let i = 0; i < 3; ++i) {
-            await game.debugTitle("Game is starting in", String(3 - i), "...");
+            await buffer.debugTitle("Game is starting in", String(3 - i), "...");
         }
 
-        await game.setTitle(
+        // TODO: this should stop here.  this seems all sorts of wrong
+        await buffer.setTitle(
             "Game Started: ",
             game.state.currentCount + 1,
             "/",
             game.state.ending.count
         );
+
         await game.clear();
         await game.run();
 
@@ -80,11 +84,11 @@ export async function runGame(game: BaseGame): Promise<void> {
                         );
                     }
 
-                    await game.setTitle(title.join(" "));
+                    await buffer.setTitle(title.join(" "));
                     game.finish();
                     return;
                 } else {
-                    await game.setTitle(
+                    await buffer.setTitle(
                         `Round ${game.state.currentCount + 1} / ${
                             game.state.ending.count
                         }`
@@ -97,40 +101,40 @@ export async function runGame(game: BaseGame): Promise<void> {
                 await game.run();
                 start = Date.now();
             } catch (e) {
-                game.debugTitle("onLineEvent#error", e.message);
+                buffer.debugTitle("onLineEvent#error", e.message);
             }
             reset();
         }
 
-        game.onLines(onLineEvent);
+        buffer.onLines(onLineEvent);
         game.onTimerExpired(() => {
             console.log("Index#onTimerExpired!");
             onLineEvent();
         });
     } catch (err) {
-        await game.nvim.outWrite(`Failure ${err}\n`);
+        await nvim.outWrite(`Failure ${err}\n`);
     }
 }
 
-export function initializeGame(
+export async function initializeGame(
     name: string,
     difficulty: GameDifficulty,
     nvim: Neovim,
     state: GameState
-): Promise<void> | void {
+): Promise<void> {
     let game: BaseGame | null = null;
-
+    let buffer = new GameBuffer(await nvim.buffer, state.lineLength);
 
     if (name === "relative") {
-        game = new DeleteGame(nvim, state, { difficulty });
+        game = new DeleteGame(nvim, buffer, state, { difficulty });
     } else if (name === "ci{") {
-        game = new CiGame(nvim, state, { difficulty });
+        game = new CiGame(nvim, buffer, state, { difficulty });
     } else if (name === "whackamole") {
-        game = new WhackAMoleGame(nvim, state, { difficulty });
+        game = new WhackAMoleGame(nvim, buffer, state, { difficulty });
     }
 
     if (game) {
-        runGame(game);
+        runGame(nvim, game);
     }
 }
 
@@ -149,7 +153,7 @@ export async function getGameState(nvim: Neovim): Promise<GameState> {
     return newGameState(await nvim.buffer, await nvim.window);
 }
 
-export default function (plugin: NvimPlugin): void {
+export default function createPlugin(plugin: NvimPlugin): void {
     plugin.setOptions({
         dev: true,
         alwaysInit: true
@@ -181,7 +185,7 @@ export default function (plugin: NvimPlugin): void {
 
                 if (availableGames.indexOf(args[0]) >= 0) {
                     state.name = args[0];
-                    initializeGame(args[0], difficulty, plugin.nvim, state);
+                    await initializeGame(args[0], difficulty, plugin.nvim, state);
                 }
 
                 // TODO: ci?
@@ -196,7 +200,7 @@ export default function (plugin: NvimPlugin): void {
                     menu.onGameSelection(
                         async (gameName: string, difficulty: string) => {
                             state.name = gameName;
-                            initializeGame(
+                            await initializeGame(
                                 gameName,
                                 stringToDiff[difficulty],
                                 plugin.nvim,

@@ -9,17 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const game_buffer_1 = require("../game-buffer");
 const base_1 = require("./base");
 // this is a comment
 class DeleteGame extends base_1.BaseGame {
-    constructor(nvim, state, opts) {
-        super(nvim, state, opts);
+    constructor(nvim, buffer, state, opts) {
+        super(nvim, buffer, state, opts);
         this.failed = false;
-        this.setInstructions([
-            "When you see a \"DELETE ME\", relative jump to it",
+        this.gameBuffer.setInstructions([
+            'When you see a "DELETE ME", relative jump to it',
             "as fast as possible and delete it.",
             "",
-            "",
+            ""
         ]);
         this.onTimerExpired(() => __awaiter(this, void 0, void 0, function* () {
             console.log("DeleteGame#onTimerExpired!");
@@ -35,10 +36,10 @@ class DeleteGame extends base_1.BaseGame {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             const high = Math.random() > 0.5;
-            const line = this.midPointRandomPoint(high);
-            const lines = new Array(this.state.lineLength).fill('');
+            const line = this.gameBuffer.midPointRandomPoint(high);
+            const lines = new Array(this.state.lineLength).fill("");
             lines[line] = "                              DELETE ME";
-            yield this.nvim.command(`:${String(this.midPointRandomPoint(!high))}`);
+            yield this.nvim.command(`:${String(this.gameBuffer.midPointRandomPoint(!high))}`);
             yield this.render(lines);
             this.startTimer();
         });
@@ -47,7 +48,7 @@ class DeleteGame extends base_1.BaseGame {
         return __awaiter(this, void 0, void 0, function* () {
             this.failed = false;
             this.clearTimer();
-            yield this.render(base_1.getEmptyLines(this.state.lineLength));
+            yield this.render(game_buffer_1.getEmptyLines(this.state.lineLength));
         });
     }
     checkForWin() {
@@ -56,11 +57,11 @@ class DeleteGame extends base_1.BaseGame {
                 return true;
             }
             const lines = yield this.state.buffer.getLines({
-                start: this.getInstructionOffset(),
+                start: this.gameBuffer.getInstructionOffset(),
                 end: yield this.state.buffer.length,
                 strictIndexing: false
             });
-            const length = lines.map(l => l.trim()).join('').length;
+            const length = lines.map(l => l.trim()).join("").length;
             return length === 0;
         });
     }

@@ -15,18 +15,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
 const types_1 = require("./types");
-const wait_1 = __importDefault(require("../wait"));
-const log_1 = require("../log");
-function getEmptyLines(len) {
-    return new Array(len).fill("");
-}
-exports.getEmptyLines = getEmptyLines;
 // this is a comment
 function newGameState(buffer, window) {
     return {
@@ -38,7 +29,7 @@ function newGameState(buffer, window) {
         currentCount: 0,
         lineRange: { start: 2, end: 22 },
         lineLength: 20,
-        results: [],
+        results: []
     };
 }
 exports.newGameState = newGameState;
@@ -68,7 +59,7 @@ exports.extraWords = [
     "war",
     "xar",
     "yar",
-    "zar",
+    "zar"
 ];
 exports.extraSentences = [
     "One is the best Prime Number",
@@ -89,83 +80,37 @@ function getRandomSentence() {
 }
 exports.getRandomSentence = getRandomSentence;
 class BaseGame {
-    constructor(nvim, state, opts = {
+    constructor(nvim, gameBuffer, state, opts = {
         difficulty: types_1.GameDifficulty.Easy
     }) {
+        this.nvim = nvim;
+        this.gameBuffer = gameBuffer;
+        this.state = state;
         this.state = state;
         this.onExpired = [];
-        this.nvim = nvim;
-        this.instructions = [];
         this.difficulty = opts.difficulty;
-        this.listenLines = (args) => {
-            if (this.linesCallback) {
-                this.linesCallback(args);
-            }
-        };
-        this.state.buffer.listen("lines", this.listenLines);
-    }
-    onLines(cb) {
-        this.linesCallback = cb;
-    }
-    getTotalLength(lines) {
-        return lines.length +
-            // + 1 = SETtITLE
-            (this.instructions && this.instructions.length || 0) + 1;
-    }
-    getInstructionOffset() {
-        return 1 + this.instructions.length;
-    }
-    setInstructions(instr) {
-        this.instructions = instr;
     }
     render(lines) {
         return __awaiter(this, void 0, void 0, function* () {
-            const len = yield this.state.buffer.length;
-            const expectedLen = this.getTotalLength(lines);
-            if (len < expectedLen + 1) {
-                yield this.state.buffer.insert(new Array(expectedLen - len).fill(''), len);
-            }
-            const toRender = [
-                ...this.instructions,
-                ...lines,
-            ].filter(x => x !== null && x !== undefined);
-            yield this.state.buffer.setLines(toRender, {
-                start: 1,
-                end: expectedLen,
-                strictIndexing: true
-            });
+            yield this.gameBuffer.render(lines);
         });
     }
     finish() {
-        const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
-        fs.writeFileSync(fName, this.state.results.map(x => x + "").join(",\n"));
-        this.linesCallback = undefined;
-        this.state.buffer.off("lines", this.listenLines);
+        return __awaiter(this, void 0, void 0, function* () {
+            const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
+            fs.writeFileSync(fName, this.state.results.map(x => x + "").join(",\n"));
+            yield this.gameBuffer.finish();
+        });
     }
     gameOver() {
         return __awaiter(this, void 0, void 0, function* () {
             // no op which can be optionally utilized by subclasses
         });
     }
-    getMidpoint() {
-        // TODO: Brandon? Games should define their own lengths that they need
-        return Math.floor(this.state.lineLength / 2);
-    }
-    pickRandomLine() {
-        return ~~(Math.random() * this.state.lineLength);
-    }
-    midPointRandomPoint(high, padding = 0) {
-        const midPoint = this.getMidpoint();
-        let line;
-        do {
-            line = this.pickRandomLine();
-        } while (high && (line - padding) > midPoint ||
-            !high && (line + padding) < midPoint);
-        return line;
-    }
     startTimer() {
         this.timerId = setTimeout(() => {
             this.onExpired.forEach(cb => cb());
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore I HATE YOU TYPESCRIPT
             this.timerId = 0;
         }, types_1.difficultyToTime(this.difficulty));
@@ -177,27 +122,6 @@ class BaseGame {
     }
     onTimerExpired(cb) {
         this.onExpired.push(cb);
-    }
-    clearBoard() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const len = yield this.state.buffer.length;
-            this.render(getEmptyLines(len));
-        });
-    }
-    debugTitle(...title) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.setTitle(...title);
-            yield wait_1.default(1000);
-        });
-    }
-    setTitle(...title) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.state.buffer.
-                setLines(log_1.join(...title), {
-                start: 0,
-                end: 1
-            });
-        });
     }
 }
 exports.BaseGame = BaseGame;

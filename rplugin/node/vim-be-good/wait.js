@@ -5,4 +5,4 @@ function wait(ms) {
         setTimeout(res, ms);
     });
 }
-exports.default = wait;
+exports.wait = wait;

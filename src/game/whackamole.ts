@@ -1,4 +1,5 @@
 import { Neovim } from "neovim";
+import { GameBuffer } from "../game-buffer";
 import { GameState, GameOptions } from "./types";
 import { BaseGame, getRandomSentence } from "./base";
 
@@ -13,8 +14,8 @@ export class WhackAMoleGame extends BaseGame {
     private winLine: string;
     private outputStartRow = 2;
 
-    constructor(nvim: Neovim, state: GameState, opts?: GameOptions) {
-        super(nvim, state, opts);
+    constructor(nvim: Neovim, buffer: GameBuffer, state: GameState, opts?: GameOptions) {
+        super(nvim, buffer, state, opts);
 
         this.winLine = "";
     }
@@ -26,7 +27,7 @@ export class WhackAMoleGame extends BaseGame {
 
     async run(): Promise<void> {
         const sentence = getRandomSentence();
-        let chosenLocation: number;
+        let chosenLocation: number = 0;
 
         do {
             const location = Math.floor(Math.random() * sentence.length);
@@ -80,7 +81,7 @@ export class WhackAMoleGame extends BaseGame {
         return lines[0] === this.winLine;
     }
 
-    private createWinLine(sentence, targetColumn): string {
+    private createWinLine(sentence: string, targetColumn: number): string {
         const preTargetChar = sentence.slice(0, targetColumn);
         const postTargetChar = sentence.slice(targetColumn + 1);
         let targetChar = sentence[targetColumn];

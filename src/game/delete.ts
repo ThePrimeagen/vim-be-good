@@ -1,16 +1,17 @@
 import { Neovim } from "neovim";
+import { GameBuffer, getEmptyLines } from "../game-buffer";
 import { GameState, GameOptions } from "./types";
-import { getEmptyLines, BaseGame } from "./base";
+import { BaseGame } from "./base";
 
 // this is a comment
 export class DeleteGame extends BaseGame {
     private failed: boolean;
 
-    constructor(nvim: Neovim, state: GameState, opts?: GameOptions) {
-        super(nvim, state, opts);
+    constructor(nvim: Neovim, buffer: GameBuffer, state: GameState, opts?: GameOptions) {
+        super(nvim, buffer, state, opts);
         this.failed = false;
 
-        this.setInstructions([
+        this.gameBuffer.setInstructions([
             'When you see a "DELETE ME", relative jump to it',
             "as fast as possible and delete it.",
             "",
@@ -30,12 +31,12 @@ export class DeleteGame extends BaseGame {
 
     async run(): Promise<void> {
         const high = Math.random() > 0.5;
-        const line = this.midPointRandomPoint(high);
+        const line = this.gameBuffer.midPointRandomPoint(high);
 
         const lines = new Array(this.state.lineLength).fill("");
         lines[line] = "                              DELETE ME";
 
-        await this.nvim.command(`:${String(this.midPointRandomPoint(!high))}`);
+        await this.nvim.command(`:${String(this.gameBuffer.midPointRandomPoint(!high))}`);
         await this.render(lines);
         this.startTimer();
     }
@@ -52,7 +53,7 @@ export class DeleteGame extends BaseGame {
         }
 
         const lines = await this.state.buffer.getLines({
-            start: this.getInstructionOffset(),
+            start: this.gameBuffer.getInstructionOffset(),
             end: await this.state.buffer.length,
             strictIndexing: false
         });

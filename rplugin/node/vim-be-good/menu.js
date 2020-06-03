@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Menu {
     constructor(plugin, games, difficulties, selectedDifficulty, __allowCreation) {
         this.headerLines = [
-            "VimBeGood is a collection of small games for neovim which are",
+            "VimBeGood2 is a collection of small games for neovim which are",
             "intended to help you improve your vim proficiency.",
             ""
         ];
@@ -36,7 +36,9 @@ class Menu {
             "https://github.com/ThePrimeagen/vim-be-good"
         ];
         this.fullMenu = [];
+        //eslint-disable-next-line @typescript-eslint/no-inferrable-types
         this.firstGameLineIndex = -1;
+        //eslint-disable-next-line @typescript-eslint/no-inferrable-types
         this.firstDifficultyLineIndex = -1;
         if (!__allowCreation) {
             throw new Error("Menu cannot be instantiated, you must use the builder");
@@ -148,9 +150,7 @@ class Menu {
             ...this.footer
         ];
         this.firstGameLineIndex =
-            this.headerLines.length +
-                this.gameInstructions.length +
-                1;
+            this.headerLines.length + this.gameInstructions.length + 1;
         this.firstDifficultyLineIndex =
             this.headerLines.length +
                 this.gameInstructions.length +

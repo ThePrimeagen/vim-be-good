@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function setRepl() {
     return __awaiter(this, void 0, void 0, function* () {
         //@ts-ignore
-        require('neovim/scripts/nvim').then((n) => global.nvim = n);
+        require("neovim/scripts/nvim").then(n => (global.nvim = n));
     });
 }
 exports.setRepl = setRepl;

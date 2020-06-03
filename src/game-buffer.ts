@@ -28,12 +28,21 @@ export class GameBuffer {
         this.buffer.listen("lines", this.listenLines);
     }
 
-    protected pickRandomLine(): number {
+    public async getGameLines(): Promise<string[]> {
+        const len = await this.buffer.length;
+        return await this.buffer.getLines({
+            start: this.getInstructionOffset(),
+            end: len,
+            strictIndexing: false
+        });
+    }
+
+    public pickRandomLine(): number {
         return ~~(Math.random() * this.lineLength);
     }
 
     // TODO: I ackshually hate this.
-    protected midPointRandomPoint(high: boolean, padding = 0): number {
+    public midPointRandomPoint(high: boolean, padding = 0): number {
         const midPoint = this.getMidpoint();
         let line: number;
         do {
@@ -45,11 +54,7 @@ export class GameBuffer {
         return line;
     }
 
-    protected getTotalLength(lines: string[]): number {
-        return lines.length + this.instructions.length + 1;
-    }
-
-    protected getInstructionOffset(): number {
+    public getInstructionOffset(): number {
         return 1 + this.instructions.length;
     }
 
@@ -98,16 +103,20 @@ export class GameBuffer {
         this.render(getEmptyLines(len));
     }
 
-    async debugTitle(...title: any[]): Promise<void> {
+    public async debugTitle(...title: any[]): Promise<void> {
         await this.setTitle(...title);
         await wait(1000);
     }
 
-    async setTitle(...title: any[]): Promise<void> {
+    public async setTitle(...title: any[]): Promise<void> {
         await this.buffer.setLines(join(...title), {
             start: 0,
             end: 1
         });
+    }
+
+    protected getTotalLength(lines: string[]): number {
+        return lines.length + this.instructions.length + 1;
     }
 };
 
