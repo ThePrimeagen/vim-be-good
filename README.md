@@ -2,14 +2,20 @@
 Vim be good is a plugin designed to make you better at vim by creating a game
 to practice basic movements in.
 
+## A note to me, ThePrimeagen
+I am sorry I have not done PRs!  From here on out, i'll PR it babies.
+I am sorry I have not done PRs!  From here on out, i'll PR it babies.
+I am sorry I have not done PRs!  From here on out, i'll PR it babies.
+I am sorry I have not done PRs!  From here on out, i'll PR it babies.
+
 ## WARNING
-* Read Installation instructions carefully.  There has been some confusion 
+* Read Installation instructions carefully.  There has been some confusion
   around that.
-* The code is a heaping pile of awefulness.  It was developed live on Twitch, 
+* The code is a heaping pile of awefulness.  It was developed live on Twitch,
   which means I did not carefully think through anything other than memes.
-* If you are looking to extend it I am about to do a refactor in the next 
-  couple of weeks to improve the current codebase and make a simplier 
-  contributor model. 
+* If you are looking to extend it I am about to do a refactor in the next
+  couple of weeks to improve the current codebase and make a simplier
+  contributor model.
 
 ## Difficulty
 The difficulty only works on a few games for now.
@@ -68,5 +74,5 @@ Please make an issue if you have a command you wish to practice and i'll make
 it into game!!
 
 ## Live on Stream
-Everything you see here has been developed on stream at [ThePrimeagen](https://twitch.tv/ThePrimeagen).  
+Everything you see here has been developed on stream at [ThePrimeagen](https://twitch.tv/ThePrimeagen).
 Stop by and troll away.  Helpful troll hints would be to complement the size of my hands.
