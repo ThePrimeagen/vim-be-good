@@ -7,6 +7,7 @@ import {
     difficultyToTime
 } from "./types";
 import wait from "../wait";
+
 import { join } from "../log";
 
 export function getEmptyLines(len: number): string[] {
@@ -209,7 +210,7 @@ export abstract class BaseGame {
         this.onExpired.push(cb);
     }
 
-    protected async clearBoard(): void {
+    protected async clearBoard(): Promise<void> {
         const len = await this.state.buffer.length;
 
         this.render(getEmptyLines(len));

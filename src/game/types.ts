@@ -1,4 +1,4 @@
-import { Buffer, Window } from "neovim";
+import { Buffer, Window, Neovim } from 'neovim';
 
 export enum GameDifficulty {
     Easy = "easy",
@@ -10,6 +10,12 @@ export enum GameDifficulty {
 
 export type GameOptions = {
     difficulty: GameDifficulty;
+};
+
+export enum RoundStatus {
+    Playing = 0,
+    Failed,
+    Won,
 };
 
 export function difficultyToTime(diff: GameDifficulty): number {

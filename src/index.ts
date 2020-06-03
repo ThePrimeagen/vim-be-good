@@ -32,7 +32,7 @@ export async function runGame(game: BaseGame): Promise<void> {
                 missingCount = 0;
                 onLineEvent();
             }
-        }
+       }
 
         // eslint-disable-next-line no-inner-declarations
         async function onLineEvent() {
@@ -119,6 +119,7 @@ export function initializeGame(
     state: GameState
 ): Promise<void> | void {
     let game: BaseGame | null = null;
+
 
     if (name === "relative") {
         game = new DeleteGame(nvim, state, { difficulty });
