@@ -95,9 +95,13 @@ export abstract class BaseGame {
 
     public async finish(): Promise<void> {
         const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
+        const results = this.state.results.map(x => x + "").join(",\n");
+
+        console.log("base -- finish", fName, results);
+
         fs.writeFileSync(
             fName,
-            this.state.results.map(x => x + "").join(",\n")
+            results,
         );
 
         await this.gameBuffer.finish();
@@ -108,16 +112,21 @@ export abstract class BaseGame {
     }
 
     protected startTimer(): void {
+        const time = difficultyToTime(this.difficulty);
+        console.log("base - startTimer", time);
+
         this.timerId = setTimeout(() => {
             this.onExpired.forEach(cb => cb());
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore I HATE YOU TYPESCRIPT
             this.timerId = 0;
-        }, difficultyToTime(this.difficulty));
+        }, time);
     }
 
     protected clearTimer(): void {
+        console.log("base - clearTimer", this.timerId);
+
         if (this.timerId) {
             clearTimeout(this.timerId);
         }

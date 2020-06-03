@@ -2,12 +2,6 @@
 Vim be good is a plugin designed to make you better at vim by creating a game
 to practice basic movements in.
 
-## A note to me, ThePrimeagen
-I am sorry I have not done PRs!  From here on out, i'll PR it babies.
-I am sorry I have not done PRs!  From here on out, i'll PR it babies.
-I am sorry I have not done PRs!  From here on out, i'll PR it babies.
-I am sorry I have not done PRs!  From here on out, i'll PR it babies.
-
 ## WARNING
 * Read Installation instructions carefully.  There has been some confusion
   around that.
@@ -76,3 +70,11 @@ it into game!!
 ## Live on Stream
 Everything you see here has been developed on stream at [ThePrimeagen](https://twitch.tv/ThePrimeagen).
 Stop by and troll away.  Helpful troll hints would be to complement the size of my hands.
+
+## Issues
+Please file an issue.  But if you do, please run the logger first and paste in
+the input.
+
+`NVIM_NODE_LOG_FILE=nvim.log nvim` -- this should print out all the
+console.log's that come with vim-be-good.  And it should give ThePrimeagen an
+idea of how to stop sucking

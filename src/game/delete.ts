@@ -36,8 +36,13 @@ export class DeleteGame extends BaseGame {
         const lines = new Array(this.state.lineLength).fill("");
         lines[line] = "                              DELETE ME";
 
-        await this.nvim.command(`:${String(this.gameBuffer.midPointRandomPoint(!high))}`);
+
+        const middlePoint = this.gameBuffer.midPointRandomPoint(!high);
+        console.log("relative -- run#rendering", middlePoint, lines);
+
+        await this.nvim.command(`:${String(middlePoint)}`);
         await this.render(lines);
+
         this.startTimer();
     }
 

@@ -10,8 +10,11 @@ import { Menu } from "./menu";
 // this is a comment
 export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
     const buffer: GameBuffer = game.gameBuffer;
+
+    console.log("runGame -- Game is starting");
     try {
         for (let i = 0; i < 3; ++i) {
+            console.log("runGame -- Game is starting in", String(3 - i));
             await buffer.debugTitle("Game is starting in", String(3 - i), "...");
         }
 
@@ -23,6 +26,8 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
             game.state.ending.count
         );
 
+        console.log("runGame -- Round 1 of", game.state.ending.count);
+
         await game.clear();
         await game.run();
 
@@ -31,8 +36,10 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
         let used = false;
         // eslint-disable-next-line no-inner-declarations
         function reset() {
+            console.log("runGame -- reset");
             used = false;
             if (missingCount > 0) {
+                console.log("runGame -- reset -- missing line event", missingCount);
                 missingCount = 0;
                 onLineEvent();
             }
@@ -50,17 +57,21 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
             used = true;
 
             try {
-                if (!(await game.checkForWin())) {
+                const checkForWin = await game.checkForWin();
+                console.log("runGame -- checking for win", checkForWin);
+                if (!checkForWin) {
                     reset();
                     return;
                 }
 
                 const failed = await game.hasFailed();
+                console.log("runGame -- checking for failed", failed);
 
                 if (!failed) {
                     game.state.results.push(startOfFunction - start);
                 }
 
+                console.log("runGame -- End of game?", game.state.currentCount >= game.state.ending.count);
                 if (game.state.currentCount >= game.state.ending.count) {
                     await game.gameOver();
 
@@ -88,6 +99,7 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                     game.finish();
                     return;
                 } else {
+                    console.log(`Round ${game.state.currentCount + 1} / ${game.state.ending.count }`);
                     await buffer.setTitle(
                         `Round ${game.state.currentCount + 1} / ${
                             game.state.ending.count
