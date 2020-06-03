@@ -81,11 +81,16 @@ export class Menu {
     }
 
     public async setup() {
+        console.log("menu -- Setup Starting");
+
         this.buffer = await this.plugin.nvim.buffer;
         this.window = await this.plugin.nvim.window;
+
+        console.log("menu -- Setup Finished");
     }
 
     public async clearScreen() {
+        console.log("menu -- clearScreen");
         await this.buffer?.remove(0, await this.buffer?.length, true);
     }
 
@@ -121,6 +126,8 @@ export class Menu {
             const newLines = await buffer.lines;
             const deletedCount = this.fullMenu.length - newLines.length;
 
+            console.log("menu -- onLineChange", deletedCount);
+
             if (deletedCount === 1) {
                 const selectedGame = this.gameList[
                     lastLine - this.firstGameLineIndex
@@ -130,7 +137,9 @@ export class Menu {
                     lastLine - this.firstDifficultyLineIndex
                 ];
 
+                console.log("menu -- onLineChange, if deletedCount === 1", selectedGame, selectedDifficulty);
                 if (selectedGame) {
+                    console.log("menu -- onLineChange, selectedGame");
                     this.stopHandlingLineEvents();
 
                     await this.clearScreen();
@@ -140,12 +149,14 @@ export class Menu {
                         this.selectedDifficulty
                     );
                 } else if (selectedDifficulty) {
+                    console.log("menu -- onLineChange, selectedDifficulty");
                     this.selectedDifficulty = selectedDifficulty;
                     this.stopHandlingLineEvents();
                     this.generateMenuLines();
 
                     await this.render();
                 } else {
+                    console.log("menu -- onLineChange, NOTHING WAS FOUND");
                     await this.render();
                 }
             } else {
