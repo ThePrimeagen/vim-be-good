@@ -1,18 +1,12 @@
 import * as fs from "fs";
 import { Neovim, Buffer, Window } from "neovim";
+import { GameBuffer } from "../game-buffer";
 import {
     GameState,
     GameOptions,
     GameDifficulty,
     difficultyToTime
 } from "./types";
-import wait from "../wait";
-
-import { join } from "../log";
-
-export function getEmptyLines(len: number): string[] {
-    return new Array(len).fill("");
-}
 
 // this is a comment
 export function newGameState(buffer: Buffer, window: Window): GameState {
@@ -77,117 +71,39 @@ export function getRandomSentence(): string {
     return extraSentences[Math.floor(Math.random() * extraSentences.length)];
 }
 
-export type LinesCallback = (args: any[]) => void;
-
 export abstract class BaseGame {
-    public state: GameState;
-    public nvim: Neovim;
-
-    private linesCallback?: LinesCallback;
-    private listenLines: LinesCallback;
-    private instructions: string[];
     private difficulty: GameDifficulty;
     private timerId?: ReturnType<typeof setTimeout>;
     private onExpired: (() => void)[];
 
     constructor(
-        nvim: Neovim,
-        state: GameState,
+        public gameBuffer: GameBuffer,
+        private state: GameState,
         opts: GameOptions = {
             difficulty: GameDifficulty.Easy
         }
     ) {
         this.state = state;
         this.onExpired = [];
-        this.nvim = nvim;
-        this.instructions = [];
         this.difficulty = opts.difficulty;
-
-        this.listenLines = (args: any[]) => {
-            if (this.linesCallback) {
-                this.linesCallback(args);
-            }
-        };
-
-        this.state.buffer.listen("lines", this.listenLines);
-    }
-
-    public onLines(cb: LinesCallback): void {
-        this.linesCallback = cb;
-    }
-
-    protected getTotalLength(lines: string[]): number {
-        return (
-            lines.length +
-            // + 1 = SETtITLE
-            ((this.instructions && this.instructions.length) || 0) +
-            1
-        );
-    }
-
-    protected getInstructionOffset(): number {
-        return 1 + this.instructions.length;
-    }
-
-    protected setInstructions(instr: string[]): void {
-        this.instructions = instr;
     }
 
     protected async render(lines: string[]): Promise<void> {
-        const len = await this.state.buffer.length;
-        const expectedLen = this.getTotalLength(lines);
-        if (len < expectedLen + 1) {
-            await this.state.buffer.insert(
-                new Array(expectedLen - len).fill(""),
-                len
-            );
-        }
-
-        const toRender = [...this.instructions, ...lines].filter(
-            x => x !== null && x !== undefined
-        );
-
-        await this.state.buffer.setLines(toRender, {
-            start: 1,
-            end: expectedLen,
-            strictIndexing: true
-        });
+        await this.gameBuffer.render(lines);
     }
 
-    public finish(): void {
+    public async finish(): Promise<void> {
         const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
         fs.writeFileSync(
             fName,
             this.state.results.map(x => x + "").join(",\n")
         );
 
-        this.linesCallback = undefined;
-        this.state.buffer.off("lines", this.listenLines);
+        await this.gameBuffer.finish();
     }
 
     public async gameOver(): Promise<void> {
         // no op which can be optionally utilized by subclasses
-    }
-
-    protected getMidpoint(): number {
-        // TODO: Brandon? Games should define their own lengths that they need
-        return Math.floor(this.state.lineLength / 2);
-    }
-
-    protected pickRandomLine(): number {
-        return ~~(Math.random() * this.state.lineLength);
-    }
-
-    protected midPointRandomPoint(high: boolean, padding = 0): number {
-        const midPoint = this.getMidpoint();
-        let line: number;
-        do {
-            line = this.pickRandomLine();
-        } while (
-            (high && line - padding > midPoint) ||
-            (!high && line + padding < midPoint)
-        );
-        return line;
     }
 
     protected startTimer(): void {
@@ -210,26 +126,8 @@ export abstract class BaseGame {
         this.onExpired.push(cb);
     }
 
-    protected async clearBoard(): Promise<void> {
-        const len = await this.state.buffer.length;
-
-        this.render(getEmptyLines(len));
-    }
-
     abstract hasFailed(): Promise<boolean>;
     abstract run(): Promise<void>;
     abstract clear(): Promise<void>;
     abstract checkForWin(): Promise<boolean>;
-
-    async debugTitle(...title: any[]): Promise<void> {
-        await this.setTitle(...title);
-        await wait(1000);
-    }
-
-    async setTitle(...title: any[]): Promise<void> {
-        await this.state.buffer.setLines(join(...title), {
-            start: 0,
-            end: 1
-        });
-    }
 }
