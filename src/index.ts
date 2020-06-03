@@ -15,7 +15,11 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
     try {
         for (let i = 0; i < 3; ++i) {
             console.log("runGame -- Game is starting in", String(3 - i));
-            await buffer.debugTitle("Game is starting in", String(3 - i), "...");
+            await buffer.debugTitle(
+                "Game is starting in",
+                String(3 - i),
+                "...",
+            );
         }
 
         // TODO: this should stop here.  this seems all sorts of wrong
@@ -23,7 +27,7 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
             "Game Started: ",
             game.state.currentCount + 1,
             "/",
-            game.state.ending.count
+            game.state.ending.count,
         );
 
         console.log("runGame -- Round 1 of", game.state.ending.count);
@@ -39,11 +43,14 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
             console.log("runGame -- reset");
             used = false;
             if (missingCount > 0) {
-                console.log("runGame -- reset -- missing line event", missingCount);
+                console.log(
+                    "runGame -- reset -- missing line event",
+                    missingCount,
+                );
                 missingCount = 0;
                 onLineEvent();
             }
-       }
+        }
 
         // eslint-disable-next-line no-inner-declarations
         async function onLineEvent() {
@@ -71,7 +78,10 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                     game.state.results.push(startOfFunction - start);
                 }
 
-                console.log("runGame -- End of game?", game.state.currentCount >= game.state.ending.count);
+                console.log(
+                    "runGame -- End of game?",
+                    game.state.currentCount >= game.state.ending.count,
+                );
                 if (game.state.currentCount >= game.state.ending.count) {
                     await game.gameOver();
 
@@ -79,7 +89,7 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                     const title = [
                         `Success: ${
                             gameCount - game.state.failureCount
-                        } / ${gameCount}`
+                        } / ${gameCount}`,
                     ];
 
                     if (game.state.results.length > 0) {
@@ -87,11 +97,11 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                             `Average Success Time!: ${
                                 game.state.results.reduce((x, y) => x + y, 0) /
                                 game.state.results.length
-                            }`
+                            }`,
                         );
                     } else {
                         title.push(
-                            `You didn't even have one success, maybe you should lower the difficulty...`
+                            `You didn't even have one success, maybe you should lower the difficulty...`,
                         );
                     }
 
@@ -99,11 +109,15 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                     game.finish();
                     return;
                 } else {
-                    console.log(`Round ${game.state.currentCount + 1} / ${game.state.ending.count }`);
+                    console.log(
+                        `Round ${game.state.currentCount + 1} / ${
+                            game.state.ending.count
+                        }`,
+                    );
                     await buffer.setTitle(
                         `Round ${game.state.currentCount + 1} / ${
                             game.state.ending.count
-                        }`
+                        }`,
                     );
                 }
 
@@ -132,7 +146,7 @@ export async function initializeGame(
     name: string,
     difficulty: GameDifficulty,
     nvim: Neovim,
-    state: GameState
+    state: GameState,
 ): Promise<void> {
     let game: BaseGame | null = null;
     let buffer = new GameBuffer(await nvim.buffer, state.lineLength);
@@ -158,7 +172,7 @@ const stringToDiff = {
     medium: GameDifficulty.Medium,
     hard: GameDifficulty.Hard,
     nightmare: GameDifficulty.Nightmare,
-    tpope: GameDifficulty.TPope
+    tpope: GameDifficulty.TPope,
 };
 
 export async function getGameState(nvim: Neovim): Promise<GameState> {
@@ -168,7 +182,7 @@ export async function getGameState(nvim: Neovim): Promise<GameState> {
 export default function createPlugin(plugin: NvimPlugin): void {
     plugin.setOptions({
         dev: true,
-        alwaysInit: true
+        alwaysInit: true,
     });
 
     plugin.registerCommand(
@@ -180,7 +194,7 @@ export default function createPlugin(plugin: NvimPlugin): void {
                 const lines = await buffer.getLines({
                     start: 0,
                     end: length,
-                    strictIndexing: true
+                    strictIndexing: true,
                 });
 
                 const lengthOfLines = lines
@@ -197,7 +211,12 @@ export default function createPlugin(plugin: NvimPlugin): void {
 
                 if (availableGames.indexOf(args[0]) >= 0) {
                     state.name = args[0];
-                    await initializeGame(args[0], difficulty, plugin.nvim, state);
+                    await initializeGame(
+                        args[0],
+                        difficulty,
+                        plugin.nvim,
+                        state,
+                    );
                 }
 
                 // TODO: ci?
@@ -206,7 +225,7 @@ export default function createPlugin(plugin: NvimPlugin): void {
                         plugin,
                         availableGames,
                         availableDifficulties,
-                        difficulty
+                        difficulty,
                     );
 
                     menu.onGameSelection(
@@ -216,9 +235,9 @@ export default function createPlugin(plugin: NvimPlugin): void {
                                 gameName,
                                 stringToDiff[difficulty],
                                 plugin.nvim,
-                                state
+                                state,
                             );
-                        }
+                        },
                     );
 
                     menu.render();
@@ -229,6 +248,6 @@ export default function createPlugin(plugin: NvimPlugin): void {
                 await plugin.nvim.outWrite("Error#" + args + " " + e.message);
             }
         },
-        { sync: false, nargs: "*" }
+        { sync: false, nargs: "*" },
     );
 }
