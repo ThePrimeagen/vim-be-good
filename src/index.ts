@@ -1,4 +1,4 @@
-import { Neovim, NvimPlugin } from "neovim";
+import { Buffer, Neovim, NvimPlugin } from "neovim";
 import { GameDifficulty, GameState, parseGameDifficulty } from "./game/types";
 import { BaseGame, newGameState } from "./game/base";
 import { DeleteGame } from "./game/delete";
@@ -179,6 +179,30 @@ export async function getGameState(nvim: Neovim): Promise<GameState> {
     return newGameState(await nvim.buffer, await nvim.window);
 }
 
+export async function createFloatingWindow(nvim: Neovim): Promise<Buffer> {
+    let rowSize = await nvim.window.height;
+    let columnSize = await nvim.window.width;
+
+    let width = Math.min( columnSize - 4, Math.max( 80, columnSize - 20 ) );
+    let height = Math.min( rowSize - 4, Math.max( 20, rowSize - 10 ) );
+    let top = (( rowSize - height ) / 2 ) - 1;
+    let left = (( columnSize - width ) / 2 );
+
+    // Create a scratch buffer
+    const buffer = (await nvim.createBuffer(false, true)) as Buffer;
+
+    const window = await nvim.openWindow(
+        buffer, true, {
+            relative: 'editor',
+            row: top,
+            col: left,
+            width: width,
+            height: height
+        }
+    );
+    return buffer;
+}
+
 export default function createPlugin(plugin: NvimPlugin): void {
     plugin.setOptions({
         dev: true,
@@ -189,22 +213,7 @@ export default function createPlugin(plugin: NvimPlugin): void {
         "VimBeGood",
         async (args: string[]) => {
             try {
-                const buffer = await plugin.nvim.buffer;
-                const length = await buffer.length;
-                const lines = await buffer.getLines({
-                    start: 0,
-                    end: length,
-                    strictIndexing: true,
-                });
-
-                const lengthOfLines = lines
-                    .reduce((acc, x) => acc + x, "")
-                    .trim().length;
-
-                if (lengthOfLines > 0) {
-                    plugin.nvim.errWriteLine("Your file is not empty.");
-                    return;
-                }
+                const buffer = await createFloatingWindow(plugin.nvim);
 
                 const difficulty = parseGameDifficulty(args[1]);
                 const state = await getGameState(plugin.nvim);
