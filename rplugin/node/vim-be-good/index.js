@@ -20,12 +20,15 @@ const menu_1 = require("./menu");
 function runGame(nvim, game) {
     return __awaiter(this, void 0, void 0, function* () {
         const buffer = game.gameBuffer;
+        console.log("runGame -- Game is starting");
         try {
             for (let i = 0; i < 3; ++i) {
+                console.log("runGame -- Game is starting in", String(3 - i));
                 yield buffer.debugTitle("Game is starting in", String(3 - i), "...");
             }
             // TODO: this should stop here.  this seems all sorts of wrong
             yield buffer.setTitle("Game Started: ", game.state.currentCount + 1, "/", game.state.ending.count);
+            console.log("runGame -- Round 1 of", game.state.ending.count);
             yield game.clear();
             yield game.run();
             let start = Date.now();
@@ -33,8 +36,10 @@ function runGame(nvim, game) {
             let used = false;
             // eslint-disable-next-line no-inner-declarations
             function reset() {
+                console.log("runGame -- reset");
                 used = false;
                 if (missingCount > 0) {
+                    console.log("runGame -- reset -- missing line event", missingCount);
                     missingCount = 0;
                     onLineEvent();
                 }
@@ -49,19 +54,23 @@ function runGame(nvim, game) {
                     }
                     used = true;
                     try {
-                        if (!(yield game.checkForWin())) {
+                        const checkForWin = yield game.checkForWin();
+                        console.log("runGame -- checking for win", checkForWin);
+                        if (!checkForWin) {
                             reset();
                             return;
                         }
                         const failed = yield game.hasFailed();
+                        console.log("runGame -- checking for failed", failed);
                         if (!failed) {
                             game.state.results.push(startOfFunction - start);
                         }
+                        console.log("runGame -- End of game?", game.state.currentCount >= game.state.ending.count);
                         if (game.state.currentCount >= game.state.ending.count) {
                             yield game.gameOver();
                             const gameCount = game.state.ending.count;
                             const title = [
-                                `Success: ${gameCount - game.state.failureCount} / ${gameCount}`
+                                `Success: ${gameCount - game.state.failureCount} / ${gameCount}`,
                             ];
                             if (game.state.results.length > 0) {
                                 title.push(`Average Success Time!: ${game.state.results.reduce((x, y) => x + y, 0) /
@@ -75,6 +84,7 @@ function runGame(nvim, game) {
                             return;
                         }
                         else {
+                            console.log(`Round ${game.state.currentCount + 1} / ${game.state.ending.count}`);
                             yield buffer.setTitle(`Round ${game.state.currentCount + 1} / ${game.state.ending.count}`);
                         }
                         game.state.currentCount++;
@@ -100,18 +110,18 @@ function runGame(nvim, game) {
     });
 }
 exports.runGame = runGame;
-function initializeGame(name, difficulty, nvim, state) {
+function initializeGame(name, difficulty, nvim, buffer, window, state) {
     return __awaiter(this, void 0, void 0, function* () {
         let game = null;
-        let buffer = new game_buffer_1.GameBuffer(yield nvim.buffer, state.lineLength);
+        let gameBuffer = new game_buffer_1.GameBuffer(buffer, state.lineLength);
         if (name === "relative") {
-            game = new delete_1.DeleteGame(nvim, buffer, state, { difficulty });
+            game = new delete_1.DeleteGame(nvim, gameBuffer, state, { difficulty });
         }
         else if (name === "ci{") {
-            game = new ci_1.CiGame(nvim, buffer, state, { difficulty });
+            game = new ci_1.CiGame(nvim, gameBuffer, state, { difficulty });
         }
         else if (name === "whackamole") {
-            game = new whackamole_1.WhackAMoleGame(nvim, buffer, state, { difficulty });
+            game = new whackamole_1.WhackAMoleGame(nvim, gameBuffer, state, { difficulty });
         }
         if (game) {
             runGame(nvim, game);
@@ -126,7 +136,7 @@ const stringToDiff = {
     medium: types_1.GameDifficulty.Medium,
     hard: types_1.GameDifficulty.Hard,
     nightmare: types_1.GameDifficulty.Nightmare,
-    tpope: types_1.GameDifficulty.TPope
+    tpope: types_1.GameDifficulty.TPope,
 };
 function getGameState(nvim) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -134,39 +144,62 @@ function getGameState(nvim) {
     });
 }
 exports.getGameState = getGameState;
+function createFloatingWindow(nvim) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let rowSize = yield nvim.window.height;
+        let columnSize = yield nvim.window.width;
+        let width = Math.min(columnSize - 4, Math.max(80, columnSize - 20));
+        let height = Math.min(rowSize - 4, Math.max(30, rowSize - 10));
+        let top = ((rowSize - height) / 2) - 1;
+        let left = ((columnSize - width) / 2);
+        // Create a scratch buffer
+        const buffer = (yield nvim.createBuffer(false, true));
+        let window = yield nvim.openWindow(buffer, true, {
+            relative: 'editor',
+            row: top,
+            col: left,
+            width: width,
+            height: height
+        });
+        // TODO: I don't think this is the way to do this, but lets find out.
+        if (typeof window === "number") {
+            window = yield nvim.window;
+        }
+        return { buffer, window };
+    });
+}
+exports.createFloatingWindow = createFloatingWindow;
 function createPlugin(plugin) {
     plugin.setOptions({
         dev: true,
-        alwaysInit: true
+        alwaysInit: true,
     });
     plugin.registerCommand("VimBeGood", (args) => __awaiter(this, void 0, void 0, function* () {
         try {
-            const buffer = yield plugin.nvim.buffer;
-            const length = yield buffer.length;
-            const lines = yield buffer.getLines({
-                start: 0,
-                end: length,
-                strictIndexing: true
-            });
-            const lengthOfLines = lines
-                .reduce((acc, x) => acc + x, "")
-                .trim().length;
-            if (lengthOfLines > 0) {
-                plugin.nvim.errWriteLine("Your file is not empty.");
-                return;
+            const useCurrentBuffer = Number(yield plugin.nvim.getVar("vim_be_good_floating")) === 0;
+            let buffer;
+            let window;
+            if (useCurrentBuffer) {
+                buffer = yield plugin.nvim.buffer;
+                window = yield plugin.nvim.window;
+            }
+            else {
+                const bufAndWindow = yield createFloatingWindow(plugin.nvim);
+                buffer = bufAndWindow.buffer;
+                window = bufAndWindow.window;
             }
             const difficulty = types_1.parseGameDifficulty(args[1]);
             const state = yield getGameState(plugin.nvim);
             if (availableGames.indexOf(args[0]) >= 0) {
                 state.name = args[0];
-                yield initializeGame(args[0], difficulty, plugin.nvim, state);
+                yield initializeGame(args[0], difficulty, plugin.nvim, buffer, window, state);
             }
             // TODO: ci?
             else {
                 const menu = yield menu_1.Menu.build(plugin, availableGames, availableDifficulties, difficulty);
                 menu.onGameSelection((gameName, difficulty) => __awaiter(this, void 0, void 0, function* () {
                     state.name = gameName;
-                    yield initializeGame(gameName, stringToDiff[difficulty], plugin.nvim, state);
+                    yield initializeGame(gameName, stringToDiff[difficulty], plugin.nvim, buffer, window, state);
                 }));
                 menu.render();
                 return;
