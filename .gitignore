@@ -1,6 +1,4 @@
 node_modules
 test
 .zshrc.bak
-
-
-
+nvim.log

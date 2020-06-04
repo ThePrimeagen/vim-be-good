@@ -39,7 +39,9 @@ class DeleteGame extends base_1.BaseGame {
             const line = this.gameBuffer.midPointRandomPoint(high);
             const lines = new Array(this.state.lineLength).fill("");
             lines[line] = "                              DELETE ME";
-            yield this.nvim.command(`:${String(this.gameBuffer.midPointRandomPoint(!high))}`);
+            const middlePoint = this.gameBuffer.midPointRandomPoint(!high);
+            console.log("relative -- run#rendering", middlePoint, lines);
+            yield this.nvim.command(`:${String(middlePoint)}`);
             yield this.render(lines);
             this.startTimer();
         });

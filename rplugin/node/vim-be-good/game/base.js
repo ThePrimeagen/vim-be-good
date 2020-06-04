@@ -98,7 +98,9 @@ class BaseGame {
     finish() {
         return __awaiter(this, void 0, void 0, function* () {
             const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
-            fs.writeFileSync(fName, this.state.results.map(x => x + "").join(",\n"));
+            const results = this.state.results.map(x => x + "").join(",\n");
+            console.log("base -- finish", fName, results);
+            fs.writeFileSync(fName, results);
             yield this.gameBuffer.finish();
         });
     }
@@ -108,14 +110,17 @@ class BaseGame {
         });
     }
     startTimer() {
+        const time = types_1.difficultyToTime(this.difficulty);
+        console.log("base - startTimer", time);
         this.timerId = setTimeout(() => {
             this.onExpired.forEach(cb => cb());
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore I HATE YOU TYPESCRIPT
             this.timerId = 0;
-        }, types_1.difficultyToTime(this.difficulty));
+        }, time);
     }
     clearTimer() {
+        console.log("base - clearTimer", this.timerId);
         if (this.timerId) {
             clearTimeout(this.timerId);
         }

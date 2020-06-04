@@ -59,13 +59,16 @@ class Menu {
     }
     setup() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("menu -- Setup Starting");
             this.buffer = yield this.plugin.nvim.buffer;
             this.window = yield this.plugin.nvim.window;
+            console.log("menu -- Setup Finished");
         });
     }
     clearScreen() {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("menu -- clearScreen");
             yield ((_a = this.buffer) === null || _a === void 0 ? void 0 : _a.remove(0, yield ((_b = this.buffer) === null || _b === void 0 ? void 0 : _b.length), true));
         });
     }
@@ -94,21 +97,26 @@ class Menu {
                 }
                 const newLines = yield buffer.lines;
                 const deletedCount = this.fullMenu.length - newLines.length;
+                console.log("menu -- onLineChange", deletedCount);
                 if (deletedCount === 1) {
                     const selectedGame = this.gameList[lastLine - this.firstGameLineIndex];
                     const selectedDifficulty = this.difficultyList[lastLine - this.firstDifficultyLineIndex];
+                    console.log("menu -- onLineChange, if deletedCount === 1", selectedGame, selectedDifficulty);
                     if (selectedGame) {
+                        console.log("menu -- onLineChange, selectedGame");
                         this.stopHandlingLineEvents();
                         yield this.clearScreen();
                         (_a = this.gameSelectionCallback) === null || _a === void 0 ? void 0 : _a.call(this, selectedGame, this.selectedDifficulty);
                     }
                     else if (selectedDifficulty) {
+                        console.log("menu -- onLineChange, selectedDifficulty");
                         this.selectedDifficulty = selectedDifficulty;
                         this.stopHandlingLineEvents();
                         this.generateMenuLines();
                         yield this.render();
                     }
                     else {
+                        console.log("menu -- onLineChange, NOTHING WAS FOUND");
                         yield this.render();
                     }
                 }

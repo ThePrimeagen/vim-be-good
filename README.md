@@ -17,6 +17,13 @@ The difficulty only works on a few games for now.
 ## Ideas?
 Please sumbit a ticket for your idea!!!
 
+## Options
+
+By default vim be good uses a floating buffer.  If you wish to have it use the
+current buffer (only if its empty) set `vim_be_good_floating` to 0.
+
+`let g:vim_be_good_floating = 0`
+
 ## Instructions are at top of games.
 here too!
 

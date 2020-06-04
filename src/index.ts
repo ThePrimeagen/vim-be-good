@@ -1,4 +1,4 @@
-import { Buffer, Neovim, NvimPlugin } from "neovim";
+import { Buffer, Neovim, NvimPlugin, Window } from "neovim";
 import { GameDifficulty, GameState, parseGameDifficulty } from "./game/types";
 import { BaseGame, newGameState } from "./game/base";
 import { DeleteGame } from "./game/delete";
@@ -146,17 +146,19 @@ export async function initializeGame(
     name: string,
     difficulty: GameDifficulty,
     nvim: Neovim,
+    buffer: Buffer,
+    window: Window,
     state: GameState,
 ): Promise<void> {
     let game: BaseGame | null = null;
-    let buffer = new GameBuffer(await nvim.buffer, state.lineLength);
+    let gameBuffer = new GameBuffer(buffer, state.lineLength);
 
     if (name === "relative") {
-        game = new DeleteGame(nvim, buffer, state, { difficulty });
+        game = new DeleteGame(nvim, gameBuffer, state, { difficulty });
     } else if (name === "ci{") {
-        game = new CiGame(nvim, buffer, state, { difficulty });
+        game = new CiGame(nvim, gameBuffer, state, { difficulty });
     } else if (name === "whackamole") {
-        game = new WhackAMoleGame(nvim, buffer, state, { difficulty });
+        game = new WhackAMoleGame(nvim, gameBuffer, state, { difficulty });
     }
 
     if (game) {
@@ -179,19 +181,24 @@ export async function getGameState(nvim: Neovim): Promise<GameState> {
     return newGameState(await nvim.buffer, await nvim.window);
 }
 
-export async function createFloatingWindow(nvim: Neovim): Promise<Buffer> {
+type BufferWindow = {
+    buffer: Buffer;
+    window: Window;
+};
+
+export async function createFloatingWindow(nvim: Neovim): Promise<BufferWindow> {
     let rowSize = await nvim.window.height;
     let columnSize = await nvim.window.width;
 
     let width = Math.min( columnSize - 4, Math.max( 80, columnSize - 20 ) );
-    let height = Math.min( rowSize - 4, Math.max( 20, rowSize - 10 ) );
+    let height = Math.min( rowSize - 4, Math.max( 30, rowSize - 10 ) );
     let top = (( rowSize - height ) / 2 ) - 1;
     let left = (( columnSize - width ) / 2 );
 
     // Create a scratch buffer
     const buffer = (await nvim.createBuffer(false, true)) as Buffer;
 
-    const window = await nvim.openWindow(
+    let window = await nvim.openWindow(
         buffer, true, {
             relative: 'editor',
             row: top,
@@ -200,8 +207,15 @@ export async function createFloatingWindow(nvim: Neovim): Promise<Buffer> {
             height: height
         }
     );
-    return buffer;
+
+    // TODO: I don't think this is the way to do this, but lets find out.
+    if (typeof window === "number") {
+        window = await nvim.window;
+    }
+
+    return {buffer, window};
 }
+
 
 export default function createPlugin(plugin: NvimPlugin): void {
     plugin.setOptions({
@@ -213,7 +227,20 @@ export default function createPlugin(plugin: NvimPlugin): void {
         "VimBeGood",
         async (args: string[]) => {
             try {
-                const buffer = await createFloatingWindow(plugin.nvim);
+                const useCurrentBuffer = Number(
+                    await plugin.nvim.getVar("vim_be_good_floating")) === 0;
+
+                let buffer: Buffer;
+                let window: Window;
+
+                if (useCurrentBuffer) {
+                    buffer = await plugin.nvim.buffer;
+                    window = await plugin.nvim.window;
+                } else {
+                    const bufAndWindow = await createFloatingWindow(plugin.nvim);
+                    buffer = bufAndWindow.buffer;
+                    window = bufAndWindow.window;
+                }
 
                 const difficulty = parseGameDifficulty(args[1]);
                 const state = await getGameState(plugin.nvim);
@@ -224,6 +251,8 @@ export default function createPlugin(plugin: NvimPlugin): void {
                         args[0],
                         difficulty,
                         plugin.nvim,
+                        buffer,
+                        window,
                         state,
                     );
                 }
@@ -244,6 +273,8 @@ export default function createPlugin(plugin: NvimPlugin): void {
                                 gameName,
                                 stringToDiff[difficulty],
                                 plugin.nvim,
+                                buffer,
+                                window,
                                 state,
                             );
                         },

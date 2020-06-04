@@ -32,7 +32,13 @@ class WhackAMoleGame extends base_1.BaseGame {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             const sentence = base_1.getRandomSentence();
-            const chosenLocation = Math.floor(Math.random() * sentence.length);
+            let chosenLocation = 0;
+            do {
+                const location = Math.floor(Math.random() * sentence.length);
+                if (location > 0 && /[A-Za-z]/.test(sentence[location])) {
+                    chosenLocation = location;
+                }
+            } while (!chosenLocation);
             const pointerLine = sentence
                 .split("")
                 .map((_, index) => (index === chosenLocation ? "^" : " "))
