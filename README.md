@@ -42,7 +42,7 @@ Plug 'ThePrimeagen/vim-be-good'
 
 2. Then execute `:UpdateRemotePlugins` to finish the installation process.
 
-If you in into any problems when running the `:UpdateRemotePlugins` run `:checkhealth` to check if your vim is node ready.
+If you run into any problems when running the `:UpdateRemotePlugins` run `:checkhealth` to check if your vim is node ready.
 
 3. If healthcheck fails node ready you need to install neovim.
 ```
