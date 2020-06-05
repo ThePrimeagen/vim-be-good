@@ -18,7 +18,7 @@ export function newGameState(buffer: Buffer, window: Window): GameState {
         failureCount: 0,
         window,
         ending: { count: 10 },
-        currentCount: 0,
+        currentCount: 1,
         lineRange: { start: 2, end: 22 },
         lineLength: 20,
         results: []
@@ -127,7 +127,7 @@ export class Game implements IGame {
         const lines = await this.currentRound.render(this);
         await this.gameBuffer.render(lines);
 
-        if (firstRun && this.currentRound.isTimedRound()) {
+        if (this.currentRound.isTimedRound()) {
             console.log("Game -- run -- starting timer");
             this.startTimer();
         }

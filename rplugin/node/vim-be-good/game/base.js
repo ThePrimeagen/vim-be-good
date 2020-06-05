@@ -26,7 +26,7 @@ function newGameState(buffer, window) {
         failureCount: 0,
         window,
         ending: { count: 10 },
-        currentCount: 0,
+        currentCount: 1,
         lineRange: { start: 2, end: 22 },
         lineLength: 20,
         results: []
@@ -121,7 +121,7 @@ class Game {
             console.log(`Game#run(${firstRun})`);
             const lines = yield this.currentRound.render(this);
             yield this.gameBuffer.render(lines);
-            if (firstRun && this.currentRound.isTimedRound()) {
+            if (this.currentRound.isTimedRound()) {
                 console.log("Game -- run -- starting timer");
                 this.startTimer();
             }

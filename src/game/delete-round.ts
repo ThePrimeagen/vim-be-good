@@ -35,7 +35,7 @@ export class DeleteRound extends Round {
     public async isRoundComplete(game: IGame): Promise<boolean> {
         const lines = await game.gameBuffer.getGameLines();
         const length = lines.map(l => l.trim()).join("").length;
-        console.log("delete-round#FooBadBar", length, lines);
+        console.log("delete-round#isRoundComplete", length, lines);
         return length === 0;
     }
 }
