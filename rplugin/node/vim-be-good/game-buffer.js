@@ -77,6 +77,7 @@ class GameBuffer {
                 yield this.buffer.insert(new Array(expectedLen - len).fill(""), len);
             }
             const toRender = [...this.instructions, ...lines].filter(x => x !== null && x !== undefined);
+            console.log("GameBuffer -- To Render", toRender);
             yield this.buffer.setLines(toRender, {
                 start: 1,
                 end: expectedLen,

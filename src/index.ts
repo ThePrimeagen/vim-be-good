@@ -1,6 +1,8 @@
 import { Buffer, Neovim, NvimPlugin, Window } from "neovim";
 import { GameDifficulty, GameState, parseGameDifficulty } from "./game/types";
-import { BaseGame, newGameState } from "./game/base";
+import { Round } from "./game/round";
+import { DeleteRound } from "./game/delete-round";
+import { Game, BaseGame, newGameState } from "./game/base";
 import { DeleteGame } from "./game/delete";
 import { GameBuffer } from "./game-buffer";
 import { CiGame } from "./game/ci";
@@ -8,9 +10,10 @@ import { WhackAMoleGame } from "./game/whackamole";
 import { Menu } from "./menu";
 
 // this is a comment
-export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
+export async function runGame(game: Game): Promise<void> {
+    const nvim: Neovim = game.nvim;
     const buffer: GameBuffer = game.gameBuffer;
-
+;
     console.log("runGame -- Game is starting");
     try {
         for (let i = 0; i < 3; ++i) {
@@ -32,8 +35,9 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
 
         console.log("runGame -- Round 1 of", game.state.ending.count);
 
-        await game.clear();
-        await game.run();
+        await game.gameBuffer.clearBoard();
+        await game.startRound();
+        await game.run(true);
 
         let start = Date.now();
         let missingCount = 0;
@@ -63,6 +67,7 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
 
             used = true;
 
+            console.log("runGame -- Starting Line Event");
             try {
                 const checkForWin = await game.checkForWin();
                 console.log("runGame -- checking for win", checkForWin);
@@ -82,8 +87,8 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                     "runGame -- End of game?",
                     game.state.currentCount >= game.state.ending.count,
                 );
+
                 if (game.state.currentCount >= game.state.ending.count) {
-                    await game.gameOver();
 
                     const gameCount = game.state.ending.count;
                     const title = [
@@ -121,10 +126,16 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                     );
                 }
 
+                console.log("Index -- Incrementing currentCount", game.state.currentCount, game.state.currentCount + 1);
                 game.state.currentCount++;
 
-                await game.clear();
-                await game.run();
+                console.log("Index -- ending game round");
+                await game.endRound();
+                console.log("Index -- Starting round");
+                await game.startRound();
+                console.log("Index -- Run game false");
+                await game.run(false);
+
                 start = Date.now();
             } catch (e) {
                 buffer.debugTitle("onLineEvent#error", e.message);
@@ -150,23 +161,27 @@ export async function initializeGame(
     window: Window,
     state: GameState,
 ): Promise<void> {
-    let game: BaseGame | null = null;
+    let roundSet: Round[] = [];
     let gameBuffer = new GameBuffer(buffer, state.lineLength);
 
     if (name === "relative") {
-        game = new DeleteGame(nvim, gameBuffer, state, { difficulty });
+        roundSet.push(
+            new DeleteRound());
+        /*
     } else if (name === "ci{") {
         game = new CiGame(nvim, gameBuffer, state, { difficulty });
     } else if (name === "whackamole") {
         game = new WhackAMoleGame(nvim, gameBuffer, state, { difficulty });
+        */
     }
 
-    if (game) {
-        runGame(nvim, game);
+    if (roundSet.length) {
+        runGame(new Game(nvim, gameBuffer, state, roundSet, {difficulty}));
     }
 }
 
-const availableGames = ["relative", "ci{", "whackamole"];
+//const availableGames = ["relative", "ci{", "whackamole"];
+const availableGames = ["relative"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 
 const stringToDiff = {

@@ -79,13 +79,95 @@ function getRandomSentence() {
     return exports.extraSentences[Math.floor(Math.random() * exports.extraSentences.length)];
 }
 exports.getRandomSentence = getRandomSentence;
+class Game {
+    constructor(nvim, gameBuffer, state, rounds, opts = {
+        difficulty: types_1.GameDifficulty.Easy
+    }) {
+        this.nvim = nvim;
+        this.gameBuffer = gameBuffer;
+        this.state = state;
+        this.rounds = rounds;
+        this.onExpired = [];
+        this.timerExpired = false;
+        this.difficulty = opts.difficulty;
+    }
+    startRound() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const nextRound = this.rounds[Math.floor(Math.random() * this.rounds.length)];
+            if (this.currentRound === nextRound) {
+                return;
+            }
+            const instructions = nextRound.getInstructions();
+            yield this.gameBuffer.clearBoard();
+            this.gameBuffer.setInstructions(instructions);
+            yield this.gameBuffer.render([]);
+            this.currentRound = nextRound;
+        });
+    }
+    checkForWin() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.currentRound.isRoundCompleted(this);
+        });
+    }
+    hasFailed() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.timerExpired;
+        });
+    }
+    run(firstRun) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("Game -- run --", firstRun);
+            this.gameBuffer.render(yield this.currentRound.render(this));
+            if (firstRun && this.currentRound.isTimedRound()) {
+                console.log("Game -- run -- starting timer");
+                this.startTimer();
+            }
+        });
+    }
+    // Anything left to do here?
+    endRound() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.clearTimer();
+        });
+    }
+    finish() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
+            const results = this.state.results.map(x => x + "").join(",\n");
+            console.log("base -- finish", fName, results);
+            fs.writeFileSync(fName, results);
+            yield this.gameBuffer.finish();
+        });
+    }
+    startTimer() {
+        const time = this.currentRound.getTimeoutTime(this.difficulty);
+        console.log("base - startTimer", time);
+        this.timerExpired = false;
+        this.timerId = setTimeout(() => {
+            this.timerExpired = true;
+            this.onExpired.forEach(cb => cb());
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore I HATE YOU TYPESCRIPT
+            this.timerId = 0;
+        }, time);
+    }
+    clearTimer() {
+        console.log("base - clearTimer", this.timerId);
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+        }
+    }
+    onTimerExpired(cb) {
+        this.onExpired.push(cb);
+    }
+}
+exports.Game = Game;
 class BaseGame {
     constructor(nvim, gameBuffer, state, opts = {
         difficulty: types_1.GameDifficulty.Easy
     }) {
         this.nvim = nvim;
         this.gameBuffer = gameBuffer;
-        this.state = state;
         this.state = state;
         this.onExpired = [];
         this.difficulty = opts.difficulty;

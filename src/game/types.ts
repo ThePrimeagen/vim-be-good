@@ -1,4 +1,4 @@
-import { Buffer, Window, Neovim } from 'neovim';
+import { Buffer, Window, Neovim } from "neovim";
 
 export enum GameDifficulty {
     Easy = "easy",
@@ -75,3 +75,31 @@ export type GameState = {
     lineLength: number;
     results: number[];
 };
+
+export type LinesCallback = (args: any[]) => void;
+
+export interface IGameBuffer {
+    lineLength: number;
+    getGameLines(): Promise<string[]>;
+    pickRandomLine(): number
+    // TODO: I ackshually hate this.
+    midPointRandomPoint(high: boolean, padding?: number): number;
+    getInstructionOffset(): number;
+
+    onLines(cb: LinesCallback): void;
+    setInstructions(instr: string[]): void;
+    finish(): Promise<void>;
+    getMidpoint(): number;
+
+    render(lines: string[]): Promise<void>;
+    clearBoard(): Promise<void>;
+    debugTitle(...title: any[]): Promise<void>;
+    setTitle(...title: any[]): Promise<void>;
+};
+
+export interface IGame {
+    nvim: Neovim;
+    gameBuffer: IGameBuffer;
+    state: GameState;
+}
+

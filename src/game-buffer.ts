@@ -1,15 +1,15 @@
 import { Buffer } from "neovim";
 
+import { IGameBuffer, LinesCallback } from "./game/types";
+
 import { wait } from "./wait";
 import { join } from "./log";
-
-export type LinesCallback = (args: any[]) => void;
 
 export function getEmptyLines(len: number): string[] {
     return new Array(len).fill("");
 }
 
-export class GameBuffer {
+export class GameBuffer implements IGameBuffer {
     private instructions!: string[];
     private linesCallback?: LinesCallback;
     private listenLines: LinesCallback;
@@ -89,6 +89,8 @@ export class GameBuffer {
         const toRender = [...this.instructions, ...lines].filter(
             x => x !== null && x !== undefined
         );
+
+        console.log("GameBuffer -- To Render", toRender);
 
         await this.buffer.setLines(toRender, {
             start: 1,

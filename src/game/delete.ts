@@ -1,6 +1,6 @@
 import { Neovim } from "neovim";
 import { GameBuffer, getEmptyLines } from "../game-buffer";
-import { GameState, GameOptions } from "./types";
+import { GameState, GameOptions, GameDifficulty } from "./types";
 import { BaseGame } from "./base";
 
 // this is a comment
