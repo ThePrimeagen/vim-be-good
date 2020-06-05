@@ -1,4 +1,4 @@
-import { IGame, GameDifficulty } from "./types";
+import { IGame } from "./types";
 import { Round } from "./round";
 
 const deleteRoundInstructions = [
@@ -8,11 +8,11 @@ const deleteRoundInstructions = [
     ""
 ];
 
-export class DeleteRound implements Round {
+export class DeleteRound extends Round {
 
-    constructor() { }
+    constructor() { super(); }
 
-    public getInstructions() {
+    public getInstructions(): string[] {
         return deleteRoundInstructions;
     }
 
@@ -32,34 +32,10 @@ export class DeleteRound implements Round {
         return lines;
     }
 
-    public getTimeoutTime(diff: GameDifficulty): number {
-        let out = 1000;
-        switch (diff) {
-            case GameDifficulty.Easy:
-                out = 5000;
-            break;
-            case GameDifficulty.Medium:
-                out = 3500;
-            break;
-            case GameDifficulty.Hard:
-                out = 2500;
-            break;
-            case GameDifficulty.Nightmare:
-                out = 1600;
-            break;
-        }
-
-        return out;
-    }
-
-    public isTimedRound(): boolean {
-        return true;
-    }
-
-    public async isRoundCompleted(game: IGame): Promise<boolean> {
+    public async isRoundComplete(game: IGame): Promise<boolean> {
         const lines = await game.gameBuffer.getGameLines();
         const length = lines.map(l => l.trim()).join("").length;
-        console.log("delete-round#isRoundComplete", length, lines);
+        console.log("delete-round#FooBadBar", length, lines);
         return length === 0;
     }
 }

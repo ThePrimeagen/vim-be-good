@@ -107,7 +107,7 @@ class Game {
     }
     checkForWin() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.currentRound.isRoundCompleted(this);
+            return yield this.currentRound.isRoundComplete(this);
         });
     }
     hasFailed() {
@@ -119,7 +119,8 @@ class Game {
     run(firstRun) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(`Game#run(${firstRun})`);
-            this.gameBuffer.render(yield this.currentRound.render(this));
+            const lines = yield this.currentRound.render(this);
+            yield this.gameBuffer.render(lines);
             if (firstRun && this.currentRound.isTimedRound()) {
                 console.log("Game -- run -- starting timer");
                 this.startTimer();

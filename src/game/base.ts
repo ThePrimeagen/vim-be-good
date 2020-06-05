@@ -114,7 +114,7 @@ export class Game implements IGame {
     }
 
     public async checkForWin(): Promise<boolean> {
-        return await this.currentRound.isRoundCompleted(this);
+        return await this.currentRound.isRoundComplete(this);
     }
 
     public async hasFailed(): Promise<boolean> {
@@ -124,7 +124,8 @@ export class Game implements IGame {
 
     public async run(firstRun: boolean): Promise<void> {
         console.log(`Game#run(${firstRun})`);
-        this.gameBuffer.render(await this.currentRound.render(this));
+        const lines = await this.currentRound.render(this);
+        await this.gameBuffer.render(lines);
 
         if (firstRun && this.currentRound.isTimedRound()) {
             console.log("Game -- run -- starting timer");
@@ -133,7 +134,7 @@ export class Game implements IGame {
     }
 
     // Anything left to do here?
-    public async endRound() {
+    public async endRound(): Promise<void> {
         this.clearTimer();
     }
 

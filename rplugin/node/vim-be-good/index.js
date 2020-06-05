@@ -13,13 +13,13 @@ const types_1 = require("./game/types");
 const delete_round_1 = require("./game/delete-round");
 const base_1 = require("./game/base");
 const game_buffer_1 = require("./game-buffer");
+const whackamole_round_1 = require("./game/whackamole-round");
 const menu_1 = require("./menu");
 // this is a comment
 function runGame(game) {
     return __awaiter(this, void 0, void 0, function* () {
         const nvim = game.nvim;
         const buffer = game.gameBuffer;
-        ;
         console.log("runGame -- Game is starting");
         try {
             for (let i = 0; i < 3; ++i) {
@@ -67,6 +67,7 @@ function runGame(game) {
                         const failed = yield game.hasFailed();
                         console.log("runGame -- hasFailed ->", failed);
                         if (!failed) {
+                            console.log("runGame -- hasFailed ->", failed);
                             game.state.results.push(startOfFunction - start);
                         }
                         console.log("runGame -- End of game?", game.state.currentCount >= game.state.ending.count);
@@ -120,16 +121,21 @@ function runGame(game) {
 exports.runGame = runGame;
 function initializeGame(name, difficulty, nvim, buffer, window, state) {
     return __awaiter(this, void 0, void 0, function* () {
-        let roundSet = [];
-        let gameBuffer = new game_buffer_1.GameBuffer(buffer, state.lineLength);
+        const roundSet = [];
+        const gameBuffer = new game_buffer_1.GameBuffer(buffer, state.lineLength);
+        // TODO: Enum?? MAYBE
         if (name === "relative") {
             roundSet.push(new delete_round_1.DeleteRound());
             /*
         } else if (name === "ci{") {
             game = new CiGame(nvim, gameBuffer, state, { difficulty });
-        } else if (name === "whackamole") {
-            game = new WhackAMoleGame(nvim, gameBuffer, state, { difficulty });
             */
+        }
+        else if (name === "whackamole") {
+            roundSet.push(new whackamole_round_1.WhackAMoleRound());
+        }
+        else if (name === "random") {
+            roundSet.push(new delete_round_1.DeleteRound(), new whackamole_round_1.WhackAMoleRound());
         }
         if (roundSet.length) {
             runGame(new base_1.Game(nvim, gameBuffer, state, roundSet, { difficulty }));
@@ -138,7 +144,7 @@ function initializeGame(name, difficulty, nvim, buffer, window, state) {
 }
 exports.initializeGame = initializeGame;
 //const availableGames = ["relative", "ci{", "whackamole"];
-const availableGames = ["relative"];
+const availableGames = ["relative", "whackamole", "random"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 const stringToDiff = {
     easy: types_1.GameDifficulty.Easy,
@@ -155,12 +161,12 @@ function getGameState(nvim) {
 exports.getGameState = getGameState;
 function createFloatingWindow(nvim) {
     return __awaiter(this, void 0, void 0, function* () {
-        let rowSize = yield nvim.window.height;
-        let columnSize = yield nvim.window.width;
-        let width = Math.min(columnSize - 4, Math.max(80, columnSize - 20));
-        let height = Math.min(rowSize - 4, Math.max(30, rowSize - 10));
-        let top = ((rowSize - height) / 2) - 1;
-        let left = ((columnSize - width) / 2);
+        const rowSize = yield nvim.window.height;
+        const columnSize = yield nvim.window.width;
+        const width = Math.min(columnSize - 4, Math.max(80, columnSize - 20));
+        const height = Math.min(rowSize - 4, Math.max(30, rowSize - 10));
+        const top = ((rowSize - height) / 2) - 1;
+        const left = ((columnSize - width) / 2);
         // Create a scratch buffer
         const buffer = (yield nvim.createBuffer(false, true));
         let window = yield nvim.openWindow(buffer, true, {

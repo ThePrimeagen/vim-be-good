@@ -30,12 +30,14 @@ class GameBuffer {
     getGameLines() {
         return __awaiter(this, void 0, void 0, function* () {
             const len = yield this.buffer.length;
-            const lines = yield this.buffer.getLines({
-                start: this.getInstructionOffset(),
+            const allLines = yield this.buffer.getLines({
+                start: 0,
                 end: len,
                 strictIndexing: false
             });
+            const lines = allLines.slice(this.getInstructionOffset(), len);
             console.log("GameBuffer#getGameLines", this.getInstructionOffset(), len, lines);
+            console.log("GameBuffer#getGameLines", allLines);
             return lines;
         });
     }
@@ -91,8 +93,9 @@ class GameBuffer {
     }
     clearBoard() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("GameBuffer#clearBoard");
             const len = yield this.buffer.length;
-            this.render(getEmptyLines(len));
+            yield this.render(getEmptyLines(len));
         });
     }
     debugTitle(...title) {

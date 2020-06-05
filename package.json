@@ -8,7 +8,6 @@
         "build": "tsc && npm run copy-rplugin-json",
         "prebuild:watch": "npm run copy-rplugin-json",
         "build:watch": "nodemon -e ts  --exec \"npm run build && echo '\nGood to go 👍'\""
-
     },
     "keywords": [],
     "author": "",

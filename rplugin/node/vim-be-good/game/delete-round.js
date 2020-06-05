@@ -9,15 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const types_1 = require("./types");
+const round_1 = require("./round");
 const deleteRoundInstructions = [
     'When you see a "DELETE ME", relative jump to it',
     "as fast as possible and delete it.",
     "",
     ""
 ];
-class DeleteRound {
-    constructor() { }
+class DeleteRound extends round_1.Round {
+    constructor() { super(); }
     getInstructions() {
         return deleteRoundInstructions;
     }
@@ -33,32 +33,11 @@ class DeleteRound {
             return lines;
         });
     }
-    getTimeoutTime(diff) {
-        let out = 1000;
-        switch (diff) {
-            case types_1.GameDifficulty.Easy:
-                out = 5000;
-                break;
-            case types_1.GameDifficulty.Medium:
-                out = 3500;
-                break;
-            case types_1.GameDifficulty.Hard:
-                out = 2500;
-                break;
-            case types_1.GameDifficulty.Nightmare:
-                out = 1600;
-                break;
-        }
-        return out;
-    }
-    isTimedRound() {
-        return true;
-    }
-    isRoundCompleted(game) {
+    isRoundComplete(game) {
         return __awaiter(this, void 0, void 0, function* () {
             const lines = yield game.gameBuffer.getGameLines();
             const length = lines.map(l => l.trim()).join("").length;
-            console.log("delete-round#isRoundComplete", length, lines);
+            console.log("delete-round#FooBadBar", length, lines);
             return length === 0;
         });
     }

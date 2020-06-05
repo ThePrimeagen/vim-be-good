@@ -1,12 +1,33 @@
-import { Neovim } from "neovim";
-import { GameBuffer } from "../game-buffer";
-import { IGame, GameState, GameDifficulty } from "./types";
+import { IGame, GameDifficulty } from "./types";
 
-export interface Round {
-    render(game: IGame): Promise<string[]>;
-    isRoundCompleted(game: IGame): Promise<boolean>;
-    isTimedRound(): boolean;
-    getInstructions(): string[];
-    getTimeoutTime(diff: GameDifficulty): number;
+export abstract class Round {
+    abstract render(game: IGame): Promise<string[]>;
+    abstract isRoundComplete(game: IGame): Promise<boolean>;
+    abstract getInstructions(): string[];
+
+    public getTimeoutTime(diff: GameDifficulty): number {
+        let out = 1000;
+        switch (diff) {
+            case GameDifficulty.Easy:
+                out = 5000;
+            break;
+            case GameDifficulty.Medium:
+                out = 3500;
+            break;
+            case GameDifficulty.Hard:
+                out = 2500;
+            break;
+            case GameDifficulty.Nightmare:
+                out = 1600;
+            break;
+        }
+
+        console.log("WhackAMoleRound#getTimeoutTime", out);
+        return out;
+    }
+
+    public isTimedRound(): boolean {
+        return true;
+    }
 }
 

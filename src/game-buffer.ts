@@ -30,11 +30,6 @@ export class GameBuffer implements IGameBuffer {
 
     public async getGameLines(): Promise<string[]> {
         const len = await this.buffer.length;
-        const lines = await this.buffer.getLines({
-            start: this.getInstructionOffset(),
-            end: len,
-            strictIndexing: false
-        });
 
         const allLines = await this.buffer.getLines({
             start: 0,
@@ -42,8 +37,11 @@ export class GameBuffer implements IGameBuffer {
             strictIndexing: false
         });
 
+        const lines = allLines.slice(this.getInstructionOffset(), len);
+
         console.log("GameBuffer#getGameLines", this.getInstructionOffset(), len, lines);
         console.log("GameBuffer#getGameLines", allLines);
+
         return lines;
     }
 
@@ -112,9 +110,10 @@ export class GameBuffer implements IGameBuffer {
     }
 
     public async clearBoard(): Promise<void> {
+        console.log("GameBuffer#clearBoard");
         const len = await this.buffer.length;
 
-        this.render(getEmptyLines(len));
+        await this.render(getEmptyLines(len));
     }
 
     public async debugTitle(...title: any[]): Promise<void> {

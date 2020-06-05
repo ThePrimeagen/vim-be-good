@@ -3,17 +3,16 @@ import { GameDifficulty, GameState, parseGameDifficulty } from "./game/types";
 import { Round } from "./game/round";
 import { DeleteRound } from "./game/delete-round";
 import { Game, BaseGame, newGameState } from "./game/base";
-import { DeleteGame } from "./game/delete";
 import { GameBuffer } from "./game-buffer";
 import { CiGame } from "./game/ci";
-import { WhackAMoleGame } from "./game/whackamole";
+import { WhackAMoleRound } from "./game/whackamole-round";
 import { Menu } from "./menu";
 
 // this is a comment
 export async function runGame(game: Game): Promise<void> {
     const nvim: Neovim = game.nvim;
     const buffer: GameBuffer = game.gameBuffer;
-;
+
     console.log("runGame -- Game is starting");
     try {
         for (let i = 0; i < 3; ++i) {
@@ -73,6 +72,7 @@ export async function runGame(game: Game): Promise<void> {
 
                 const checkForWin = await game.checkForWin();
                 console.log("runGame -- game.checkForWin -> ", checkForWin);
+
                 if (!checkForWin) {
                     console.log("checkForWin was false --- resetting");
                     reset();
@@ -83,6 +83,7 @@ export async function runGame(game: Game): Promise<void> {
                 console.log("runGame -- hasFailed ->", failed);
 
                 if (!failed) {
+                    console.log("runGame -- hasFailed ->", failed);
                     game.state.results.push(startOfFunction - start);
                 }
 
@@ -165,18 +166,25 @@ export async function initializeGame(
     window: Window,
     state: GameState,
 ): Promise<void> {
-    let roundSet: Round[] = [];
-    let gameBuffer = new GameBuffer(buffer, state.lineLength);
+    const roundSet: Round[] = [];
+    const gameBuffer = new GameBuffer(buffer, state.lineLength);
 
+    // TODO: Enum?? MAYBE
     if (name === "relative") {
         roundSet.push(
             new DeleteRound());
         /*
     } else if (name === "ci{") {
         game = new CiGame(nvim, gameBuffer, state, { difficulty });
-    } else if (name === "whackamole") {
-        game = new WhackAMoleGame(nvim, gameBuffer, state, { difficulty });
         */
+    } else if (name === "whackamole") {
+        roundSet.push(new WhackAMoleRound());
+    }
+
+    else if (name === "random") {
+        roundSet.push(
+            new DeleteRound(),
+            new WhackAMoleRound());
     }
 
     if (roundSet.length) {
@@ -185,7 +193,7 @@ export async function initializeGame(
 }
 
 //const availableGames = ["relative", "ci{", "whackamole"];
-const availableGames = ["relative"];
+const availableGames = ["relative", "whackamole", "random"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 
 const stringToDiff = {
@@ -206,13 +214,13 @@ type BufferWindow = {
 };
 
 export async function createFloatingWindow(nvim: Neovim): Promise<BufferWindow> {
-    let rowSize = await nvim.window.height;
-    let columnSize = await nvim.window.width;
+    const rowSize = await nvim.window.height;
+    const columnSize = await nvim.window.width;
 
-    let width = Math.min( columnSize - 4, Math.max( 80, columnSize - 20 ) );
-    let height = Math.min( rowSize - 4, Math.max( 30, rowSize - 10 ) );
-    let top = (( rowSize - height ) / 2 ) - 1;
-    let left = (( columnSize - width ) / 2 );
+    const width = Math.min( columnSize - 4, Math.max( 80, columnSize - 20 ) );
+    const height = Math.min( rowSize - 4, Math.max( 30, rowSize - 10 ) );
+    const top = (( rowSize - height ) / 2 ) - 1;
+    const left = (( columnSize - width ) / 2 );
 
     // Create a scratch buffer
     const buffer = (await nvim.createBuffer(false, true)) as Buffer;
