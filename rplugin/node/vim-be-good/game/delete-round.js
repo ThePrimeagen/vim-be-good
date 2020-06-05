@@ -58,6 +58,7 @@ class DeleteRound {
         return __awaiter(this, void 0, void 0, function* () {
             const lines = yield game.gameBuffer.getGameLines();
             const length = lines.map(l => l.trim()).join("").length;
+            console.log("delete-round#isRoundComplete", length, lines);
             return length === 0;
         });
     }

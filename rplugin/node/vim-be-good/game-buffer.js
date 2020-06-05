@@ -30,11 +30,13 @@ class GameBuffer {
     getGameLines() {
         return __awaiter(this, void 0, void 0, function* () {
             const len = yield this.buffer.length;
-            return yield this.buffer.getLines({
+            const lines = yield this.buffer.getLines({
                 start: this.getInstructionOffset(),
                 end: len,
                 strictIndexing: false
             });
+            console.log("GameBuffer#getGameLines", this.getInstructionOffset(), len, lines);
+            return lines;
         });
     }
     pickRandomLine() {
@@ -54,9 +56,11 @@ class GameBuffer {
         return 1 + this.instructions.length;
     }
     onLines(cb) {
+        console.log("GameBuffer#onLines");
         this.linesCallback = cb;
     }
     setInstructions(instr) {
+        console.log("GameBuffer#setInstructions", instr);
         this.instructions = instr;
     }
     finish() {

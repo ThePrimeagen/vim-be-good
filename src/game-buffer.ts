@@ -30,11 +30,21 @@ export class GameBuffer implements IGameBuffer {
 
     public async getGameLines(): Promise<string[]> {
         const len = await this.buffer.length;
-        return await this.buffer.getLines({
+        const lines = await this.buffer.getLines({
             start: this.getInstructionOffset(),
             end: len,
             strictIndexing: false
         });
+
+        const allLines = await this.buffer.getLines({
+            start: 0,
+            end: len,
+            strictIndexing: false
+        });
+
+        console.log("GameBuffer#getGameLines", this.getInstructionOffset(), len, lines);
+        console.log("GameBuffer#getGameLines", allLines);
+        return lines;
     }
 
     public pickRandomLine(): number {
@@ -59,10 +69,12 @@ export class GameBuffer implements IGameBuffer {
     }
 
     public onLines(cb: LinesCallback): void {
+        console.log("GameBuffer#onLines");
         this.linesCallback = cb;
     }
 
     public setInstructions(instr: string[]): void {
+        console.log("GameBuffer#setInstructions", instr);
         this.instructions = instr;
     }
 

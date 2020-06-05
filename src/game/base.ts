@@ -95,10 +95,13 @@ export class Game implements IGame {
     }
 
     public async startRound(): Promise<void> {
+        console.log("Game#startRound");
+
         const nextRound =
             this.rounds[Math.floor(Math.random() * this.rounds.length)];
 
         if (this.currentRound === nextRound) {
+            console.log("Game#startRound currentRound === nextRound");
             return;
         }
 
@@ -106,7 +109,6 @@ export class Game implements IGame {
 
         await this.gameBuffer.clearBoard();
         this.gameBuffer.setInstructions(instructions);
-        await this.gameBuffer.render([]);
 
         this.currentRound = nextRound;
     }
@@ -116,11 +118,12 @@ export class Game implements IGame {
     }
 
     public async hasFailed(): Promise<boolean> {
+        console.log(`Game#hasFailed -> ${this.timerExpired}`);
         return this.timerExpired;
     }
 
     public async run(firstRun: boolean): Promise<void> {
-        console.log("Game -- run --", firstRun);
+        console.log(`Game#run(${firstRun})`);
         this.gameBuffer.render(await this.currentRound.render(this));
 
         if (firstRun && this.currentRound.isTimedRound()) {
@@ -152,7 +155,9 @@ export class Game implements IGame {
         const time = this.currentRound.getTimeoutTime(this.difficulty);
 
         console.log("base - startTimer", time);
+
         this.timerExpired = false;
+
         this.timerId = setTimeout(() => {
             this.timerExpired = true;
             this.onExpired.forEach(cb => cb());
@@ -172,6 +177,7 @@ export class Game implements IGame {
     }
 
     public onTimerExpired(cb: () => void): void {
+        console.log("On timer expired");
         this.onExpired.push(cb);
     }
 }

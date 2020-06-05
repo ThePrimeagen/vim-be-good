@@ -93,14 +93,15 @@ class Game {
     }
     startRound() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("Game#startRound");
             const nextRound = this.rounds[Math.floor(Math.random() * this.rounds.length)];
             if (this.currentRound === nextRound) {
+                console.log("Game#startRound currentRound === nextRound");
                 return;
             }
             const instructions = nextRound.getInstructions();
             yield this.gameBuffer.clearBoard();
             this.gameBuffer.setInstructions(instructions);
-            yield this.gameBuffer.render([]);
             this.currentRound = nextRound;
         });
     }
@@ -111,12 +112,13 @@ class Game {
     }
     hasFailed() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(`Game#hasFailed -> ${this.timerExpired}`);
             return this.timerExpired;
         });
     }
     run(firstRun) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Game -- run --", firstRun);
+            console.log(`Game#run(${firstRun})`);
             this.gameBuffer.render(yield this.currentRound.render(this));
             if (firstRun && this.currentRound.isTimedRound()) {
                 console.log("Game -- run -- starting timer");
@@ -158,6 +160,7 @@ class Game {
         }
     }
     onTimerExpired(cb) {
+        console.log("On timer expired");
         this.onExpired.push(cb);
     }
 }

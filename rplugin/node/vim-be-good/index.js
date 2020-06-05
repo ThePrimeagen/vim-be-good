@@ -54,15 +54,18 @@ function runGame(game) {
                         return;
                     }
                     used = true;
+                    console.log("runGame -- Starting Line Event");
                     try {
+                        console.log("runGame#try Starting State Check");
                         const checkForWin = yield game.checkForWin();
-                        console.log("runGame -- checking for win", checkForWin);
+                        console.log("runGame -- game.checkForWin -> ", checkForWin);
                         if (!checkForWin) {
+                            console.log("checkForWin was false --- resetting");
                             reset();
                             return;
                         }
                         const failed = yield game.hasFailed();
-                        console.log("runGame -- checking for failed", failed);
+                        console.log("runGame -- hasFailed ->", failed);
                         if (!failed) {
                             game.state.results.push(startOfFunction - start);
                         }
@@ -93,13 +96,13 @@ function runGame(game) {
                         yield game.endRound();
                         console.log("Index -- Starting round");
                         yield game.startRound();
-                        console.log("Index -- Run game false");
                         yield game.run(false);
                         start = Date.now();
                     }
                     catch (e) {
                         buffer.debugTitle("onLineEvent#error", e.message);
                     }
+                    console.log("Index -- Resetting from bottom of loop");
                     reset();
                 });
             }
