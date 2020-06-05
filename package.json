@@ -4,7 +4,11 @@
     "description": "",
     "main": "src/index.ts",
     "scripts": {
-        "build": "tsc && cp rplugin-package.json ./rplugin/node/vim-be-good/package.json"
+        "copy-rplugin-json": "cp ./rplugin-package.json ./rplugin/node/vim-be-good/package.json",
+        "build": "tsc && npm run copy-rplugin-json",
+        "prebuild:watch": "npm run copy-rplugin-json",
+        "build:watch": "nodemon -e ts  --exec \"npm run build && echo '\nGood to go 👍'\""
+
     },
     "keywords": [],
     "author": "",
@@ -14,14 +18,15 @@
         "@typescript-eslint/eslint-plugin": "^3.1.0",
         "@typescript-eslint/parser": "^3.1.0",
         "eslint": "^7.1.0",
+        "eslint-config-prettier": "^6.11.0",
         "neovim": "^4.8.0",
+        "nodemon": "^2.0.4",
+        "prettier": "^2.0.5",
         "ts-loader": "^7.0.0",
         "tsc": "^1.20150623.0",
         "typescript": "^3.8.3",
         "webpack": "^4.42.1",
-        "webpack-cli": "^3.3.11",
-        "eslint-config-prettier": "^6.11.0",
-        "prettier": "^2.0.5"
+        "webpack-cli": "^3.3.11"
     },
     "dependencies": {
         "@chemzqm/neovim": "^5.2.3"
