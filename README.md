@@ -15,7 +15,7 @@ to practice basic movements in.
 The difficulty only works on a few games for now.
 
 ## Ideas?
-Please sumbit a ticket for your idea!!!
+Please submit a ticket for your idea!!!
 
 ## Options
 
