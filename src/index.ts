@@ -1,14 +1,16 @@
 import { Buffer, Neovim, NvimPlugin, Window } from "neovim";
 import { GameDifficulty, GameState, parseGameDifficulty } from "./game/types";
-import { BaseGame, newGameState } from "./game/base";
-import { DeleteGame } from "./game/delete";
+import { Round } from "./game/round";
+import { DeleteRound } from "./game/delete-round";
+import { Game, newGameState } from "./game/base";
 import { GameBuffer } from "./game-buffer";
-import { CiGame } from "./game/ci";
-import { WhackAMoleGame } from "./game/whackamole";
+import { WhackAMoleRound } from "./game/whackamole-round";
+import { CiRound } from "./game/ci-round";
 import { Menu } from "./menu";
 
 // this is a comment
-export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
+export async function runGame(game: Game): Promise<void> {
+    const nvim: Neovim = game.nvim;
     const buffer: GameBuffer = game.gameBuffer;
 
     console.log("runGame -- Game is starting");
@@ -32,8 +34,9 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
 
         console.log("runGame -- Round 1 of", game.state.ending.count);
 
-        await game.clear();
-        await game.run();
+        await game.gameBuffer.clearBoard();
+        await game.startRound();
+        await game.run(true);
 
         let start = Date.now();
         let missingCount = 0;
@@ -63,18 +66,25 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
 
             used = true;
 
+            console.log("runGame -- Starting Line Event");
             try {
+                console.log("runGame#try Starting State Check");
+
                 const checkForWin = await game.checkForWin();
-                console.log("runGame -- checking for win", checkForWin);
-                if (!checkForWin) {
+                console.log("runGame -- game.checkForWin -> ", checkForWin);
+
+                const failed = await game.hasFailed();
+                console.log("runGame -- hasFailed ->", failed);
+
+                if (!checkForWin && !failed) {
+                    console.log("checkForWin was false --- resetting");
                     reset();
                     return;
                 }
 
-                const failed = await game.hasFailed();
-                console.log("runGame -- checking for failed", failed);
-
+                console.log("runGame -- hasFailed ->", failed);
                 if (!failed) {
+                    console.log("runGame -- !failed pushing results", startOfFunction - start);
                     game.state.results.push(startOfFunction - start);
                 }
 
@@ -82,13 +92,27 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                     "runGame -- End of game?",
                     game.state.currentCount >= game.state.ending.count,
                 );
-                if (game.state.currentCount >= game.state.ending.count) {
-                    await game.gameOver();
+
+                console.log("Index -- Incrementing currentCount", game.state.currentCount, game.state.currentCount + 1);
+                game.state.currentCount++;
+
+                console.log(
+                    `Round ${game.state.currentCount} / ${
+                        game.state.ending.count
+                    }`,
+                );
+                await buffer.setTitle(
+                    `Round ${game.state.currentCount} / ${
+                        game.state.ending.count
+                    }`,
+                );
+
+                if (game.state.currentCount > game.state.ending.count) {
 
                     const gameCount = game.state.ending.count;
                     const title = [
                         `Success: ${
-                            gameCount - game.state.failureCount
+                            game.state.results.length
                         } / ${gameCount}`,
                     ];
 
@@ -96,7 +120,7 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                         title.push(
                             `Average Success Time!: ${
                                 game.state.results.reduce((x, y) => x + y, 0) /
-                                game.state.results.length
+                                    game.state.results.length
                             }`,
                         );
                     } else {
@@ -108,38 +132,33 @@ export async function runGame(nvim: Neovim, game: BaseGame): Promise<void> {
                     await buffer.setTitle(title.join(" "));
                     game.finish();
                     return;
-                } else {
-                    console.log(
-                        `Round ${game.state.currentCount + 1} / ${
-                            game.state.ending.count
-                        }`,
-                    );
-                    await buffer.setTitle(
-                        `Round ${game.state.currentCount + 1} / ${
-                            game.state.ending.count
-                        }`,
-                    );
                 }
 
-                game.state.currentCount++;
+                console.log("Index -- ending game round");
+                await game.endRound();
+                console.log("Index -- Starting round");
+                await game.startRound();
+                await game.run(false);
 
-                await game.clear();
-                await game.run();
                 start = Date.now();
             } catch (e) {
                 buffer.debugTitle("onLineEvent#error", e.message);
             }
+
+            console.log("Index -- Resetting from bottom of loop");
             reset();
         }
 
         buffer.onLines(onLineEvent);
         game.onTimerExpired(() => {
+
             console.log("Index#onTimerExpired!");
             onLineEvent();
         });
     } catch (err) {
         await nvim.outWrite(`Failure ${err}\n`);
     }
+
 }
 
 export async function initializeGame(
@@ -150,23 +169,29 @@ export async function initializeGame(
     window: Window,
     state: GameState,
 ): Promise<void> {
-    let game: BaseGame | null = null;
-    let gameBuffer = new GameBuffer(buffer, state.lineLength);
+    const roundSet: Round[] = [];
+    const gameBuffer = new GameBuffer(buffer, state.lineLength);
+    const isRandom = name === "random";
 
-    if (name === "relative") {
-        game = new DeleteGame(nvim, gameBuffer, state, { difficulty });
-    } else if (name === "ci{") {
-        game = new CiGame(nvim, gameBuffer, state, { difficulty });
-    } else if (name === "whackamole") {
-        game = new WhackAMoleGame(nvim, gameBuffer, state, { difficulty });
+    // TODO: Enum?? MAYBE
+    if (name === "relative" || isRandom) {
+        roundSet.push(
+            new DeleteRound());
+    }
+    if (name === "ci{" || isRandom) {
+        roundSet.push(
+            new CiRound());
+    }
+    if (name === "whackamole" || isRandom) {
+        roundSet.push(new WhackAMoleRound());
     }
 
-    if (game) {
-        runGame(nvim, game);
+    if (roundSet.length) {
+        runGame(new Game(nvim, gameBuffer, state, roundSet, {difficulty}));
     }
 }
 
-const availableGames = ["relative", "ci{", "whackamole"];
+const availableGames = ["relative", "ci{", "whackamole", "random"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 
 const stringToDiff = {
@@ -187,13 +212,13 @@ type BufferWindow = {
 };
 
 export async function createFloatingWindow(nvim: Neovim): Promise<BufferWindow> {
-    let rowSize = await nvim.window.height;
-    let columnSize = await nvim.window.width;
+    const rowSize = await nvim.window.height;
+    const columnSize = await nvim.window.width;
 
-    let width = Math.min( columnSize - 4, Math.max( 80, columnSize - 20 ) );
-    let height = Math.min( rowSize - 4, Math.max( 30, rowSize - 10 ) );
-    let top = (( rowSize - height ) / 2 ) - 1;
-    let left = (( columnSize - width ) / 2 );
+    const width = Math.min( columnSize - 4, Math.max( 80, columnSize - 20 ) );
+    const height = Math.min( rowSize - 4, Math.max( 40, rowSize - 10 ) );
+    const top = (( rowSize - height ) / 2 ) - 1;
+    const left = (( columnSize - width ) / 2 );
 
     // Create a scratch buffer
     const buffer = (await nvim.createBuffer(false, true)) as Buffer;
@@ -216,7 +241,6 @@ export async function createFloatingWindow(nvim: Neovim): Promise<BufferWindow> 
     return {buffer, window};
 }
 
-
 export default function createPlugin(plugin: NvimPlugin): void {
     plugin.setOptions({
         dev: true,
@@ -230,60 +254,60 @@ export default function createPlugin(plugin: NvimPlugin): void {
                 const useCurrentBuffer = Number(
                     await plugin.nvim.getVar("vim_be_good_floating")) === 0;
 
-                let buffer: Buffer;
-                let window: Window;
+                    let buffer: Buffer;
+                    let window: Window;
 
-                if (useCurrentBuffer) {
-                    buffer = await plugin.nvim.buffer;
-                    window = await plugin.nvim.window;
-                } else {
-                    const bufAndWindow = await createFloatingWindow(plugin.nvim);
-                    buffer = bufAndWindow.buffer;
-                    window = bufAndWindow.window;
-                }
+                    if (useCurrentBuffer) {
+                        buffer = await plugin.nvim.buffer;
+                        window = await plugin.nvim.window;
+                    } else {
+                        const bufAndWindow = await createFloatingWindow(plugin.nvim);
+                        buffer = bufAndWindow.buffer;
+                        window = bufAndWindow.window;
+                    }
 
-                const difficulty = parseGameDifficulty(args[1]);
-                const state = await getGameState(plugin.nvim);
+                    const difficulty = parseGameDifficulty(args[1]);
+                    const state = await getGameState(plugin.nvim);
 
-                if (availableGames.indexOf(args[0]) >= 0) {
-                    state.name = args[0];
-                    await initializeGame(
-                        args[0],
-                        difficulty,
-                        plugin.nvim,
-                        buffer,
-                        window,
-                        state,
-                    );
-                }
+                    if (availableGames.indexOf(args[0]) >= 0) {
+                        state.name = args[0];
+                        await initializeGame(
+                            args[0],
+                            difficulty,
+                            plugin.nvim,
+                            buffer,
+                            window,
+                            state,
+                        );
+                    }
 
-                // TODO: ci?
-                else {
-                    const menu = await Menu.build(
-                        plugin,
-                        availableGames,
-                        availableDifficulties,
-                        difficulty,
-                    );
+                    // TODO: ci?
+                    else {
+                        const menu = await Menu.build(
+                            plugin,
+                            availableGames,
+                            availableDifficulties,
+                            difficulty,
+                        );
 
-                    menu.onGameSelection(
-                        async (gameName: string, difficulty: string) => {
-                            state.name = gameName;
-                            await initializeGame(
-                                gameName,
-                                stringToDiff[difficulty],
-                                plugin.nvim,
-                                buffer,
-                                window,
-                                state,
-                            );
-                        },
-                    );
+                        menu.onGameSelection(
+                            async (gameName: string, difficulty: string) => {
+                                state.name = gameName;
+                                await initializeGame(
+                                    gameName,
+                                    stringToDiff[difficulty],
+                                    plugin.nvim,
+                                    buffer,
+                                    window,
+                                    state,
+                                );
+                            },
+                        );
 
-                    menu.render();
+                        menu.render();
 
-                    return;
-                }
+                        return;
+                    }
             } catch (e) {
                 await plugin.nvim.outWrite("Error#" + args + " " + e.message);
             }

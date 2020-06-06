@@ -30,11 +30,15 @@ class GameBuffer {
     getGameLines() {
         return __awaiter(this, void 0, void 0, function* () {
             const len = yield this.buffer.length;
-            return yield this.buffer.getLines({
-                start: this.getInstructionOffset(),
+            const allLines = yield this.buffer.getLines({
+                start: 0,
                 end: len,
                 strictIndexing: false
             });
+            const lines = allLines.slice(this.getInstructionOffset(), len);
+            console.log("GameBuffer#getGameLines", this.getInstructionOffset(), len, lines);
+            console.log("GameBuffer#getGameLines", allLines);
+            return lines;
         });
     }
     pickRandomLine() {
@@ -54,9 +58,11 @@ class GameBuffer {
         return 1 + this.instructions.length;
     }
     onLines(cb) {
+        console.log("GameBuffer#onLines");
         this.linesCallback = cb;
     }
     setInstructions(instr) {
+        console.log("GameBuffer#setInstructions", instr);
         this.instructions = instr;
     }
     finish() {
@@ -77,6 +83,7 @@ class GameBuffer {
                 yield this.buffer.insert(new Array(expectedLen - len).fill(""), len);
             }
             const toRender = [...this.instructions, ...lines].filter(x => x !== null && x !== undefined);
+            console.log("GameBuffer -- To Render", toRender);
             yield this.buffer.setLines(toRender, {
                 start: 1,
                 end: expectedLen,
@@ -86,8 +93,9 @@ class GameBuffer {
     }
     clearBoard() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("GameBuffer#clearBoard");
             const len = yield this.buffer.length;
-            this.render(getEmptyLines(len));
+            yield this.render(getEmptyLines(len));
         });
     }
     debugTitle(...title) {

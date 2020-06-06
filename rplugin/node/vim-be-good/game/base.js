@@ -26,7 +26,7 @@ function newGameState(buffer, window) {
         failureCount: 0,
         window,
         ending: { count: 10 },
-        currentCount: 0,
+        currentCount: 1,
         lineRange: { start: 2, end: 22 },
         lineLength: 20,
         results: []
@@ -79,20 +79,58 @@ function getRandomSentence() {
     return exports.extraSentences[Math.floor(Math.random() * exports.extraSentences.length)];
 }
 exports.getRandomSentence = getRandomSentence;
-class BaseGame {
-    constructor(nvim, gameBuffer, state, opts = {
+class Game {
+    constructor(nvim, gameBuffer, state, rounds, opts = {
         difficulty: types_1.GameDifficulty.Easy
     }) {
         this.nvim = nvim;
         this.gameBuffer = gameBuffer;
         this.state = state;
-        this.state = state;
+        this.rounds = rounds;
         this.onExpired = [];
+        this.timerExpired = false;
         this.difficulty = opts.difficulty;
     }
-    render(lines) {
+    startRound() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("Game#startRound");
+            const nextRound = this.rounds[Math.floor(Math.random() * this.rounds.length)];
+            if (this.currentRound === nextRound) {
+                console.log("Game#startRound currentRound === nextRound");
+                return;
+            }
+            const instructions = nextRound.getInstructions();
+            yield this.gameBuffer.clearBoard();
+            this.gameBuffer.setInstructions(instructions);
+            this.currentRound = nextRound;
+        });
+    }
+    checkForWin() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.currentRound.isRoundComplete(this);
+        });
+    }
+    hasFailed() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(`Game#hasFailed -> ${this.timerExpired}`);
+            return this.timerExpired;
+        });
+    }
+    run(firstRun) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(`Game#run(${firstRun})`);
+            const lines = yield this.currentRound.render(this);
             yield this.gameBuffer.render(lines);
+            if (this.currentRound.isTimedRound()) {
+                console.log("Game -- run -- starting timer");
+                this.startTimer();
+            }
+        });
+    }
+    // Anything left to do here?
+    endRound() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.clearTimer();
         });
     }
     finish() {
@@ -104,15 +142,12 @@ class BaseGame {
             yield this.gameBuffer.finish();
         });
     }
-    gameOver() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // no op which can be optionally utilized by subclasses
-        });
-    }
     startTimer() {
-        const time = types_1.difficultyToTime(this.difficulty);
+        const time = this.currentRound.getTimeoutTime(this.difficulty);
         console.log("base - startTimer", time);
+        this.timerExpired = false;
         this.timerId = setTimeout(() => {
+            this.timerExpired = true;
             this.onExpired.forEach(cb => cb());
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore I HATE YOU TYPESCRIPT
@@ -126,7 +161,8 @@ class BaseGame {
         }
     }
     onTimerExpired(cb) {
+        console.log("On timer expired");
         this.onExpired.push(cb);
     }
 }
-exports.BaseGame = BaseGame;
+exports.Game = Game;

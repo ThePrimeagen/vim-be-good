@@ -1,15 +1,15 @@
 import { Buffer } from "neovim";
 
+import { IGameBuffer, LinesCallback } from "./game/types";
+
 import { wait } from "./wait";
 import { join } from "./log";
-
-export type LinesCallback = (args: any[]) => void;
 
 export function getEmptyLines(len: number): string[] {
     return new Array(len).fill("");
 }
 
-export class GameBuffer {
+export class GameBuffer implements IGameBuffer {
     private instructions!: string[];
     private linesCallback?: LinesCallback;
     private listenLines: LinesCallback;
@@ -30,11 +30,19 @@ export class GameBuffer {
 
     public async getGameLines(): Promise<string[]> {
         const len = await this.buffer.length;
-        return await this.buffer.getLines({
-            start: this.getInstructionOffset(),
+
+        const allLines = await this.buffer.getLines({
+            start: 0,
             end: len,
             strictIndexing: false
         });
+
+        const lines = allLines.slice(this.getInstructionOffset(), len);
+
+        console.log("GameBuffer#getGameLines", this.getInstructionOffset(), len, lines);
+        console.log("GameBuffer#getGameLines", allLines);
+
+        return lines;
     }
 
     public pickRandomLine(): number {
@@ -59,10 +67,12 @@ export class GameBuffer {
     }
 
     public onLines(cb: LinesCallback): void {
+        console.log("GameBuffer#onLines");
         this.linesCallback = cb;
     }
 
     public setInstructions(instr: string[]): void {
+        console.log("GameBuffer#setInstructions", instr);
         this.instructions = instr;
     }
 
@@ -90,6 +100,8 @@ export class GameBuffer {
             x => x !== null && x !== undefined
         );
 
+        console.log("GameBuffer -- To Render", toRender);
+
         await this.buffer.setLines(toRender, {
             start: 1,
             end: expectedLen,
@@ -98,9 +110,10 @@ export class GameBuffer {
     }
 
     public async clearBoard(): Promise<void> {
+        console.log("GameBuffer#clearBoard");
         const len = await this.buffer.length;
 
-        this.render(getEmptyLines(len));
+        await this.render(getEmptyLines(len));
     }
 
     public async debugTitle(...title: any[]): Promise<void> {

@@ -10,15 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("./game/types");
+const delete_round_1 = require("./game/delete-round");
 const base_1 = require("./game/base");
-const delete_1 = require("./game/delete");
 const game_buffer_1 = require("./game-buffer");
-const ci_1 = require("./game/ci");
-const whackamole_1 = require("./game/whackamole");
+const whackamole_round_1 = require("./game/whackamole-round");
+const ci_round_1 = require("./game/ci-round");
 const menu_1 = require("./menu");
 // this is a comment
-function runGame(nvim, game) {
+function runGame(game) {
     return __awaiter(this, void 0, void 0, function* () {
+        const nvim = game.nvim;
         const buffer = game.gameBuffer;
         console.log("runGame -- Game is starting");
         try {
@@ -29,8 +30,9 @@ function runGame(nvim, game) {
             // TODO: this should stop here.  this seems all sorts of wrong
             yield buffer.setTitle("Game Started: ", game.state.currentCount + 1, "/", game.state.ending.count);
             console.log("runGame -- Round 1 of", game.state.ending.count);
-            yield game.clear();
-            yield game.run();
+            yield game.gameBuffer.clearBoard();
+            yield game.startRound();
+            yield game.run(true);
             let start = Date.now();
             let missingCount = 0;
             let used = false;
@@ -53,24 +55,32 @@ function runGame(nvim, game) {
                         return;
                     }
                     used = true;
+                    console.log("runGame -- Starting Line Event");
                     try {
+                        console.log("runGame#try Starting State Check");
                         const checkForWin = yield game.checkForWin();
-                        console.log("runGame -- checking for win", checkForWin);
-                        if (!checkForWin) {
+                        console.log("runGame -- game.checkForWin -> ", checkForWin);
+                        const failed = yield game.hasFailed();
+                        console.log("runGame -- hasFailed ->", failed);
+                        if (!checkForWin && !failed) {
+                            console.log("checkForWin was false --- resetting");
                             reset();
                             return;
                         }
-                        const failed = yield game.hasFailed();
-                        console.log("runGame -- checking for failed", failed);
+                        console.log("runGame -- hasFailed ->", failed);
                         if (!failed) {
+                            console.log("runGame -- !failed pushing results", startOfFunction - start);
                             game.state.results.push(startOfFunction - start);
                         }
                         console.log("runGame -- End of game?", game.state.currentCount >= game.state.ending.count);
-                        if (game.state.currentCount >= game.state.ending.count) {
-                            yield game.gameOver();
+                        console.log("Index -- Incrementing currentCount", game.state.currentCount, game.state.currentCount + 1);
+                        game.state.currentCount++;
+                        console.log(`Round ${game.state.currentCount} / ${game.state.ending.count}`);
+                        yield buffer.setTitle(`Round ${game.state.currentCount} / ${game.state.ending.count}`);
+                        if (game.state.currentCount > game.state.ending.count) {
                             const gameCount = game.state.ending.count;
                             const title = [
-                                `Success: ${gameCount - game.state.failureCount} / ${gameCount}`,
+                                `Success: ${game.state.results.length} / ${gameCount}`,
                             ];
                             if (game.state.results.length > 0) {
                                 title.push(`Average Success Time!: ${game.state.results.reduce((x, y) => x + y, 0) /
@@ -83,18 +93,17 @@ function runGame(nvim, game) {
                             game.finish();
                             return;
                         }
-                        else {
-                            console.log(`Round ${game.state.currentCount + 1} / ${game.state.ending.count}`);
-                            yield buffer.setTitle(`Round ${game.state.currentCount + 1} / ${game.state.ending.count}`);
-                        }
-                        game.state.currentCount++;
-                        yield game.clear();
-                        yield game.run();
+                        console.log("Index -- ending game round");
+                        yield game.endRound();
+                        console.log("Index -- Starting round");
+                        yield game.startRound();
+                        yield game.run(false);
                         start = Date.now();
                     }
                     catch (e) {
                         buffer.debugTitle("onLineEvent#error", e.message);
                     }
+                    console.log("Index -- Resetting from bottom of loop");
                     reset();
                 });
             }
@@ -112,24 +121,26 @@ function runGame(nvim, game) {
 exports.runGame = runGame;
 function initializeGame(name, difficulty, nvim, buffer, window, state) {
     return __awaiter(this, void 0, void 0, function* () {
-        let game = null;
-        let gameBuffer = new game_buffer_1.GameBuffer(buffer, state.lineLength);
-        if (name === "relative") {
-            game = new delete_1.DeleteGame(nvim, gameBuffer, state, { difficulty });
+        const roundSet = [];
+        const gameBuffer = new game_buffer_1.GameBuffer(buffer, state.lineLength);
+        const isRandom = name === "random";
+        // TODO: Enum?? MAYBE
+        if (name === "relative" || isRandom) {
+            roundSet.push(new delete_round_1.DeleteRound());
         }
-        else if (name === "ci{") {
-            game = new ci_1.CiGame(nvim, gameBuffer, state, { difficulty });
+        if (name === "ci{" || isRandom) {
+            roundSet.push(new ci_round_1.CiRound());
         }
-        else if (name === "whackamole") {
-            game = new whackamole_1.WhackAMoleGame(nvim, gameBuffer, state, { difficulty });
+        if (name === "whackamole" || isRandom) {
+            roundSet.push(new whackamole_round_1.WhackAMoleRound());
         }
-        if (game) {
-            runGame(nvim, game);
+        if (roundSet.length) {
+            runGame(new base_1.Game(nvim, gameBuffer, state, roundSet, { difficulty }));
         }
     });
 }
 exports.initializeGame = initializeGame;
-const availableGames = ["relative", "ci{", "whackamole"];
+const availableGames = ["relative", "ci{", "whackamole", "random"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 const stringToDiff = {
     easy: types_1.GameDifficulty.Easy,
@@ -146,12 +157,12 @@ function getGameState(nvim) {
 exports.getGameState = getGameState;
 function createFloatingWindow(nvim) {
     return __awaiter(this, void 0, void 0, function* () {
-        let rowSize = yield nvim.window.height;
-        let columnSize = yield nvim.window.width;
-        let width = Math.min(columnSize - 4, Math.max(80, columnSize - 20));
-        let height = Math.min(rowSize - 4, Math.max(30, rowSize - 10));
-        let top = ((rowSize - height) / 2) - 1;
-        let left = ((columnSize - width) / 2);
+        const rowSize = yield nvim.window.height;
+        const columnSize = yield nvim.window.width;
+        const width = Math.min(columnSize - 4, Math.max(80, columnSize - 20));
+        const height = Math.min(rowSize - 4, Math.max(40, rowSize - 10));
+        const top = ((rowSize - height) / 2) - 1;
+        const left = ((columnSize - width) / 2);
         // Create a scratch buffer
         const buffer = (yield nvim.createBuffer(false, true));
         let window = yield nvim.openWindow(buffer, true, {
