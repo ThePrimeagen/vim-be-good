@@ -193,6 +193,18 @@ function createPlugin(plugin) {
             if (useCurrentBuffer) {
                 buffer = yield plugin.nvim.buffer;
                 window = yield plugin.nvim.window;
+                const len = yield buffer.length;
+                const contents = yield buffer.getLines({
+                    start: 0,
+                    end: len,
+                    strictIndexing: false
+                });
+                const hasContent = contents.
+                    map(l => l.trim()).
+                    filter(x => x.length).length > 0;
+                if (hasContent) {
+                    throw new Error("Your buffer is not empty and you are not using floating window mode.  Please use an empty buffer.");
+                }
             }
             else {
                 const bufAndWindow = yield createFloatingWindow(plugin.nvim);

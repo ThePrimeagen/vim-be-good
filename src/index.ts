@@ -260,6 +260,23 @@ export default function createPlugin(plugin: NvimPlugin): void {
                     if (useCurrentBuffer) {
                         buffer = await plugin.nvim.buffer;
                         window = await plugin.nvim.window;
+
+                        const len = await buffer.length;
+                        const contents = await buffer.getLines({
+                            start: 0,
+                            end: len,
+                            strictIndexing: false
+                        });
+
+                        const hasContent =
+                            contents.
+                                map(l => l.trim()).
+                                filter(x => x.length).length > 0;
+
+                        if (hasContent) {
+                            throw new Error("Your buffer is not empty and you are not using floating window mode.  Please use an empty buffer.");
+                        }
+
                     } else {
                         const bufAndWindow = await createFloatingWindow(plugin.nvim);
                         buffer = bufAndWindow.buffer;
