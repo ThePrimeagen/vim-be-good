@@ -9,17 +9,17 @@ export class Menu {
     private headerLines = [
         "VimBeGood2 is a collection of small games for neovim which are",
         "intended to help you improve your vim proficiency.",
-        ""
+        "",
     ];
     private gameInstructions = [
         "Select a Game (delete from the list to select)",
-        "----------------------------------------------"
+        "----------------------------------------------",
     ];
 
     private difficultyInstructions = [
         "",
         "Select a Difficulty (delete from the list to select)",
-        "----------------------------------------------------"
+        "----------------------------------------------------",
     ];
     private gameList: string[];
     private difficultyList: string[];
@@ -31,7 +31,7 @@ export class Menu {
         "",
         "Created by ThePrimeagen",
         "           Brandoncc",
-        "https://github.com/ThePrimeagen/vim-be-good"
+        "https://github.com/ThePrimeagen/vim-be-good",
     ];
     private fullMenu: string[] = [];
     //eslint-disable-next-line @typescript-eslint/no-inferrable-types
@@ -45,11 +45,11 @@ export class Menu {
         games,
         difficulties,
         selectedDifficulty,
-        __allowCreation
+        __allowCreation,
     ) {
         if (!__allowCreation) {
             throw new Error(
-                "Menu cannot be instantiated, you must use the builder"
+                "Menu cannot be instantiated, you must use the builder",
             );
         }
 
@@ -65,14 +65,14 @@ export class Menu {
         plugin: NvimPlugin,
         availableGames: string[],
         availableDifficulties: string[],
-        selectedDifficulty
+        selectedDifficulty,
     ) {
         const menu = new Menu(
             plugin,
             availableGames,
             availableDifficulties,
             selectedDifficulty,
-            true
+            true,
         );
 
         await menu.setup();
@@ -116,7 +116,7 @@ export class Menu {
         _firstLine,
         lastLine,
         _newData,
-        _more
+        _more,
     ) {
         try {
             if (!this.window) {
@@ -137,7 +137,11 @@ export class Menu {
                     lastLine - this.firstDifficultyLineIndex
                 ];
 
-                console.log("menu -- onLineChange, if deletedCount === 1", selectedGame, selectedDifficulty);
+                console.log(
+                    "menu -- onLineChange, if deletedCount === 1",
+                    selectedGame,
+                    selectedDifficulty,
+                );
                 if (selectedGame) {
                     console.log("menu -- onLineChange, selectedGame");
                     this.stopHandlingLineEvents();
@@ -146,7 +150,7 @@ export class Menu {
 
                     this.gameSelectionCallback?.(
                         selectedGame,
-                        this.selectedDifficulty
+                        this.selectedDifficulty,
                     );
                 } else if (selectedDifficulty) {
                     console.log("menu -- onLineChange, selectedDifficulty");
@@ -164,7 +168,7 @@ export class Menu {
             }
         } catch (e) {
             await this.plugin.nvim.outWrite(
-                "Error while handling line: " + e.message + "\n"
+                "Error while handling line: " + e.message + "\n",
             );
         }
     }
@@ -178,7 +182,7 @@ export class Menu {
     }
 
     private createDifficultyLines(difficulties) {
-        return difficulties.map(diff => {
+        return difficulties.map((diff) => {
             if (this.selectedDifficulty === diff) {
                 return `[X] ${diff}`;
             } else {
@@ -195,7 +199,7 @@ export class Menu {
             ...this.gameList,
             ...this.difficultyInstructions,
             ...this.difficultyLines,
-            ...this.footer
+            ...this.footer,
         ];
         this.firstGameLineIndex =
             this.headerLines.length + this.gameInstructions.length + 1;

@@ -43,17 +43,20 @@ export class WhackAMoleRound extends Round {
 
         this.winLine = this.createWinLine(sentence, chosenLocation);
 
-        await game.nvim.command(`:${String(instructionLines.length + this.outputStartRow + 1)}`);
+        await game.nvim.command(
+            `:${String(instructionLines.length + this.outputStartRow + 1)}`,
+        );
 
-        return [
-            sentence,
-            pointerLine
-        ];
+        return [sentence, pointerLine];
     }
 
     public async isRoundComplete(game: IGame): Promise<boolean> {
         const lines = await game.gameBuffer.getGameLines();
-        console.log("WhackAMoleRound#isRoundComplete", lines.indexOf(this.winLine) !== -1, lines);
+        console.log(
+            "WhackAMoleRound#isRoundComplete",
+            lines.indexOf(this.winLine) !== -1,
+            lines,
+        );
 
         return lines.indexOf(this.winLine) !== -1;
     }
@@ -72,4 +75,3 @@ export class WhackAMoleRound extends Round {
         return preTargetChar + targetChar + postTargetChar;
     }
 }
-

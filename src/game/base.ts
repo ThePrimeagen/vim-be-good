@@ -21,7 +21,7 @@ export function newGameState(buffer: Buffer, window: Window): GameState {
         currentCount: 1,
         lineRange: { start: 2, end: 22 },
         lineLength: 20,
-        results: []
+        results: [],
     };
 }
 
@@ -51,7 +51,7 @@ export const extraWords = [
     "war",
     "xar",
     "yar",
-    "zar"
+    "zar",
 ];
 
 export const extraSentences = [
@@ -62,7 +62,7 @@ export const extraSentences = [
     "The internet is an amazing place full of interesting facts",
     "Did you know the internet crosses continental boundaries using a wire?!",
     "I am out of interesting facts to type here",
-    "Others should contribute more sentences to be used in the game"
+    "Others should contribute more sentences to be used in the game",
 ];
 
 export function getRandomWord(): string {
@@ -86,8 +86,8 @@ export class Game implements IGame {
         public state: GameState,
         public rounds: Round[],
         opts: GameOptions = {
-            difficulty: GameDifficulty.Easy
-        }
+            difficulty: GameDifficulty.Easy,
+        },
     ) {
         this.onExpired = [];
         this.timerExpired = false;
@@ -97,8 +97,9 @@ export class Game implements IGame {
     public async startRound(): Promise<void> {
         console.log("Game#startRound");
 
-        const nextRound =
-            this.rounds[Math.floor(Math.random() * this.rounds.length)];
+        const nextRound = this.rounds[
+            Math.floor(Math.random() * this.rounds.length)
+        ];
 
         if (this.currentRound === nextRound) {
             console.log("Game#startRound currentRound === nextRound");
@@ -140,14 +141,11 @@ export class Game implements IGame {
 
     public async finish(): Promise<void> {
         const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
-        const results = this.state.results.map(x => x + "").join(",\n");
+        const results = this.state.results.map((x) => x + "").join(",\n");
 
         console.log("base -- finish", fName, results);
 
-        fs.writeFileSync(
-            fName,
-            results,
-        );
+        fs.writeFileSync(fName, results);
 
         await this.gameBuffer.finish();
     }
@@ -161,7 +159,7 @@ export class Game implements IGame {
 
         this.timerId = setTimeout(() => {
             this.timerExpired = true;
-            this.onExpired.forEach(cb => cb());
+            this.onExpired.forEach((cb) => cb());
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore I HATE YOU TYPESCRIPT
@@ -182,4 +180,3 @@ export class Game implements IGame {
         this.onExpired.push(cb);
     }
 }
-
