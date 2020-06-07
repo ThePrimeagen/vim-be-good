@@ -5,12 +5,13 @@ const deleteRoundInstructions = [
     'When you see a "DELETE ME", relative jump to it',
     "as fast as possible and delete it.",
     "",
-    ""
+    "",
 ];
 
 export class DeleteRound extends Round {
-
-    constructor() { super(); }
+    constructor() {
+        super();
+    }
 
     public getInstructions(): string[] {
         return deleteRoundInstructions;
@@ -24,8 +25,13 @@ export class DeleteRound extends Round {
         lines[line] = "                              DELETE ME";
 
         const middlePoint = game.gameBuffer.midPointRandomPoint(!high);
-        console.log("relative -- run#rendering",
-                    high, middlePoint, game.state.lineLength, lines);
+        console.log(
+            "relative -- run#rendering",
+            high,
+            middlePoint,
+            game.state.lineLength,
+            lines,
+        );
 
         await game.nvim.command(`:${String(middlePoint)}`);
 
@@ -34,10 +40,8 @@ export class DeleteRound extends Round {
 
     public async isRoundComplete(game: IGame): Promise<boolean> {
         const lines = await game.gameBuffer.getGameLines();
-        const length = lines.map(l => l.trim()).join("").length;
+        const length = lines.map((l) => l.trim()).join("").length;
         console.log("delete-round#isRoundComplete", length, lines);
         return length === 0;
     }
 }
-
-

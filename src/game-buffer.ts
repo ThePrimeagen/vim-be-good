@@ -14,9 +14,7 @@ export class GameBuffer implements IGameBuffer {
     private linesCallback?: LinesCallback;
     private listenLines: LinesCallback;
 
-    constructor(private buffer: Buffer,
-                public lineLength: number) {
-
+    constructor(private buffer: Buffer, public lineLength: number) {
         this.instructions = [];
 
         this.listenLines = (args: any[]) => {
@@ -34,12 +32,17 @@ export class GameBuffer implements IGameBuffer {
         const allLines = await this.buffer.getLines({
             start: 0,
             end: len,
-            strictIndexing: false
+            strictIndexing: false,
         });
 
         const lines = allLines.slice(this.getInstructionOffset(), len);
 
-        console.log("GameBuffer#getGameLines", this.getInstructionOffset(), len, lines);
+        console.log(
+            "GameBuffer#getGameLines",
+            this.getInstructionOffset(),
+            len,
+            lines,
+        );
         console.log("GameBuffer#getGameLines", allLines);
 
         return lines;
@@ -92,12 +95,12 @@ export class GameBuffer implements IGameBuffer {
         if (len < expectedLen + 1) {
             await this.buffer.insert(
                 new Array(expectedLen - len).fill(""),
-                len
+                len,
             );
         }
 
         const toRender = [...this.instructions, ...lines].filter(
-            x => x !== null && x !== undefined
+            (x) => x !== null && x !== undefined,
         );
 
         console.log("GameBuffer -- To Render", toRender);
@@ -105,7 +108,7 @@ export class GameBuffer implements IGameBuffer {
         await this.buffer.setLines(toRender, {
             start: 1,
             end: expectedLen,
-            strictIndexing: true
+            strictIndexing: true,
         });
     }
 
@@ -124,12 +127,11 @@ export class GameBuffer implements IGameBuffer {
     public async setTitle(...title: any[]): Promise<void> {
         await this.buffer.setLines(join(...title), {
             start: 0,
-            end: 1
+            end: 1,
         });
     }
 
     protected getTotalLength(lines: string[]): number {
         return lines.length + this.instructions.length + 1;
     }
-};
-
+}

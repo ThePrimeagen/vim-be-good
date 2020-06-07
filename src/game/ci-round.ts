@@ -12,14 +12,16 @@ const instructions = [
     "   item1,       ->   ]",
     "   item1,",
     "   item1,",
-    "]"
+    "]",
 ];
 
 export class CiRound extends Round {
     private currentRandomWord!: string;
     private ifStatment = false;
 
-    constructor() { super(); }
+    constructor() {
+        super();
+    }
 
     getInstructions(): string[] {
         return instructions;
@@ -60,7 +62,7 @@ export class CiRound extends Round {
 
     async isRoundComplete(game: IGame): Promise<boolean> {
         const lines = await game.gameBuffer.getGameLines();
-        const contents = lines.map(l => l.trim()).join("");
+        const contents = lines.map((l) => l.trim()).join("");
 
         return (
             (this.ifStatment &&
@@ -70,5 +72,3 @@ export class CiRound extends Round {
         );
     }
 }
-
-

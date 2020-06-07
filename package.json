@@ -7,7 +7,9 @@
         "copy-rplugin-json": "cp ./rplugin-package.json ./rplugin/node/vim-be-good/package.json",
         "build": "tsc && npm run copy-rplugin-json",
         "prebuild:watch": "npm run copy-rplugin-json",
-        "build:watch": "nodemon -e ts  --exec \"npm run build && echo '\nGood to go 👍'\""
+        "build:watch": "nodemon -e ts  --exec \"npm run build && echo '\nGood to go 👍'\"",
+        "lint": "prettier ./src --check",
+        "lint:fix": "prettier ./src --write"
     },
     "keywords": [],
     "author": "",

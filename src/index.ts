@@ -84,7 +84,10 @@ export async function runGame(game: Game): Promise<void> {
 
                 console.log("runGame -- hasFailed ->", failed);
                 if (!failed) {
-                    console.log("runGame -- !failed pushing results", startOfFunction - start);
+                    console.log(
+                        "runGame -- !failed pushing results",
+                        startOfFunction - start,
+                    );
                     game.state.results.push(startOfFunction - start);
                 }
 
@@ -93,34 +96,31 @@ export async function runGame(game: Game): Promise<void> {
                     game.state.currentCount >= game.state.ending.count,
                 );
 
-                console.log("Index -- Incrementing currentCount", game.state.currentCount, game.state.currentCount + 1);
+                console.log(
+                    "Index -- Incrementing currentCount",
+                    game.state.currentCount,
+                    game.state.currentCount + 1,
+                );
                 game.state.currentCount++;
 
                 console.log(
-                    `Round ${game.state.currentCount} / ${
-                        game.state.ending.count
-                    }`,
+                    `Round ${game.state.currentCount} / ${game.state.ending.count}`,
                 );
                 await buffer.setTitle(
-                    `Round ${game.state.currentCount} / ${
-                        game.state.ending.count
-                    }`,
+                    `Round ${game.state.currentCount} / ${game.state.ending.count}`,
                 );
 
                 if (game.state.currentCount > game.state.ending.count) {
-
                     const gameCount = game.state.ending.count;
                     const title = [
-                        `Success: ${
-                            game.state.results.length
-                        } / ${gameCount}`,
+                        `Success: ${game.state.results.length} / ${gameCount}`,
                     ];
 
                     if (game.state.results.length > 0) {
                         title.push(
                             `Average Success Time!: ${
                                 game.state.results.reduce((x, y) => x + y, 0) /
-                                    game.state.results.length
+                                game.state.results.length
                             }`,
                         );
                     } else {
@@ -151,14 +151,12 @@ export async function runGame(game: Game): Promise<void> {
 
         buffer.onLines(onLineEvent);
         game.onTimerExpired(() => {
-
             console.log("Index#onTimerExpired!");
             onLineEvent();
         });
     } catch (err) {
         await nvim.outWrite(`Failure ${err}\n`);
     }
-
 }
 
 export async function initializeGame(
@@ -175,19 +173,17 @@ export async function initializeGame(
 
     // TODO: Enum?? MAYBE
     if (name === "relative" || isRandom) {
-        roundSet.push(
-            new DeleteRound());
+        roundSet.push(new DeleteRound());
     }
     if (name === "ci{" || isRandom) {
-        roundSet.push(
-            new CiRound());
+        roundSet.push(new CiRound());
     }
     if (name === "whackamole" || isRandom) {
         roundSet.push(new WhackAMoleRound());
     }
 
     if (roundSet.length) {
-        runGame(new Game(nvim, gameBuffer, state, roundSet, {difficulty}));
+        runGame(new Game(nvim, gameBuffer, state, roundSet, { difficulty }));
     }
 }
 
@@ -211,34 +207,34 @@ type BufferWindow = {
     window: Window;
 };
 
-export async function createFloatingWindow(nvim: Neovim): Promise<BufferWindow> {
+export async function createFloatingWindow(
+    nvim: Neovim,
+): Promise<BufferWindow> {
     const rowSize = await nvim.window.height;
     const columnSize = await nvim.window.width;
 
-    const width = Math.min( columnSize - 4, Math.max( 80, columnSize - 20 ) );
-    const height = Math.min( rowSize - 4, Math.max( 40, rowSize - 10 ) );
-    const top = (( rowSize - height ) / 2 ) - 1;
-    const left = (( columnSize - width ) / 2 );
+    const width = Math.min(columnSize - 4, Math.max(80, columnSize - 20));
+    const height = Math.min(rowSize - 4, Math.max(40, rowSize - 10));
+    const top = (rowSize - height) / 2 - 1;
+    const left = (columnSize - width) / 2;
 
     // Create a scratch buffer
     const buffer = (await nvim.createBuffer(false, true)) as Buffer;
 
-    let window = await nvim.openWindow(
-        buffer, true, {
-            relative: 'editor',
-            row: top,
-            col: left,
-            width: width,
-            height: height
-        }
-    );
+    let window = await nvim.openWindow(buffer, true, {
+        relative: "editor",
+        row: top,
+        col: left,
+        width: width,
+        height: height,
+    });
 
     // TODO: I don't think this is the way to do this, but lets find out.
     if (typeof window === "number") {
         window = await nvim.window;
     }
 
-    return {buffer, window};
+    return { buffer, window };
 }
 
 export default function createPlugin(plugin: NvimPlugin): void {
@@ -251,8 +247,9 @@ export default function createPlugin(plugin: NvimPlugin): void {
         "VimBeGood",
         async (args: string[]) => {
             try {
-                const useCurrentBuffer = Number(
-                    await plugin.nvim.getVar("vim_be_good_floating")) === 0;
+                const useCurrentBuffer =
+                    Number(await plugin.nvim.getVar("vim_be_good_floating")) ===
+                    0;
 
                 let buffer: Buffer;
                 let window: Window;
@@ -265,21 +262,26 @@ export default function createPlugin(plugin: NvimPlugin): void {
                     const contents = await buffer.getLines({
                         start: 0,
                         end: len,
-                        strictIndexing: false
+                        strictIndexing: false,
                     });
 
                     const hasContent =
-                        contents.
-                        map(l => l.trim()).
-                        filter(x => x.length).length > 0;
+                        contents.map((l) => l.trim()).filter((x) => x.length)
+                            .length > 0;
 
-                    console.log("Checking to see if buffer has content", hasContent);
+                    console.log(
+                        "Checking to see if buffer has content",
+                        hasContent,
+                    );
                     if (hasContent) {
-                        throw new Error("Your buffer is not empty and you are not using floating window mode.  Please use an empty buffer.");
+                        throw new Error(
+                            "Your buffer is not empty and you are not using floating window mode.  Please use an empty buffer.",
+                        );
                     }
-
                 } else {
-                    const bufAndWindow = await createFloatingWindow(plugin.nvim);
+                    const bufAndWindow = await createFloatingWindow(
+                        plugin.nvim,
+                    );
                     buffer = bufAndWindow.buffer;
                     window = bufAndWindow.window;
                 }

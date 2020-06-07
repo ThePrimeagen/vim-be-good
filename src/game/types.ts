@@ -5,7 +5,7 @@ export enum GameDifficulty {
     Medium = "medium",
     Hard = "hard",
     Nightmare = "nightmare",
-    TPope = "tpope"
+    TPope = "tpope",
 }
 
 export type GameOptions = {
@@ -16,7 +16,7 @@ export enum RoundStatus {
     Playing = 0,
     Failed,
     Won,
-};
+}
 
 export function difficultyToTime(diff: GameDifficulty): number {
     let out = 1000;
@@ -40,7 +40,7 @@ export function difficultyToTime(diff: GameDifficulty): number {
 
 export function parseGameDifficulty(
     diff: string,
-    defaultValue = GameDifficulty.Easy
+    defaultValue = GameDifficulty.Easy,
 ): GameDifficulty {
     let difficulty = defaultValue;
     switch (diff) {
@@ -81,7 +81,7 @@ export type LinesCallback = (args: any[]) => void;
 export interface IGameBuffer {
     lineLength: number;
     getGameLines(): Promise<string[]>;
-    pickRandomLine(): number
+    pickRandomLine(): number;
     // TODO: I ackshually hate this.
     midPointRandomPoint(high: boolean, padding?: number): number;
     getInstructionOffset(): number;
@@ -95,11 +95,10 @@ export interface IGameBuffer {
     clearBoard(): Promise<void>;
     debugTitle(...title: any[]): Promise<void>;
     setTitle(...title: any[]): Promise<void>;
-};
+}
 
 export interface IGame {
     nvim: Neovim;
     gameBuffer: IGameBuffer;
     state: GameState;
 }
-

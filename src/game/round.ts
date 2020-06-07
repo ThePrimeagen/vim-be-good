@@ -10,16 +10,16 @@ export abstract class Round {
         switch (diff) {
             case GameDifficulty.Easy:
                 out = 5000;
-            break;
+                break;
             case GameDifficulty.Medium:
                 out = 3500;
-            break;
+                break;
             case GameDifficulty.Hard:
                 out = 2500;
-            break;
+                break;
             case GameDifficulty.Nightmare:
                 out = 1600;
-            break;
+                break;
         }
 
         console.log("WhackAMoleRound#getTimeoutTime", out);
@@ -30,4 +30,3 @@ export abstract class Round {
         return true;
     }
 }
-
