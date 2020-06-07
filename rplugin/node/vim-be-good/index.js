@@ -202,6 +202,7 @@ function createPlugin(plugin) {
                 const hasContent = contents.
                     map(l => l.trim()).
                     filter(x => x.length).length > 0;
+                console.log("Checking to see if buffer has content", hasContent);
                 if (hasContent) {
                     throw new Error("Your buffer is not empty and you are not using floating window mode.  Please use an empty buffer.");
                 }
@@ -229,7 +230,7 @@ function createPlugin(plugin) {
             }
         }
         catch (e) {
-            yield plugin.nvim.outWrite("Error#" + args + " " + e.message);
+            yield plugin.nvim.outWrite(`Error: ${args} ${e.message}\n`);
         }
     }), { sync: false, nargs: "*" });
 }
