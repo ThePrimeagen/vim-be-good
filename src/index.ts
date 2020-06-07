@@ -254,62 +254,80 @@ export default function createPlugin(plugin: NvimPlugin): void {
                 const useCurrentBuffer = Number(
                     await plugin.nvim.getVar("vim_be_good_floating")) === 0;
 
-                    let buffer: Buffer;
-                    let window: Window;
+                let buffer: Buffer;
+                let window: Window;
 
-                    if (useCurrentBuffer) {
-                        buffer = await plugin.nvim.buffer;
-                        window = await plugin.nvim.window;
-                    } else {
-                        const bufAndWindow = await createFloatingWindow(plugin.nvim);
-                        buffer = bufAndWindow.buffer;
-                        window = bufAndWindow.window;
+                if (useCurrentBuffer) {
+                    buffer = await plugin.nvim.buffer;
+                    window = await plugin.nvim.window;
+
+                    const len = await buffer.length;
+                    const contents = await buffer.getLines({
+                        start: 0,
+                        end: len,
+                        strictIndexing: false
+                    });
+
+                    const hasContent =
+                        contents.
+                        map(l => l.trim()).
+                        filter(x => x.length).length > 0;
+
+                    console.log("Checking to see if buffer has content", hasContent);
+                    if (hasContent) {
+                        throw new Error("Your buffer is not empty and you are not using floating window mode.  Please use an empty buffer.");
                     }
 
-                    const difficulty = parseGameDifficulty(args[1]);
-                    const state = await getGameState(plugin.nvim);
+                } else {
+                    const bufAndWindow = await createFloatingWindow(plugin.nvim);
+                    buffer = bufAndWindow.buffer;
+                    window = bufAndWindow.window;
+                }
 
-                    if (availableGames.indexOf(args[0]) >= 0) {
-                        state.name = args[0];
-                        await initializeGame(
-                            args[0],
-                            difficulty,
-                            plugin.nvim,
-                            buffer,
-                            window,
-                            state,
-                        );
-                    }
+                const difficulty = parseGameDifficulty(args[1]);
+                const state = await getGameState(plugin.nvim);
 
-                    // TODO: ci?
-                    else {
-                        const menu = await Menu.build(
-                            plugin,
-                            availableGames,
-                            availableDifficulties,
-                            difficulty,
-                        );
+                if (availableGames.indexOf(args[0]) >= 0) {
+                    state.name = args[0];
+                    await initializeGame(
+                        args[0],
+                        difficulty,
+                        plugin.nvim,
+                        buffer,
+                        window,
+                        state,
+                    );
+                }
 
-                        menu.onGameSelection(
-                            async (gameName: string, difficulty: string) => {
-                                state.name = gameName;
-                                await initializeGame(
-                                    gameName,
-                                    stringToDiff[difficulty],
-                                    plugin.nvim,
-                                    buffer,
-                                    window,
-                                    state,
-                                );
-                            },
-                        );
+                // TODO: ci?
+                else {
+                    const menu = await Menu.build(
+                        plugin,
+                        availableGames,
+                        availableDifficulties,
+                        difficulty,
+                    );
 
-                        menu.render();
+                    menu.onGameSelection(
+                        async (gameName: string, difficulty: string) => {
+                            state.name = gameName;
+                            await initializeGame(
+                                gameName,
+                                stringToDiff[difficulty],
+                                plugin.nvim,
+                                buffer,
+                                window,
+                                state,
+                            );
+                        },
+                    );
 
-                        return;
-                    }
+                    menu.render();
+
+                    return;
+                }
             } catch (e) {
-                await plugin.nvim.outWrite("Error#" + args + " " + e.message);
+                await plugin.nvim.outWrite(`Error: ${args} ${e.message}\n`);
             }
         },
         { sync: false, nargs: "*" },
