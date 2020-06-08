@@ -3,3 +3,5 @@ test
 .zshrc.bak
 nvim.log
 out
+out.log
+rplugin/node/out.log

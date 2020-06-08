@@ -53,9 +53,12 @@ export class GameBuffer implements IGameBuffer {
     }
 
     // TODO: I ackshually hate this.
+    // TODO: the problem is actually easy.  If its high, simply do the thngi.
+    // TODO: Do this when testing.
     public midPointRandomPoint(high: boolean, padding = 0): number {
         const midPoint = this.getMidpoint();
         let line: number;
+
         do {
             line = this.pickRandomLine();
         } while (

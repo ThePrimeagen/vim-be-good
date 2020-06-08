@@ -45,6 +45,8 @@ class GameBuffer {
         return ~~(Math.random() * this.lineLength);
     }
     // TODO: I ackshually hate this.
+    // TODO: the problem is actually easy.  If its high, simply do the thngi.
+    // TODO: Do this when testing.
     midPointRandomPoint(high, padding = 0) {
         const midPoint = this.getMidpoint();
         let line;

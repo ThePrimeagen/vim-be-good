@@ -55,9 +55,13 @@ class CiRound extends round_1.Round {
                 lines[line + 4] = `    ${base_1.getRandomWord()},`;
                 lines[line + 5] = `]`;
             }
-            const jumpPoint = game.gameBuffer.midPointRandomPoint(!high);
-            yield game.nvim.command(`:${String(jumpPoint)}`);
+            this.jumpPoint = game.gameBuffer.midPointRandomPoint(!high);
             return lines;
+        });
+    }
+    postRender(game) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield game.nvim.command(`:${this.jumpPoint}`);
         });
     }
     isRoundComplete(game) {

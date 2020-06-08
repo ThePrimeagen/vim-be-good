@@ -31,8 +31,13 @@ class DeleteRound extends round_1.Round {
             lines[line] = "                              DELETE ME";
             const middlePoint = game.gameBuffer.midPointRandomPoint(!high);
             console.log("relative -- run#rendering", high, middlePoint, game.state.lineLength, lines);
-            yield game.nvim.command(`:${String(middlePoint)}`);
+            this.jumpPoint = middlePoint;
             return lines;
+        });
+    }
+    postRender(game) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield game.nvim.command(`:${this.jumpPoint}`);
         });
     }
     isRoundComplete(game) {

@@ -18,6 +18,7 @@ const instructions = [
 export class CiRound extends Round {
     private currentRandomWord!: string;
     private ifStatment = false;
+    private jumpPoint!: number;
 
     constructor() {
         super();
@@ -53,11 +54,13 @@ export class CiRound extends Round {
             lines[line + 5] = `]`;
         }
 
-        const jumpPoint = game.gameBuffer.midPointRandomPoint(!high);
-
-        await game.nvim.command(`:${String(jumpPoint)}`);
+        this.jumpPoint = game.gameBuffer.midPointRandomPoint(!high);
 
         return lines;
+    }
+
+    async postRender(game: IGame): Promise<void> {
+        await game.nvim.command(`:${this.jumpPoint}`);
     }
 
     async isRoundComplete(game: IGame): Promise<boolean> {
