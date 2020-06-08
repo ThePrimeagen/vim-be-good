@@ -193,9 +193,10 @@ function createPlugin(plugin) {
         try {
             const useCurrentBuffer = Number(yield plugin.nvim.getVar("vim_be_good_floating")) ===
                 0;
+            const isDefined = yield plugin.nvim.eval("exists(\"vim_be_good_floating\")");
             let buffer;
             let window;
-            if (useCurrentBuffer) {
+            if (useCurrentBuffer && isDefined) {
                 buffer = yield plugin.nvim.buffer;
                 window = yield plugin.nvim.window;
                 const len = yield buffer.length;
