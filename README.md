@@ -44,7 +44,7 @@ character's case to complete the round.
 vim.
 
 ```viml
-Plug 'ThePrimeagen/vim-be-good'
+Plug 'ThePrimeagen/vim-be-good', {'do': './install.sh'}
 ```
 
 2. Then execute `:UpdateRemotePlugins` to finish the installation process.
