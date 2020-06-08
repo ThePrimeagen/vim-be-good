@@ -59,7 +59,7 @@ class DeleteGame extends base_1.BaseGame {
                 return true;
             }
             const lines = yield this.state.buffer.getLines({
-                start: this.gameBuffer.getInstructionOffset(),
+                start: this.gameBuffer.getOffset(),
                 end: yield this.state.buffer.length,
                 strictIndexing: false
             });

@@ -14,7 +14,6 @@ var RoundStatus;
     RoundStatus[RoundStatus["Failed"] = 1] = "Failed";
     RoundStatus[RoundStatus["Won"] = 2] = "Won";
 })(RoundStatus = exports.RoundStatus || (exports.RoundStatus = {}));
-;
 function difficultyToTime(diff) {
     let out = 1000;
     switch (diff) {
@@ -53,4 +52,3 @@ function parseGameDifficulty(diff, defaultValue = GameDifficulty.Easy) {
     return difficulty;
 }
 exports.parseGameDifficulty = parseGameDifficulty;
-;

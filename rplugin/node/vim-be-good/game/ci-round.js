@@ -21,7 +21,7 @@ const instructions = [
     "   item1,       ->   ]",
     "   item1,",
     "   item1,",
-    "]"
+    "]",
 ];
 class CiRound extends round_1.Round {
     constructor() {
@@ -63,7 +63,7 @@ class CiRound extends round_1.Round {
     isRoundComplete(game) {
         return __awaiter(this, void 0, void 0, function* () {
             const lines = yield game.gameBuffer.getGameLines();
-            const contents = lines.map(l => l.trim()).join("");
+            const contents = lines.map((l) => l.trim()).join("");
             return ((this.ifStatment &&
                 contents.toLowerCase() ===
                     `if (${this.currentRandomWord}) {bar}`) ||

@@ -14,16 +14,16 @@ class Menu {
         this.headerLines = [
             "VimBeGood2 is a collection of small games for neovim which are",
             "intended to help you improve your vim proficiency.",
-            ""
+            "",
         ];
         this.gameInstructions = [
             "Select a Game (delete from the list to select)",
-            "----------------------------------------------"
+            "----------------------------------------------",
         ];
         this.difficultyInstructions = [
             "",
             "Select a Difficulty (delete from the list to select)",
-            "----------------------------------------------------"
+            "----------------------------------------------------",
         ];
         this.difficultyLines = [];
         this.footer = [
@@ -33,7 +33,7 @@ class Menu {
             "",
             "Created by ThePrimeagen",
             "           Brandoncc",
-            "https://github.com/ThePrimeagen/vim-be-good"
+            "https://github.com/ThePrimeagen/vim-be-good",
         ];
         this.fullMenu = [];
         //eslint-disable-next-line @typescript-eslint/no-inferrable-types
@@ -138,7 +138,7 @@ class Menu {
         (_a = this.buffer) === null || _a === void 0 ? void 0 : _a.unlisten("lines", this.lineEventHandler);
     }
     createDifficultyLines(difficulties) {
-        return difficulties.map(diff => {
+        return difficulties.map((diff) => {
             if (this.selectedDifficulty === diff) {
                 return `[X] ${diff}`;
             }
@@ -155,7 +155,7 @@ class Menu {
             ...this.gameList,
             ...this.difficultyInstructions,
             ...this.difficultyLines,
-            ...this.footer
+            ...this.footer,
         ];
         this.firstGameLineIndex =
             this.headerLines.length + this.gameInstructions.length + 1;

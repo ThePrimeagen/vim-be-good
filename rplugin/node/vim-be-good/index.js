@@ -15,6 +15,7 @@ const base_1 = require("./game/base");
 const game_buffer_1 = require("./game-buffer");
 const whackamole_round_1 = require("./game/whackamole-round");
 const ci_round_1 = require("./game/ci-round");
+const hjkl_1 = require("./game/hjkl");
 const menu_1 = require("./menu");
 // this is a comment
 function runGame(game) {
@@ -128,6 +129,9 @@ function initializeGame(name, difficulty, nvim, buffer, window, state) {
         if (name === "relative" || isRandom) {
             roundSet.push(new delete_round_1.DeleteRound());
         }
+        if (name === "hjkl" || isRandom) {
+            roundSet.push(new hjkl_1.HjklRound());
+        }
         if (name === "ci{" || isRandom) {
             roundSet.push(new ci_round_1.CiRound());
         }
@@ -140,7 +144,7 @@ function initializeGame(name, difficulty, nvim, buffer, window, state) {
     });
 }
 exports.initializeGame = initializeGame;
-const availableGames = ["relative", "ci{", "whackamole", "random"];
+const availableGames = ["relative", "hjkl", "ci{", "whackamole", "random"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 const stringToDiff = {
     easy: types_1.GameDifficulty.Easy,
@@ -161,16 +165,16 @@ function createFloatingWindow(nvim) {
         const columnSize = yield nvim.window.width;
         const width = Math.min(columnSize - 4, Math.max(80, columnSize - 20));
         const height = Math.min(rowSize - 4, Math.max(40, rowSize - 10));
-        const top = ((rowSize - height) / 2) - 1;
-        const left = ((columnSize - width) / 2);
+        const top = (rowSize - height) / 2 - 1;
+        const left = (columnSize - width) / 2;
         // Create a scratch buffer
         const buffer = (yield nvim.createBuffer(false, true));
         let window = yield nvim.openWindow(buffer, true, {
-            relative: 'editor',
+            relative: "editor",
             row: top,
             col: left,
             width: width,
-            height: height
+            height: height,
         });
         // TODO: I don't think this is the way to do this, but lets find out.
         if (typeof window === "number") {
@@ -187,7 +191,8 @@ function createPlugin(plugin) {
     });
     plugin.registerCommand("VimBeGood", (args) => __awaiter(this, void 0, void 0, function* () {
         try {
-            const useCurrentBuffer = Number(yield plugin.nvim.getVar("vim_be_good_floating")) === 0;
+            const useCurrentBuffer = Number(yield plugin.nvim.getVar("vim_be_good_floating")) ===
+                0;
             let buffer;
             let window;
             if (useCurrentBuffer) {
@@ -197,11 +202,10 @@ function createPlugin(plugin) {
                 const contents = yield buffer.getLines({
                     start: 0,
                     end: len,
-                    strictIndexing: false
+                    strictIndexing: false,
                 });
-                const hasContent = contents.
-                    map(l => l.trim()).
-                    filter(x => x.length).length > 0;
+                const hasContent = contents.map((l) => l.trim()).filter((x) => x.length)
+                    .length > 0;
                 console.log("Checking to see if buffer has content", hasContent);
                 if (hasContent) {
                     throw new Error("Your buffer is not empty and you are not using floating window mode.  Please use an empty buffer.");
