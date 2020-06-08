@@ -28,7 +28,7 @@ export async function runGame(game: Game): Promise<void> {
         // TODO: this should stop here.  this seems all sorts of wrong
         await buffer.setTitle(
             "Game Started: ",
-            game.state.currentCount + 1,
+            game.state.currentCount,
             "/",
             game.state.ending.count,
         );

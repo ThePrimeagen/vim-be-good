@@ -29,7 +29,7 @@ function runGame(game) {
                 yield buffer.debugTitle("Game is starting in", String(3 - i), "...");
             }
             // TODO: this should stop here.  this seems all sorts of wrong
-            yield buffer.setTitle("Game Started: ", game.state.currentCount + 1, "/", game.state.ending.count);
+            yield buffer.setTitle("Game Started: ", game.state.currentCount, "/", game.state.ending.count);
             console.log("runGame -- Round 1 of", game.state.ending.count);
             yield game.gameBuffer.clearBoard();
             yield game.startRound();

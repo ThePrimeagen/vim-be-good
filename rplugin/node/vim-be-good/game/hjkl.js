@@ -46,8 +46,8 @@ class HjklRound extends round_1.Round {
             } while (xX === cX || xY === cY);
             out[xY][xX] = 'x';
             console.log("hjkl Render", [xX, xY], [cX, cY]);
-            yield game.nvim.command(`:${cY + game.gameBuffer.getOffset()}`);
-            console.log("hjkl Render: Setting Position", cY + game.gameBuffer.getOffset());
+            yield game.nvim.command(`:${cY + game.gameBuffer.getOffset() + 1}`);
+            console.log("hjkl Render: Setting Position", cY + game.gameBuffer.getOffset() + 1);
             yield game.nvim.command(`:norm!_`);
             console.log("hjkl Render: norm!_");
             yield game.nvim.command(`:norm!${cX}h`);
