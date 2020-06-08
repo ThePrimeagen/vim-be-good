@@ -4,4 +4,4 @@ test
 nvim.log
 out
 out.log
-rplugin/node/out.log
+rplugin
