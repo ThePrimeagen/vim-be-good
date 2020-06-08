@@ -14,10 +14,12 @@ const deleteRoundInstructions = [
     'When you see a "DELETE ME", relative jump to it',
     "as fast as possible and delete it.",
     "",
-    ""
+    "",
 ];
 class DeleteRound extends round_1.Round {
-    constructor() { super(); }
+    constructor() {
+        super();
+    }
     getInstructions() {
         return deleteRoundInstructions;
     }
@@ -36,7 +38,7 @@ class DeleteRound extends round_1.Round {
     isRoundComplete(game) {
         return __awaiter(this, void 0, void 0, function* () {
             const lines = yield game.gameBuffer.getGameLines();
-            const length = lines.map(l => l.trim()).join("").length;
+            const length = lines.map((l) => l.trim()).join("").length;
             console.log("delete-round#isRoundComplete", length, lines);
             return length === 0;
         });

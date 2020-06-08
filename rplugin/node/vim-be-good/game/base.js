@@ -29,7 +29,7 @@ function newGameState(buffer, window) {
         currentCount: 1,
         lineRange: { start: 2, end: 22 },
         lineLength: 20,
-        results: []
+        results: [],
     };
 }
 exports.newGameState = newGameState;
@@ -59,7 +59,7 @@ exports.extraWords = [
     "war",
     "xar",
     "yar",
-    "zar"
+    "zar",
 ];
 exports.extraSentences = [
     "One is the best Prime Number",
@@ -69,7 +69,7 @@ exports.extraSentences = [
     "The internet is an amazing place full of interesting facts",
     "Did you know the internet crosses continental boundaries using a wire?!",
     "I am out of interesting facts to type here",
-    "Others should contribute more sentences to be used in the game"
+    "Others should contribute more sentences to be used in the game",
 ];
 function getRandomWord() {
     return exports.extraWords[Math.floor(Math.random() * exports.extraWords.length)];
@@ -81,7 +81,7 @@ function getRandomSentence() {
 exports.getRandomSentence = getRandomSentence;
 class Game {
     constructor(nvim, gameBuffer, state, rounds, opts = {
-        difficulty: types_1.GameDifficulty.Easy
+        difficulty: types_1.GameDifficulty.Easy,
     }) {
         this.nvim = nvim;
         this.gameBuffer = gameBuffer;
@@ -136,7 +136,7 @@ class Game {
     finish() {
         return __awaiter(this, void 0, void 0, function* () {
             const fName = `/tmp/${this.state.name}-${Date.now()}.csv`;
-            const results = this.state.results.map(x => x + "").join(",\n");
+            const results = this.state.results.map((x) => x + "").join(",\n");
             console.log("base -- finish", fName, results);
             fs.writeFileSync(fName, results);
             yield this.gameBuffer.finish();
@@ -148,7 +148,7 @@ class Game {
         this.timerExpired = false;
         this.timerId = setTimeout(() => {
             this.timerExpired = true;
-            this.onExpired.forEach(cb => cb());
+            this.onExpired.forEach((cb) => cb());
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore I HATE YOU TYPESCRIPT
             this.timerId = 0;

@@ -33,10 +33,10 @@ class GameBuffer {
             const allLines = yield this.buffer.getLines({
                 start: 0,
                 end: len,
-                strictIndexing: false
+                strictIndexing: false,
             });
-            const lines = allLines.slice(this.getInstructionOffset(), len);
-            console.log("GameBuffer#getGameLines", this.getInstructionOffset(), len, lines);
+            const lines = allLines.slice(this.getOffset(), len);
+            console.log("GameBuffer#getGameLines", this.getOffset(), len, lines);
             console.log("GameBuffer#getGameLines", allLines);
             return lines;
         });
@@ -54,7 +54,7 @@ class GameBuffer {
             (!high && line + padding < midPoint));
         return line;
     }
-    getInstructionOffset() {
+    getOffset() {
         return 1 + this.instructions.length;
     }
     onLines(cb) {
@@ -82,12 +82,12 @@ class GameBuffer {
             if (len < expectedLen + 1) {
                 yield this.buffer.insert(new Array(expectedLen - len).fill(""), len);
             }
-            const toRender = [...this.instructions, ...lines].filter(x => x !== null && x !== undefined);
+            const toRender = [...this.instructions, ...lines].filter((x) => x !== null && x !== undefined);
             console.log("GameBuffer -- To Render", toRender);
             yield this.buffer.setLines(toRender, {
                 start: 1,
                 end: expectedLen,
-                strictIndexing: true
+                strictIndexing: true,
             });
         });
     }
@@ -108,7 +108,7 @@ class GameBuffer {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.buffer.setLines(log_1.join(...title), {
                 start: 0,
-                end: 1
+                end: 1,
             });
         });
     }
@@ -117,4 +117,3 @@ class GameBuffer {
     }
 }
 exports.GameBuffer = GameBuffer;
-;

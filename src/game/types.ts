@@ -84,7 +84,7 @@ export interface IGameBuffer {
     pickRandomLine(): number;
     // TODO: I ackshually hate this.
     midPointRandomPoint(high: boolean, padding?: number): number;
-    getInstructionOffset(): number;
+    getOffset(): number;
 
     onLines(cb: LinesCallback): void;
     setInstructions(instr: string[]): void;

@@ -6,6 +6,7 @@ import { Game, newGameState } from "./game/base";
 import { GameBuffer } from "./game-buffer";
 import { WhackAMoleRound } from "./game/whackamole-round";
 import { CiRound } from "./game/ci-round";
+import { HjklRound } from "./game/hjkl";
 import { Menu } from "./menu";
 
 // this is a comment
@@ -175,6 +176,9 @@ export async function initializeGame(
     if (name === "relative" || isRandom) {
         roundSet.push(new DeleteRound());
     }
+    if (name === "hjkl" || isRandom) {
+        roundSet.push(new HjklRound());
+    }
     if (name === "ci{" || isRandom) {
         roundSet.push(new CiRound());
     }
@@ -187,7 +191,7 @@ export async function initializeGame(
     }
 }
 
-const availableGames = ["relative", "ci{", "whackamole", "random"];
+const availableGames = ["relative", "hjkl", "ci{", "whackamole", "random"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 
 const stringToDiff = {

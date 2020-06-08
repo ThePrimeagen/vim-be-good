@@ -35,11 +35,11 @@ export class GameBuffer implements IGameBuffer {
             strictIndexing: false,
         });
 
-        const lines = allLines.slice(this.getInstructionOffset(), len);
+        const lines = allLines.slice(this.getOffset(), len);
 
         console.log(
             "GameBuffer#getGameLines",
-            this.getInstructionOffset(),
+            this.getOffset(),
             len,
             lines,
         );
@@ -65,7 +65,7 @@ export class GameBuffer implements IGameBuffer {
         return line;
     }
 
-    public getInstructionOffset(): number {
+    public getOffset(): number {
         return 1 + this.instructions.length;
     }
 
