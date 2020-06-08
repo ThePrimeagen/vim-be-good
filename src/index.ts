@@ -255,10 +255,13 @@ export default function createPlugin(plugin: NvimPlugin): void {
                     Number(await plugin.nvim.getVar("vim_be_good_floating")) ===
                     0;
 
+                const isDefined =
+                    await plugin.nvim.eval("exists(\"vim_be_good_floating\")");
+
                 let buffer: Buffer;
                 let window: Window;
 
-                if (useCurrentBuffer) {
+                if (useCurrentBuffer && isDefined) {
                     buffer = await plugin.nvim.buffer;
                     window = await plugin.nvim.window;
 
