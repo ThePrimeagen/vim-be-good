@@ -9,6 +9,9 @@ const instructions = [
 ];
 
 export class HjklRound extends Round {
+    private cY!: number;
+    private cX!: number;
+
     constructor() {
         super();
     }
@@ -44,14 +47,22 @@ export class HjklRound extends Round {
         out[xY][xX] = 'x';
 
         console.log("hjkl Render", [xX, xY], [cX, cY]);
-        await game.nvim.command(`:${cY + game.gameBuffer.getOffset() + 1}`);
-        console.log("hjkl Render: Setting Position", cY + game.gameBuffer.getOffset() + 1);
-        await game.nvim.command(`:norm!_`);
-        console.log("hjkl Render: norm!_");
-        await game.nvim.command(`:norm!${cX}h`);
-        console.log(`hjkl Render: :norm!${cX}h`);
+
+        this.cY = cY;
+        this.cX = cX;
 
         return out.map(l => l.join(''));
+    }
+
+    public async postRender(game: IGame): Promise<void> {
+
+        console.log("hjkl Render: Setting Position", this.cY + game.gameBuffer.getOffset() + 1);
+        console.log("hjkl Render: norm!_");
+        console.log(`hjkl Render: :norm!${this.cX}h`);
+
+        await game.nvim.command(`:${this.cY + game.gameBuffer.getOffset() + 1}`);
+        await game.nvim.command(`:norm!_`);
+        await game.nvim.command(`:norm!${this.cX}h`);
     }
 
     async isRoundComplete(game: IGame): Promise<boolean> {

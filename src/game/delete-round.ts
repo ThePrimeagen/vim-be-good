@@ -9,6 +9,7 @@ const deleteRoundInstructions = [
 ];
 
 export class DeleteRound extends Round {
+    private jumpPoint!: number;
     constructor() {
         super();
     }
@@ -33,9 +34,13 @@ export class DeleteRound extends Round {
             lines,
         );
 
-        await game.nvim.command(`:${String(middlePoint)}`);
+        this.jumpPoint = middlePoint;
 
         return lines;
+    }
+
+    public async postRender(game: IGame): Promise<void> {
+        await game.nvim.command(`:${this.jumpPoint}`);
     }
 
     public async isRoundComplete(game: IGame): Promise<boolean> {

@@ -43,8 +43,13 @@ class WhackAMoleRound extends round_1.Round {
                 .map((_, index) => (index === chosenLocation ? "^" : " "))
                 .join("");
             this.winLine = this.createWinLine(sentence, chosenLocation);
-            yield game.nvim.command(`:${String(instructionLines.length + this.outputStartRow + 1)}`);
+            this.jumpPoint = instructionLines.length + this.outputStartRow;
             return [sentence, pointerLine];
+        });
+    }
+    postRender(game) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield game.nvim.command(`:${this.jumpPoint}`);
         });
     }
     isRoundComplete(game) {

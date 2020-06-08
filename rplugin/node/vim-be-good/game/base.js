@@ -121,6 +121,8 @@ class Game {
             console.log(`Game#run(${firstRun})`);
             const lines = yield this.currentRound.render(this);
             yield this.gameBuffer.render(lines);
+            // Post render for positional adjustments to game.
+            yield this.currentRound.postRender(this);
             if (this.currentRound.isTimedRound()) {
                 console.log("Game -- run -- starting timer");
                 this.startTimer();

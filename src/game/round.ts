@@ -5,6 +5,10 @@ export abstract class Round {
     abstract isRoundComplete(game: IGame): Promise<boolean>;
     abstract getInstructions(): string[];
 
+    async postRender(game: IGame): Promise<void> {
+        return;
+    }
+
     public getTimeoutTime(diff: GameDifficulty): number {
         let out = 1000;
         switch (diff) {

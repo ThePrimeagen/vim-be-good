@@ -124,8 +124,12 @@ export class Game implements IGame {
 
     public async run(firstRun: boolean): Promise<void> {
         console.log(`Game#run(${firstRun})`);
+
         const lines = await this.currentRound.render(this);
         await this.gameBuffer.render(lines);
+
+        // Post render for positional adjustments to game.
+        await this.currentRound.postRender(this);
 
         if (this.currentRound.isTimedRound()) {
             console.log("Game -- run -- starting timer");

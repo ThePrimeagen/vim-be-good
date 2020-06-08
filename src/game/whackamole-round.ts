@@ -14,6 +14,7 @@ const instructionLines = [
 export class WhackAMoleRound extends Round {
     private winLine: string;
     private outputStartRow = 2;
+    private jumpPoint!: number;
 
     constructor() {
         super();
@@ -42,12 +43,13 @@ export class WhackAMoleRound extends Round {
             .join("");
 
         this.winLine = this.createWinLine(sentence, chosenLocation);
-
-        await game.nvim.command(
-            `:${String(instructionLines.length + this.outputStartRow + 1)}`,
-        );
+        this.jumpPoint = instructionLines.length + this.outputStartRow;
 
         return [sentence, pointerLine];
+    }
+
+    async postRender(game: IGame): Promise<void> {
+        await game.nvim.command(`:${this.jumpPoint}`);
     }
 
     public async isRoundComplete(game: IGame): Promise<boolean> {
