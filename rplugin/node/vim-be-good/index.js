@@ -15,6 +15,7 @@ const base_1 = require("./game/base");
 const game_buffer_1 = require("./game-buffer");
 const whackamole_round_1 = require("./game/whackamole-round");
 const ci_round_1 = require("./game/ci-round");
+const vada_1 = require("./game/vada");
 const menu_1 = require("./menu");
 // this is a comment
 function runGame(game) {
@@ -101,7 +102,7 @@ function runGame(game) {
                         start = Date.now();
                     }
                     catch (e) {
-                        buffer.debugTitle("onLineEvent#error", e.message);
+                        yield buffer.debugTitle("onLineEvent#error", e.message);
                     }
                     console.log("Index -- Resetting from bottom of loop");
                     reset();
@@ -128,6 +129,9 @@ function initializeGame(name, difficulty, nvim, buffer, window, state) {
         if (name === "relative" || isRandom) {
             roundSet.push(new delete_round_1.DeleteRound());
         }
+        if (name === "vada" || isRandom) {
+            roundSet.push(new vada_1.VadaRound());
+        }
         if (name === "ci{" || isRandom) {
             roundSet.push(new ci_round_1.CiRound());
         }
@@ -140,7 +144,7 @@ function initializeGame(name, difficulty, nvim, buffer, window, state) {
     });
 }
 exports.initializeGame = initializeGame;
-const availableGames = ["relative", "ci{", "whackamole", "random"];
+const availableGames = ["vada", "relative", "ci{", "whackamole", "random"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 const stringToDiff = {
     easy: types_1.GameDifficulty.Easy,
@@ -160,7 +164,7 @@ function createFloatingWindow(nvim) {
         const rowSize = yield nvim.window.height;
         const columnSize = yield nvim.window.width;
         const width = Math.min(columnSize - 4, Math.max(80, columnSize - 20));
-        const height = Math.min(rowSize - 4, Math.max(40, rowSize - 10));
+        const height = Math.min(rowSize - 4, Math.max(50, rowSize - 10));
         const top = ((rowSize - height) / 2) - 1;
         const left = ((columnSize - width) / 2);
         // Create a scratch buffer

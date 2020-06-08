@@ -6,7 +6,6 @@ import {
     GameState,
     GameOptions,
     GameDifficulty,
-    difficultyToTime,
     IGame,
 } from "./types";
 

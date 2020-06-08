@@ -21,6 +21,10 @@ module.exports = {
     "plugins": [
         "@typescript-eslint"
     ],
+
+
     "rules": {
+        "ban-ts-comment": 0,
+        "@typecript-eslint/ban-ts-comment": 0,
     }
 };

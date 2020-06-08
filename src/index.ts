@@ -6,6 +6,7 @@ import { Game, newGameState } from "./game/base";
 import { GameBuffer } from "./game-buffer";
 import { WhackAMoleRound } from "./game/whackamole-round";
 import { CiRound } from "./game/ci-round";
+import { VadaRound } from "./game/vada";
 import { Menu } from "./menu";
 
 // this is a comment
@@ -142,7 +143,7 @@ export async function runGame(game: Game): Promise<void> {
 
                 start = Date.now();
             } catch (e) {
-                buffer.debugTitle("onLineEvent#error", e.message);
+                await buffer.debugTitle("onLineEvent#error", e.message);
             }
 
             console.log("Index -- Resetting from bottom of loop");
@@ -178,6 +179,10 @@ export async function initializeGame(
         roundSet.push(
             new DeleteRound());
     }
+    if (name === "vada" || isRandom) {
+        roundSet.push(
+            new VadaRound());
+    }
     if (name === "ci{" || isRandom) {
         roundSet.push(
             new CiRound());
@@ -191,7 +196,7 @@ export async function initializeGame(
     }
 }
 
-const availableGames = ["relative", "ci{", "whackamole", "random"];
+const availableGames = ["vada", "relative", "ci{", "whackamole", "random"];
 const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
 
 const stringToDiff = {
@@ -216,7 +221,7 @@ export async function createFloatingWindow(nvim: Neovim): Promise<BufferWindow> 
     const columnSize = await nvim.window.width;
 
     const width = Math.min( columnSize - 4, Math.max( 80, columnSize - 20 ) );
-    const height = Math.min( rowSize - 4, Math.max( 40, rowSize - 10 ) );
+    const height = Math.min( rowSize - 4, Math.max( 50, rowSize - 10 ) );
     const top = (( rowSize - height ) / 2 ) - 1;
     const left = (( columnSize - width ) / 2 );
 

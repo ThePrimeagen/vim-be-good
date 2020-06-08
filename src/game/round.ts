@@ -5,6 +5,8 @@ export abstract class Round {
     abstract isRoundComplete(game: IGame): Promise<boolean>;
     abstract getInstructions(): string[];
 
+    public async reset(): Promise<void> { }
+
     public getTimeoutTime(diff: GameDifficulty): number {
         let out = 1000;
         switch (diff) {
@@ -22,7 +24,7 @@ export abstract class Round {
             break;
         }
 
-        console.log("WhackAMoleRound#getTimeoutTime", out);
+        console.log("Round#getTimeoutTime", out);
         return out;
     }
 

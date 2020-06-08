@@ -9,12 +9,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const types_1 = require("./game/types");
+const _1 = require(".");
 // @ts-ignore
 global.nvim = null;
 function setRepl() {
     return __awaiter(this, void 0, void 0, function* () {
         //@ts-ignore
-        require("neovim/scripts/nvim").then(n => (global.nvim = n));
+        return require("neovim/scripts/nvim").then(n => (global.nvim = n));
     });
 }
 exports.setRepl = setRepl;
+function createGame(name) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield setRepl();
+        const diff = types_1.GameDifficulty.Easy;
+        // @ts-ignore
+        const nvim = global.nvim;
+        const { buffer, window, } = yield _1.createFloatingWindow(nvim);
+        const gs = yield _1.getGameState(nvim);
+        _1.initializeGame(name, diff, nvim, buffer, window, gs);
+    });
+}
+exports.createGame = createGame;
