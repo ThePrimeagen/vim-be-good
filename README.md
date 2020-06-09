@@ -49,6 +49,10 @@ Plug 'ThePrimeagen/vim-be-good', {'do': './install.sh'}
 ```
 
 Windows 10 - PowerShell
+Requirements:
+[Git for Windows BASH emulation](https://gitforwindows.org/)
+[NodeJs](https://nodejs.org/en/download/)
+
 ```viml
 Plug 'ThePrimeagen/vim-be-good', {'do': '.\install.sh'}
 ```
