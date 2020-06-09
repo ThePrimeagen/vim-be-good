@@ -42,9 +42,19 @@ character's case to complete the round.
 
 1. Use your favorite plugin manager to install!  Only works on Nvim, the one true
 vim.
-
+ 
+Linux
 ```viml
 Plug 'ThePrimeagen/vim-be-good', {'do': './install.sh'}
+```
+
+Windows 10 - PowerShell
+Requirements:
+[Git for Windows BASH emulation](https://gitforwindows.org/)
+[NodeJs](https://nodejs.org/en/download/)
+
+```viml
+Plug 'ThePrimeagen/vim-be-good', {'do': '.\install.sh'}
 ```
 
 2. Then execute `:UpdateRemotePlugins` to finish the installation process.
