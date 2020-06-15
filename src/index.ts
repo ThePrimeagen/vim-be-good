@@ -192,9 +192,17 @@ export async function initializeGame(
 }
 
 const availableGames = ["relative", "hjkl", "ci{", "whackamole", "random"];
-const availableDifficulties = ["easy", "medium", "hard", "nightmare", "tpope"];
+const availableDifficulties = [
+    "noob",
+    "easy",
+    "medium",
+    "hard",
+    "nightmare",
+    "tpope",
+];
 
 const stringToDiff = {
+    noob: GameDifficulty.Noob,
     easy: GameDifficulty.Easy,
     medium: GameDifficulty.Medium,
     hard: GameDifficulty.Hard,
@@ -255,8 +263,9 @@ export default function createPlugin(plugin: NvimPlugin): void {
                     Number(await plugin.nvim.getVar("vim_be_good_floating")) ===
                     0;
 
-                const isDefined =
-                    await plugin.nvim.eval("exists(\"vim_be_good_floating\")");
+                const isDefined = await plugin.nvim.eval(
+                    'exists("vim_be_good_floating")',
+                );
 
                 let buffer: Buffer;
                 let window: Window;
