@@ -27,9 +27,9 @@ export class HjklRound extends Round {
     // The goal is to make a required 4 keypresses to get to the x
     async render(game: IGame): Promise<string[]> {
         const out: string[][] = [
-            '    '.split(''),
-            '    '.split(''),
-            '    '.split(''),
+            "    ".split(""),
+            "    ".split(""),
+            "    ".split(""),
         ];
 
         let xX: number;
@@ -44,23 +44,27 @@ export class HjklRound extends Round {
             cY = this.getRando(3);
         } while (xX === cX || xY === cY);
 
-        out[xY][xX] = 'x';
+        out[xY][xX] = "x";
 
         console.log("hjkl Render", [xX, xY], [cX, cY]);
 
         this.cY = cY;
         this.cX = cX;
 
-        return out.map(l => l.join(''));
+        return out.map((l) => l.join(""));
     }
 
     public async postRender(game: IGame): Promise<void> {
-
-        console.log("hjkl Render: Setting Position", this.cY + game.gameBuffer.getOffset() + 1);
+        console.log(
+            "hjkl Render: Setting Position",
+            this.cY + game.gameBuffer.getOffset() + 1,
+        );
         console.log("hjkl Render: norm!_");
         console.log(`hjkl Render: :norm!${this.cX}h`);
 
-        await game.nvim.command(`:${this.cY + game.gameBuffer.getOffset() + 1}`);
+        await game.nvim.command(
+            `:${this.cY + game.gameBuffer.getOffset() + 1}`,
+        );
         await game.nvim.command(`:norm!_`);
         await game.nvim.command(`:norm!${this.cX}h`);
     }

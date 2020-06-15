@@ -1,4 +1,4 @@
-import { IGame, GameDifficulty } from "./types";
+import { GameDifficulty, IGame } from "./types";
 
 export abstract class Round {
     abstract render(game: IGame): Promise<string[]>;
@@ -30,7 +30,7 @@ export abstract class Round {
         return out;
     }
 
-    public isTimedRound(): boolean {
-        return true;
+    public isTimedRound(diff: GameDifficulty): boolean {
+        return diff === GameDifficulty.Noob ? false : true;
     }
 }

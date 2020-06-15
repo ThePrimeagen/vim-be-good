@@ -37,12 +37,7 @@ export class GameBuffer implements IGameBuffer {
 
         const lines = allLines.slice(this.getOffset(), len);
 
-        console.log(
-            "GameBuffer#getGameLines",
-            this.getOffset(),
-            len,
-            lines,
-        );
+        console.log("GameBuffer#getGameLines", this.getOffset(), len, lines);
         console.log("GameBuffer#getGameLines", allLines);
 
         return lines;

@@ -1,6 +1,7 @@
 import { Buffer, Window, Neovim } from "neovim";
 
 export enum GameDifficulty {
+    Noob = "noob",
     Easy = "easy",
     Medium = "medium",
     Hard = "hard",

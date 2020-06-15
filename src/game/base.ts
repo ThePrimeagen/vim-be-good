@@ -2,12 +2,7 @@ import * as fs from "fs";
 import { Neovim, Buffer, Window } from "neovim";
 import { GameBuffer } from "../game-buffer";
 import { Round } from "./round";
-import {
-    GameState,
-    GameOptions,
-    GameDifficulty,
-    IGame,
-} from "./types";
+import { GameState, GameOptions, GameDifficulty, IGame } from "./types";
 
 // this is a comment
 export function newGameState(buffer: Buffer, window: Window): GameState {
@@ -131,7 +126,7 @@ export class Game implements IGame {
         // Post render for positional adjustments to game.
         await this.currentRound.postRender(this);
 
-        if (this.currentRound.isTimedRound()) {
+        if (this.currentRound.isTimedRound(this.difficulty)) {
             console.log("Game -- run -- starting timer");
             this.startTimer();
         }
