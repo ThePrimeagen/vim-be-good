@@ -179,11 +179,12 @@ export class Game implements IGame {
     }
 
     public incrementRoundNumber() {
-       if (this.difficulty == GameDifficulty.Noob) {
-           console.log("base - incrementRoundNumber - noob")
-           this.state.currentCount
+       if (this.difficulty === GameDifficulty.Noob) {
+           console.log("base - incrementRoundNumber - noob");
+           return 1;
        } else {
-           this.state.currentCount++
+           console.log("base - incrementRoundNumber - ", this.state.currentCount);
+           return this.state.currentCount + 1;
        }
    } 
 }
