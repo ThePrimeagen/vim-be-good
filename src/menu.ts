@@ -19,6 +19,7 @@ export class Menu {
     private difficultyInstructions = [
         "",
         "Select a Difficulty (delete from the list to select)",
+        "Noob diffculty is endless so it must be quit with :q",
         "----------------------------------------------------",
     ];
     private gameList: string[];

@@ -177,4 +177,13 @@ export class Game implements IGame {
         console.log("On timer expired");
         this.onExpired.push(cb);
     }
+
+    public incrementRoundNumber() {
+       if (this.difficulty == GameDifficulty.Noob) {
+           console.log("base - incrementRoundNumber - noob")
+           this.state.currentCount
+       } else {
+           this.state.currentCount++
+       }
+   } 
 }
