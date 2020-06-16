@@ -260,7 +260,7 @@ export default function createPlugin(plugin: NvimPlugin): void {
     });
 
     plugin.registerCommand(
-        "VimBeGood3",
+        "VimBeGood",
         async (args: string[]) => {
             try {
                 const useCurrentBuffer =
