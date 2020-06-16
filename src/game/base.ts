@@ -178,7 +178,7 @@ export class Game implements IGame {
         this.onExpired.push(cb);
     }
 
-    public incrementRoundNumber() {
+    public nextRoundNumber() {
        if (this.difficulty === GameDifficulty.Noob) {
            console.log("base - incrementRoundNumber - noob");
            return 1;
