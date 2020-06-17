@@ -5,7 +5,7 @@ to practice basic movements in.
 ## WARNING
 * Read Installation instructions carefully.  There has been some confusion
   around that.
-* The code is a heaping pile of awefulness.  It was developed live on Twitch,
+* The code is a heaping pile of awfulness.  It was developed live on Twitch,
   which means I did not carefully think through anything other than memes.
 * If you are looking to extend it I am about to do a refactor in the next
   couple of weeks to improve the current codebase and make a simplier
@@ -95,3 +95,18 @@ the input.
 `NVIM_NODE_LOG_FILE=nvim.log nvim` -- this should print out all the
 console.log's that come with vim-be-good.  And it should give ThePrimeagen an
 idea of how to stop sucking
+
+## Contribute
+- Fork
+- Create a feature branch
+- Make changes
+- Build `npm i && npm run build && nvim --headless -c ":UpdateRemotePlugins" -c ":qa"`
+- Modify the configuration to use local build:
+`~/.config/nvim/init.vim`
+```
+    call plug#begin('~/.vim/plugged')
+    Plug '/tmp/vim-be-good' " path to your vim-be-good fork
+    call plug#end()
+```
+- Check your new feature `NVIM_NODE_LOG_FILE=/tmp/nvim.log nvim +VimBeGood` (you can view logs with `less /tmp/nvim.log`)
+- Make PR
