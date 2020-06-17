@@ -102,7 +102,11 @@ export async function runGame(game: Game): Promise<void> {
                     game.state.currentCount,
                     game.state.currentCount + 1,
                 );
-                game.state.currentCount++;
+
+                //check if currentCount should be incremented
+                //if gameDifficluty is noob currentCount is always 1 to achieve endless mode
+                //otherwise is incremented
+                game.state.currentCount = game.nextRoundNumber();
 
                 console.log(
                     `Round ${game.state.currentCount} / ${game.state.ending.count}`,

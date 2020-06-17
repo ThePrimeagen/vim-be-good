@@ -7,7 +7,7 @@ export class Menu {
     //eslint-disable-next-line @typescript-eslint/ban-types
     private gameSelectionCallback?: Function;
     private headerLines = [
-        "VimBeGood2 is a collection of small games for neovim which are",
+        "VimBeGood is a collection of small games for neovim which are",
         "intended to help you improve your vim proficiency.",
         "",
     ];
@@ -19,6 +19,7 @@ export class Menu {
     private difficultyInstructions = [
         "",
         "Select a Difficulty (delete from the list to select)",
+        "Noob diffculty is endless so it must be quit with :q",
         "----------------------------------------------------",
     ];
     private gameList: string[];
