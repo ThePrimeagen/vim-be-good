@@ -7,6 +7,7 @@ import { GameBuffer } from "./game-buffer";
 import { WhackAMoleRound } from "./game/whackamole-round";
 import { CiRound } from "./game/ci-round";
 import { HjklRound } from "./game/hjkl";
+import { StarRound } from "./game/star";
 import { Menu } from "./menu";
 
 // this is a comment
@@ -189,13 +190,23 @@ export async function initializeGame(
     if (name === "whackamole" || isRandom) {
         roundSet.push(new WhackAMoleRound());
     }
+    if (name === "stars" || isRandom) {
+        roundSet.push(new StarRound());
+    }
 
     if (roundSet.length) {
         runGame(new Game(nvim, gameBuffer, state, roundSet, { difficulty }));
     }
 }
 
-const availableGames = ["relative", "hjkl", "ci{", "whackamole", "random"];
+const availableGames = [
+    "relative",
+    "hjkl",
+    "ci{",
+    "whackamole",
+    "stars",
+    "random",
+];
 const availableDifficulties = [
     "noob",
     "easy",
