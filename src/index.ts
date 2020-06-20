@@ -109,10 +109,27 @@ export async function runGame(game: Game): Promise<void> {
                 game.state.currentCount = game.nextRoundNumber();
 
                 console.log(
-                    `Round ${game.state.currentCount} / ${game.state.ending.count}`,
+                    `Round ${Math.abs(game.state.currentCount)} / ${
+                        game.state.ending.count
+                    } - `,
+                    `Average round time: ${Math.abs(
+                        Math.round(
+                            game.state.results.reduce((x, y) => x + y, 0) /
+                                game.state.currentCount,
+                        ),
+                    )}ms`,
                 );
+
                 await buffer.setTitle(
-                    `Round ${game.state.currentCount} / ${game.state.ending.count}`,
+                    `Round ${Math.abs(game.state.currentCount)} / ${
+                        game.state.ending.count
+                    } - `,
+                    `Average round time: ${Math.abs(
+                        Math.round(
+                            game.state.results.reduce((x, y) => x + y, 0) /
+                                game.state.currentCount,
+                        ),
+                    )}ms`,
                 );
 
                 if (game.state.currentCount > game.state.ending.count) {
