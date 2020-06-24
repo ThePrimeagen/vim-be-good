@@ -68,11 +68,11 @@ export function getRandomSentence(): string {
 }
 
 export class Game implements IGame {
-    private difficulty: GameDifficulty;
     private timerId?: ReturnType<typeof setTimeout>;
     private onExpired: (() => void)[];
     private timerExpired: boolean;
     public currentRound!: Round;
+    public difficulty!: GameDifficulty;
 
     constructor(
         public nvim: Neovim,

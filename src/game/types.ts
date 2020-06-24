@@ -102,4 +102,5 @@ export interface IGame {
     nvim: Neovim;
     gameBuffer: IGameBuffer;
     state: GameState;
+    difficulty: GameDifficulty;
 }
