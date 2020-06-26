@@ -14,13 +14,13 @@ export class DeleteRound extends Round {
         super();
     }
 
-    private async getGameDeleteMeColumOffset(game: IGame) {
+    private async getColumnOffset(game: IGame) {
         const isDefindedUserOffset = await game.nvim.eval(
             'exists("vim_be_good_delete_me_offset")',
         );
         let offset;
         console.log(
-            "delete-round#getGameDeleteMeColumOffset - isDefindedUserOffset ",
+            "delete-round#getColumnOffset - isDefindedUserOffset ",
             isDefindedUserOffset,
         );
         if (game.difficulty === "noob") {
@@ -31,10 +31,7 @@ export class DeleteRound extends Round {
             offset = Number(
                 await game.nvim.getVar("vim_be_good_delete_me_offset"),
             );
-            console.log(
-                "delete-round#getGameDeleteMeColumOffset - userOffset ",
-                offset,
-            );
+            console.log("delete-round#getColumnOffset - userOffset ", offset);
         } else {
             offset = Math.floor(Math.random() * (40 - 5)) + 5;
         }
@@ -51,8 +48,7 @@ export class DeleteRound extends Round {
 
         const lines = new Array(game.state.lineLength).fill("");
 
-        lines[line] =
-            (await this.getGameDeleteMeColumOffset(game)) + "DELETE ME";
+        lines[line] = (await this.getColumnOffset(game)) + "DELETE ME";
 
         const middlePoint = game.gameBuffer.midPointRandomPoint(!high);
         console.log(
