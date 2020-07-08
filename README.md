@@ -24,6 +24,13 @@ current buffer (only if its empty) set `vim_be_good_floating` to 0.
 
 `let g:vim_be_good_floating = 0`
 
+### Games - relative
+By default vim be good returns random offset for game difficult above noob, if 
+you with to set fixed offset set `vim_be_good_delete_me_offset` to desired
+value.
+
+`let g:vim_be_good_delete_me_offset = 35`
+
 ## Instructions are at top of games.
 here too!
 
@@ -40,7 +47,7 @@ character's case to complete the round.
 
 ## Installation
 
-1. Use your favorite plugin manager to install!  Only works on Nvim, the one true
+1. Use your favorite plugin manager to install! Only works on Nvim, the one true
 vim.
  
 Linux

@@ -266,7 +266,6 @@ export default function createPlugin(plugin: NvimPlugin): void {
                 const useCurrentBuffer =
                     Number(await plugin.nvim.getVar("vim_be_good_floating")) ===
                     0;
-
                 const isDefined = await plugin.nvim.eval(
                     'exists("vim_be_good_floating")',
                 );
