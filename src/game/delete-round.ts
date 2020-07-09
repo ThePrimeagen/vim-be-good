@@ -25,9 +25,7 @@ export class DeleteRound extends Round {
         );
         if (game.difficulty === "noob") {
             offset = 3;
-        }
-
-        if (isDefindedUserOffset) {
+        } else if (isDefindedUserOffset) {
             offset = Number(
                 await game.nvim.getVar("vim_be_good_delete_me_offset"),
             );
