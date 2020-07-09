@@ -2,6 +2,9 @@
 Vim be good is a plugin designed to make you better at vim by creating a game
 to practice basic movements in.
 
+## Programmed with Love and Fury
+and tunes https://www.youtube.com/watch?v=emOKaGi8u5U
+
 ## WARNING
 * Read Installation instructions carefully.  There has been some confusion
   around that.
