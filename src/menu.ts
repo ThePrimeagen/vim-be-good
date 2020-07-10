@@ -58,7 +58,7 @@ export class Menu {
         this.lineEventHandler = this.lineEventHandler.bind(this);
         this.gameList = games;
         this.difficultyList = difficulties;
-        this.selectedDifficulty = difficulties[0];
+        this.selectedDifficulty = difficulties[1];
         this.generateMenuLines();
     }
 
@@ -66,8 +66,8 @@ export class Menu {
         plugin: NvimPlugin,
         availableGames: string[],
         availableDifficulties: string[],
-        selectedDifficulty,
-    ) {
+        selectedDifficulty: string,
+    ): Promise<Menu> {
         const menu = new Menu(
             plugin,
             availableGames,
@@ -81,7 +81,7 @@ export class Menu {
         return menu;
     }
 
-    public async setup() {
+    public async setup(): Promise<void> {
         console.log("menu -- Setup Starting");
 
         this.buffer = await this.plugin.nvim.buffer;
@@ -90,12 +90,12 @@ export class Menu {
         console.log("menu -- Setup Finished");
     }
 
-    public async clearScreen() {
+    public async clearScreen(): Promise<void> {
         console.log("menu -- clearScreen");
         await this.buffer?.remove(0, await this.buffer?.length, true);
     }
 
-    public async render() {
+    public async render(): Promise<void> {
         if (!this.window) {
             return;
         }
@@ -107,7 +107,7 @@ export class Menu {
         this.handleLineEvents();
     }
 
-    public onGameSelection(cb) {
+    public onGameSelection(cb): void {
         this.gameSelectionCallback = cb;
     }
 
@@ -118,7 +118,7 @@ export class Menu {
         lastLine,
         _newData,
         _more,
-    ) {
+    ): Promise<void> {
         try {
             if (!this.window) {
                 return;
