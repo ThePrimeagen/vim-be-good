@@ -14,25 +14,95 @@ export class DeleteRound extends Round {
         super();
     }
 
-    private async getColumnOffset(game: IGame) {
-        const isDefindedUserOffset = await game.nvim.eval(
-            'exists("vim_be_good_delete_me_offset")',
+    private async getGameOptions(game: IGame) {
+        type userOptionsType = { [key: string]: number };
+
+        let randomOffset: number = 0;
+        let fixedOffset: number = 0;
+
+        const isDefinedUserRandomOffset = await game.nvim.eval(
+            'exists("vim_be_good_delete_me_fixed_offset")',
         );
-        let offset;
-        console.log(
-            "delete-round#getColumnOffset - isDefindedUserOffset ",
-            isDefindedUserOffset,
+        const isDefinedUserFixedOffset = await game.nvim.eval(
+            'exists("vim_be_good_delete_me_random_offset")',
         );
-        if (game.difficulty === "noob") {
-            offset = 3;
-        } else if (isDefindedUserOffset) {
-            offset = Number(
-                await game.nvim.getVar("vim_be_good_delete_me_offset"),
+
+        if (isDefinedUserRandomOffset) {
+            randomOffset = Number(
+                await game.nvim.getVar("vim_be_good_delete_me_random_offset"),
             );
-            console.log("delete-round#getColumnOffset - userOffset ", offset);
-        } else {
-            offset = Math.floor(Math.random() * (40 - 5)) + 5;
         }
+
+        if (isDefinedUserFixedOffset) {
+            fixedOffset = Number(
+                await game.nvim.getVar("vim_be_good_delete_me_fixed_offset"),
+            );
+        }
+
+        console.log(
+            "delete-round#getGameOptions - isDefinedUserRandomOffset ",
+            randomOffset,
+        );
+        console.log(
+            "delete-round#getGameOptions - isDefinedUserFixedOffset ",
+            fixedOffset,
+        );
+
+        let userOptions: userOptionsType = {
+            vim_be_good_delete_me_random_offset: randomOffset,
+            vim_be_good_delete_me_fixed_offset: fixedOffset,
+        };
+
+        return userOptions;
+    }
+
+    private async getColumnOffset(game: IGame) {
+        let userOptions = this.getGameOptions(game);
+        let randomOffest = userOptions["vim_be_good_delete_me_random_offset"];
+        let fixedOffset = userOptions["vim_be_good_delete_me_fixed_offset"];
+        let offset: number;
+
+        var maxOffset = {
+            noob: 0,
+            easy: 10,
+            medium: 20,
+            hard: 30,
+            nightmare: 35,
+            tpope: 40,
+        };
+        var minOffset = {
+            noob: 0,
+            easy: 3,
+            medium: 5,
+            hard: 10,
+            nightmare: 15,
+            tpope: 30,
+        };
+
+        offset =
+            Math.floor(
+                Math.random() *
+                    (maxOffset[game.difficulty] - minOffset[game.difficulty]),
+            ) + minOffset[game.difficulty];
+        console.log("delete-round#getColumnOffset - levelOffset ", offset);
+
+        if (randomOffest > 0) {
+            console.log(
+                "delete-round#getColumnOffset - userRandomOffset ",
+                randomOffest,
+            );
+            offset = randomOffest;
+        }
+
+        if (fixedOffset > 0) {
+            console.log(
+                "delete-round#getColumnOffset - userFixedOffset ",
+                fixedOffset,
+            );
+            offset = fixedOffset;
+        }
+
+        console.log("delete-round#getColumnOffset - offset ", fixedOffset);
         return " ".repeat(offset);
     }
 
