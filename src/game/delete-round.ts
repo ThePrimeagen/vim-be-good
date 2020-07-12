@@ -32,7 +32,6 @@ export class DeleteRound extends Round {
                 await game.nvim.getVar("vim_be_good_delete_me_random_offset"),
             );
         }
-
         if (isDefinedUserFixedOffset) {
             fixedOffset = Number(
                 await game.nvim.getVar("vim_be_good_delete_me_fixed_offset"),
@@ -57,12 +56,12 @@ export class DeleteRound extends Round {
     }
 
     private async getColumnOffset(game: IGame) {
-        let userOptions = this.getGameOptions(game);
-        let randomOffest = userOptions["vim_be_good_delete_me_random_offset"];
+        let userOptions = await this.getGameOptions(game);
+        let randomOffset = userOptions["vim_be_good_delete_me_random_offset"];
         let fixedOffset = userOptions["vim_be_good_delete_me_fixed_offset"];
         let offset: number;
 
-        var maxOffset = {
+        let maxOffset = {
             noob: 0,
             easy: 10,
             medium: 20,
@@ -70,7 +69,7 @@ export class DeleteRound extends Round {
             nightmare: 35,
             tpope: 40,
         };
-        var minOffset = {
+        let minOffset = {
             noob: 0,
             easy: 3,
             medium: 5,
@@ -79,6 +78,8 @@ export class DeleteRound extends Round {
             tpope: 30,
         };
 
+        console.log("Delete THIS: ", userOptions);
+
         offset =
             Math.floor(
                 Math.random() *
@@ -86,12 +87,14 @@ export class DeleteRound extends Round {
             ) + minOffset[game.difficulty];
         console.log("delete-round#getColumnOffset - levelOffset ", offset);
 
-        if (randomOffest > 0) {
+        if (randomOffset > 0) {
             console.log(
                 "delete-round#getColumnOffset - userRandomOffset ",
-                randomOffest,
+                randomOffset,
             );
-            offset = randomOffest;
+
+            offset =
+                Math.floor(Math.random() * (40 - randomOffset)) + randomOffset;
         }
 
         if (fixedOffset > 0) {
@@ -102,7 +105,7 @@ export class DeleteRound extends Round {
             offset = fixedOffset;
         }
 
-        console.log("delete-round#getColumnOffset - offset ", fixedOffset);
+        console.log("delete-round#getColumnOffset - offset ", offset);
         return " ".repeat(offset);
     }
 

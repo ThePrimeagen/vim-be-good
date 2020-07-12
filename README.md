@@ -29,10 +29,18 @@ current buffer (only if its empty) set `vim_be_good_floating` to 0.
 
 ### Games - relative
 By default vim be good returns random offset for game difficult above noob, if 
-you with to set fixed offset set `vim_be_good_delete_me_offset` to desired
+you with to set fixed offset set `vim_be_good_delete_me_fixed_offset` to desired
 value.
 
-`let g:vim_be_good_delete_me_offset = 35`
+`let g:vim_be_good_delete_me_fixed_offset = 35`
+
+You can also use `vim_be_good_delete_me_random_offset` to set minimal value of 
+random offset.
+
+`let g:vim_be_good_delete_me_fixed_offset = 5`
+
+>Note: If both `vim_be_good_delete_me_fixed_offset` and `vim_be_good_delete_me_fixed_offset`
+ are set only `vim_be_good_delete_me_fixed_offset` is applied.
 
 ## Instructions are at top of games.
 here too!
