@@ -78,8 +78,6 @@ export class DeleteRound extends Round {
             tpope: 30,
         };
 
-        console.log("Delete THIS: ", userOptions);
-
         offset =
             Math.floor(
                 Math.random() *
