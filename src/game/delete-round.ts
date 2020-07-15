@@ -61,28 +61,21 @@ export class DeleteRound extends Round {
         let fixedOffset = userOptions["vim_be_good_delete_me_fixed_offset"];
         let offset: number;
 
-        let maxOffset = {
-            noob: 0,
-            easy: 10,
-            medium: 20,
-            hard: 30,
-            nightmare: 35,
-            tpope: 40,
-        };
-        let minOffset = {
-            noob: 0,
-            easy: 3,
-            medium: 5,
-            hard: 10,
-            nightmare: 15,
-            tpope: 30,
+        let difficultyToOffset = {
+            noob: { min: 0, max: 0 },
+            easy: { min: 3, max: 10 },
+            medium: { min: 5, max: 20 },
+            hard: { min: 10, max: 30 },
+            nightmare: { min: 15, max: 35 },
+            tpope: { min: 30, max: 40 },
         };
 
         offset =
             Math.floor(
                 Math.random() *
-                    (maxOffset[game.difficulty] - minOffset[game.difficulty]),
-            ) + minOffset[game.difficulty];
+                    (difficultyToOffset[game.difficulty].max -
+                        difficultyToOffset[game.difficulty].min),
+            ) + difficultyToOffset[game.difficulty].min;
         console.log("delete-round#getColumnOffset - levelOffset ", offset);
 
         if (randomOffset > 0) {
