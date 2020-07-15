@@ -21,10 +21,10 @@ export class DeleteRound extends Round {
         let fixedOffset: number = 0;
 
         const isDefinedUserRandomOffset = await game.nvim.eval(
-            'exists("vim_be_good_delete_me_fixed_offset")',
+            'exists("vim_be_good_delete_me_random_offset")',
         );
         const isDefinedUserFixedOffset = await game.nvim.eval(
-            'exists("vim_be_good_delete_me_random_offset")',
+            'exists("vim_be_good_delete_me_fixed_offset")',
         );
 
         if (isDefinedUserRandomOffset) {

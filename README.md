@@ -29,7 +29,7 @@ current buffer (only if its empty) set `vim_be_good_floating` to 0.
 
 ### Games - relative
 By default vim be good returns random offset for game difficult above noob, if 
-you with to set fixed offset set `vim_be_good_delete_me_fixed_offset` to desired
+you want to set fixed offset set `vim_be_good_delete_me_fixed_offset` to desired
 value.
 
 `let g:vim_be_good_delete_me_fixed_offset = 35`
@@ -37,7 +37,7 @@ value.
 You can also use `vim_be_good_delete_me_random_offset` to set minimal value of 
 random offset.
 
-`let g:vim_be_good_delete_me_fixed_offset = 5`
+`let g:vim_be_good_delete_me_random_offset = 5`
 
 >Note: If both `vim_be_good_delete_me_fixed_offset` and `vim_be_good_delete_me_fixed_offset`
  are set only `vim_be_good_delete_me_fixed_offset` is applied.
@@ -128,3 +128,14 @@ idea of how to stop sucking
 ```
 - Check your new feature `NVIM_NODE_LOG_FILE=/tmp/nvim.log nvim +VimBeGood` (you can view logs with `less /tmp/nvim.log`)
 - Make PR
+
+If you see something similar during your build:
+```bash
+Checking formatting...
+src/game/delete-round.ts
+Code style issues found in the above file(s). Forgot to run Prettier?
+```
+Just run `npm run lint:fix` to fix it.
+
+
+
