@@ -1,8 +1,6 @@
 fun! VimBeGood()
-    lua package.loaded["vim-be-good"] = nil
-    lua package.loaded["vim-be-good.window"] = nil
-    lua package.loaded["vim-be-good.menu"] = nil
-    lua package.loaded["vim-be-good.buffer"] = nil
+    " dont forget to remove this one....
+    lua for k in pairs(package.loaded) do if k:match("^vim%-be%-good") then package.loaded[k] = nil end end
     lua require("vim-be-good").menu()
 endfun
 

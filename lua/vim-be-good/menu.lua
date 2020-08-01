@@ -1,8 +1,21 @@
--- I DON"T KNOW
-local types = require("vim-be-good.types")
 local bind = require("vim-be-good.bind")
+local types = require("vim-be-good.types")
+local createEmpty = require("vim-be-good.game-utils").createEmpty
 
 local Menu = {}
+
+local gameHeader = {
+    "",
+    "Select a Game (delete from the list to select)",
+    "----------------------------------------------",
+}
+
+local difficultyHeader = {
+    "",
+    "Select a Difficulty (delete from the list to select)",
+    "Noob diffculty is endless so it must be quit with :q",
+    "----------------------------------------------------",
+}
 
 local instructions = {
     "VimBeGood is a collection of small games for neovim which are",
@@ -41,14 +54,75 @@ function Menu:new(window, onResults)
 
     self.__index = self
     local createdMenu = setmetatable(menuObj, self)
-    window.buffer:onChange(bind(createdMenu, "onChange"))
+
+    createdMenu._onChange = bind(createdMenu, "onChange")
+    window.buffer:onChange(createdMenu._onChange)
 
     return createdMenu
 end
 
+local function getMenuLength()
+    return #types.games + #types.difficulty + #gameHeader +
+        #difficultyHeader + #credits
+end
+
+local function getTableChanges(lines, compareSet, startIdx)
+    local maxCount = #lines
+    local idx = startIdx
+    local i = 1
+    local found = false
+
+    while found == false and idx <= maxCount and i <= #compareSet do
+        if lines[idx] == nil or lines[idx]:find(compareSet[i], 1, true) == nil then
+            found = true
+        else
+            i = i + 1
+            idx = idx + 1
+        end
+    end
+
+    return found, i, idx
+end
+
 function Menu:onChange()
     local lines = self.window.buffer:getGameLines()
-    print(lines)
+    local maxCount = getMenuLength()
+
+    if #lines == maxCount then
+        return
+    end
+
+    local found, i, idx = getTableChanges(lines, gameHeader, 1)
+    if found then
+        self:render()
+        return
+    end
+
+    found, i, idx = getTableChanges(lines, types.games, idx)
+    if found then
+        self.game = types.games[i]
+
+        status, ret, err = xpcall(
+            self.onResults, debug.traceback, self.game, self.difficulty)
+
+        if status == false then
+            print("Menu:onChange error", status, ret, err)
+        end
+        return
+    end
+
+    found, i, idx = getTableChanges(lines, difficultyHeader, idx)
+    if found then
+        self:render()
+        return
+    end
+
+    found, i, idx = getTableChanges(lines, types.difficulty, idx)
+    if found then
+        self.difficulty = types.difficulty[i]
+        self:render()
+        return
+    end
 end
 
 local function createMenuItem(str, currentValue)
@@ -59,30 +133,34 @@ local function createMenuItem(str, currentValue)
 end
 
 function Menu:render()
-    local lines = {
-        "",
-        "Select a Game (delete from the list to select)",
-        "----------------------------------------------",
-    }
+    self.window.buffer:clearGameLines()
 
-    for idx = 1, table.getn(types.games), 1 do
+    local lines = { }
+    for idx = 1, #gameHeader do
+        table.insert(lines, gameHeader[idx])
+    end
+
+    for idx = 1, #types.games do
         table.insert(lines, createMenuItem(types.games[idx], self.game))
     end
 
-    table.insert(lines, "")
-    table.insert(lines, "Select a Difficulty (delete from the list to select)")
-    table.insert(lines, "Noob diffculty is endless so it must be quit with :q")
-    table.insert(lines, "----------------------------------------------------")
+    for idx = 1, #difficultyHeader do
+        table.insert(lines, difficultyHeader[idx])
+    end
 
-    for idx = 1, table.getn(types.difficulty), 1 do
+    for idx = 1, #types.difficulty do
         table.insert(lines, createMenuItem(types.difficulty[idx], self.difficulty))
     end
 
-    for idx = 1, table.getn(credits), 1 do
+    for idx = 1, #credits do
         table.insert(lines, credits[idx])
     end
 
     self.window.buffer:render(lines)
+end
+
+function Menu:close()
+    self.buffer:removeListener(self._onChange)
 end
 
 return Menu

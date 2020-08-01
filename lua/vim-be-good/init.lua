@@ -1,11 +1,23 @@
 local WindowHandler = require("vim-be-good.window");
 local Menu = require("vim-be-good.menu");
+local GameRunner = require("vim-be-good.game-runner");
 
 local function menu()
     local windowHandler = WindowHandler:new(6)
     windowHandler:show()
 
-    local menu = Menu:new(windowHandler)
+    local menu
+    local gameRunner
+
+    menu = Menu:new(windowHandler, function(game, difficulty)
+        menu:close()
+
+        print("I AM HERES")
+        print("I AM HERES")
+        local gameRunner = GameRunner:new({game}, difficulty, windowHandler)
+        gameRunner:init()
+    end)
+
     menu:render()
 end
 

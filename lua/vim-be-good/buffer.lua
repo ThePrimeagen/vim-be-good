@@ -15,7 +15,6 @@ function Buffer:new(bufh, window)
     local newBuf = {
         bufh = bufh,
         window = window,
-        debugLineStr = {},
         instructions = {},
         onChangeList = onChangeList,
         lastRendered = {},
@@ -29,33 +28,32 @@ function Buffer:new(bufh, window)
 end
 
 function Buffer:close()
-    nvim_buf_detach(self.bufh)
+    assert(false, "how did I get here?")
+    vim.api.nvim_buf_detach(self.bufh)
 end
 
-local count = 0
-function Buffer:onLine(buf, changedtick, firstline, lastline, linedata, more)
-    print("onLine", count, " ", self.onChangeList)
-    count = count + 1
-
+function Buffer:_scheduledOnLine()
     if self == nil or self.onChangeList == nil then
         print("Memory Leak...", self.bufh, self.window)
         return
     end
 
-    for idx = 1, table.getn(self.onChangeList), 1 do
-        local fn = self.onChangeList[idx]
-        status, ret, err = xpcall(fn, debug.traceback, buf, changedtick, firstline, lastline, linedata, more)
+    for _, fn in ipairs(self.onChangeList) do
 
-        print("ONLINE RESULTS!!!", status, ret, err)
+        local status, ret, err = xpcall(fn, debug.traceback, buf, changedtick, firstline, lastline, linedata, more)
+
         if status == false then
             print("Error in buf_attach, must close down:", err)
-            self.window:close()
+            xpcall(bind(self.window, "close"), debug.traceback)
         end
     end
 end
 
+function Buffer:onLine(buf, changedtick, firstline, lastline, linedata, more)
+    vim.schedule(bind(self, "_scheduledOnLine"))
+end
+
 function Buffer:attach()
-    print("WHAT IS THIS???", self.bufh)
     vim.api.nvim_buf_attach(self.bufh, true, {
         on_lines = bind(self, "onLine")
     })
@@ -63,11 +61,18 @@ end
 
 
 function Buffer:render(lines)
-    self.lastRendered = lines
-    self:debugLine()
 
     local idx = 1
-    local instructionLen = table.getn(self.instructions)
+    local instructionLen = #self.instructions
+    local lastRenderedLen = #self.lastRendered
+
+    self:clear()
+    self.lastRendered = lines
+
+    if self.debugLineStr ~= nil then
+        vim.api.nvim_buf_set_lines(
+            self.bufh, 0, 1, false, {self.debugLineStr})
+    end
 
     if instructionLen > 0 then
         vim.api.nvim_buf_set_lines(
@@ -75,18 +80,13 @@ function Buffer:render(lines)
         idx = idx + instructionLen
     end
 
-    local linesLength = table.getn(lines)
-    vim.api.nvim_buf_set_lines(self.bufh, idx, idx + linesLength, false, lines)
+    vim.api.nvim_buf_set_lines(self.bufh, idx, idx + #lines, false, lines)
 end
 
 function Buffer:debugLine(line)
     if line ~= nil then
-        self.debugLineStr = {line}
+        self.debugLineStr = line
     end
-
-    print("debugLine", type(self.debugLineStr))
-
-    vim.api.nvim_buf_set_lines(self.bufh, 0, 1, false, self.debugLineStr)
 end
 
 function Buffer:setInstructions(lines)
@@ -108,21 +108,34 @@ function Buffer:getGameLines()
     local lines = vim.api.nvim_buf_get_lines(
         self.bufh, startOffset, startOffset + len, false)
 
-    print("buffer#getGameLines", lines)
     return lines
 end
 
 function Buffer:clear()
-    local startOffset = table.getn(self.instructions) + 1
-    local len = table.getn(self.lastRendered)
+    local len = #self.instructions + 1 + (#self.lastRendered or 0)
 
     vim.api.nvim_buf_set_lines(
-        self.bufh, 0, startOffset + len, false, createEmpty(startOffset + len))
+        self.bufh, 0, len, false, createEmpty(len))
 end
 
 function Buffer:onChange(cb)
-    print("About to insert onChange baby")
     table.insert(self.onChangeList, cb)
+end
+
+function Buffer:removeListener(cb)
+
+    local idx = 1
+    local found = false
+    while idx <= #self.onChangeList and found == false do
+        found = self.onChangeList[idx] == cb
+        if found == false then
+            idx = idx + 1
+        end
+    end
+
+    if found then
+        table.remove(self.onChangeList, idx)
+    end
 end
 
 return Buffer

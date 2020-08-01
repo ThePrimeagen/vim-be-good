@@ -36,7 +36,7 @@ end
 
 function WindowHandler:close()
     if self.winId ~= 0 then
-        vim.fn.nvim_win_close(self.winId)
+        vim.fn.nvim_win_close(self.winId, true)
     end
 
     self.winId = 0
