@@ -33,6 +33,7 @@ function Buffer:close()
 end
 
 function Buffer:_scheduledOnLine()
+    local self = self
     if self == nil or self.onChangeList == nil then
         print("Memory Leak...", self.bufh, self.window)
         return
@@ -40,11 +41,16 @@ function Buffer:_scheduledOnLine()
 
     for _, fn in ipairs(self.onChangeList) do
 
-        local status, ret, err = xpcall(fn, debug.traceback, buf, changedtick, firstline, lastline, linedata, more)
+        local ok, errMessage = pcall(
+            fn, buf, changedtick, firstline, lastline, linedata, more)
 
-        if status == false then
-            print("Error in buf_attach, must close down:", err)
-            xpcall(bind(self.window, "close"), debug.traceback)
+        if not ok then
+            print("Buffer:_scheduledOnLine: is not ok", errMessage)
+            ok, errMessage = pcall(function() self.window:close() end)
+
+            if not ok then
+                print("AGAIN?????????", errMessage)
+            end
         end
     end
 end

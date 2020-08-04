@@ -102,11 +102,10 @@ function Menu:onChange()
     if found then
         self.game = types.games[i]
 
-        status, ret, err = xpcall(
-            self.onResults, debug.traceback, self.game, self.difficulty)
+        ok, msg = pcall(self.onResults, self.game, self.difficulty)
 
-        if status == false then
-            print("Menu:onChange error", status, ret, err)
+        if not ok then
+            print("Menu:onChange error", msg)
         end
         return
     end

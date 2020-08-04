@@ -35,5 +35,6 @@ return {
     difficultyToTime = difficultyToTime,
     getRoundCount = getRoundCount,
     createEmpty = createEmpty,
+    getTime = getTime
 }
 

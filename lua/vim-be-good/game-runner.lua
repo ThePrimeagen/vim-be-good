@@ -6,6 +6,8 @@ local games = {
     relative = function(...) return RelativeRound:new(...) end
 }
 
+local runningId = 0
+
 local GameRunner = {}
 
 local function getGame(game, ...)
@@ -21,7 +23,7 @@ function GameRunner:new(selectedGames, diffculty, window)
 
     local rounds = {}
     for idx = 1, #selectedGames do
-        table.insert(rounds, getGame(selectedGames[idx], config))
+        table.insert(rounds, getGame(selectedGames[idx], diffculty, window))
     end
 
     local gameRunner = {
@@ -29,15 +31,29 @@ function GameRunner:new(selectedGames, diffculty, window)
         rounds = rounds,
         config = config,
         window = window,
+        results = {
+            successes = 0,
+            failures = 0,
+            timings = {},
+            games = {},
+        },
     }
 
     self.__index = self
-    return setmetatable(gameRunner, self)
+    local game = setmetatable(gameRunner, self)
+
+    local function onChange()
+        game:checkForWin()
+    end
+
+    game.onChange = onChange
+    window.buffer:onChange(onChange)
+    return game
 end
 
 function GameRunner:countdown(count, cb)
     local self = self
-    xpcall(function()
+    ok, msg = pcall(function()
         if count > 0 then
             local str = string.format("Game Starts in %d", count)
 
@@ -50,7 +66,11 @@ function GameRunner:countdown(count, cb)
         else
             cb()
         end
-    end, debug.traceback)
+    end)
+
+    if not ok then
+        print("Error: GameRunner#countdown", msg)
+    end
 end
 
 function GameRunner:init()
@@ -59,17 +79,82 @@ function GameRunner:init()
     vim.schedule(function()
         self.window.buffer:setInstructions({})
         self.window.buffer:clear()
-        self:countdown(3, function() self:start() end)
+        self:countdown(3, function() self:run() end)
     end)
 end
 
-function GameRunner:start()
-    local idx = math.random(1, #self.config.rounds)
-    local round = self.config.rounds[idx]
+function GameRunner:checkForWin()
+    if not self.round then
+        return
+    end
 
-    self.window.buffer:debugLine(string.format("Round %d / %d", self.currentRound, round))
-    self.window.buffer:setInstructions(round.getInstructions())
-    self.window.buffer:render(round.render())
+    if not self.running then
+        return
+    end
+
+    if not self.round:checkForWin() then
+        return
+    end
+
+    self:endRound(true)
+end
+
+function GameRunner:endRound(success)
+    local self = self
+
+    self.running = false
+    if success then
+        self.results.successes = self.results.successes + 1
+    else
+        self.results.failures = self.results.failures + 1
+    end
+
+    local endTime = GameUtils.getTime()
+    table.insert(self.results.timings, endTime - self.startTime)
+    table.insert(self.results.games, self.round:name())
+
+    self.currentRound = self.currentRound + 1
+    if self.config.roundCount == self.currentRound then
+        self:endGame()
+        return
+    end
+
+    vim.schedule_wrap(function() self:run() end)()
+end
+
+function GameRunner:endGame()
+    print("I should of ended the game by now....", vim.inspect(self))
+    self.window.buffer:removeListener(self.onChange)
+end
+
+function GameRunner:run()
+    local idx = math.random(1, #self.rounds)
+    self.round = self.rounds[idx]
+    local roundConfig = self.round:getConfig()
+    print("RoundName:", self.round:name())
+
+    self.window.buffer:debugLine(string.format(
+        "Round %d / %d", self.currentRound, self.config.roundCount))
+
+    self.window.buffer:setInstructions(self.round.getInstructions())
+    self.window.buffer:render(self.round:render())
+
+    self.startTime = GameUtils.getTime()
+
+    runningId = runningId + 1
+    local currentId = runningId
+    self.running = true
+
+    local _self = self
+    vim.defer_fn(function()
+        print("Deferred?", currentId, runningId)
+        if currentId < runningId then
+            return
+        end
+
+        _self:endRound()
+    end, roundConfig.roundTime)
+
 end
 
 return GameRunner

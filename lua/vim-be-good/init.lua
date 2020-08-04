@@ -12,10 +12,11 @@ local function menu()
     menu = Menu:new(windowHandler, function(game, difficulty)
         menu:close()
 
-        print("I AM HERES")
-        print("I AM HERES")
         local gameRunner = GameRunner:new({game}, difficulty, windowHandler)
-        gameRunner:init()
+        ok, msg = pcall(function() gameRunner:init() end, debug.traceback)
+        if not ok then
+            print("Error: Menu:new callback", msg)
+        end
     end)
 
     menu:render()

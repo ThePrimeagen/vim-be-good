@@ -15,9 +15,9 @@ local instructions = {
 }
 
 local RelativeRound = {}
-function RelativeRound:new(diffculty, buffer)
+function RelativeRound:new(diffculty, window)
     local round = {
-        buffer = buffer,
+        window = window,
         difficulty = diffculty,
         fixedOffset = vim.g["vim_be_good_delete_me_fixed_offset"],
         randomOffset = vim.g["vim_be_good_delete_me_random_offset"] or randomOffset[diffculty],
@@ -33,8 +33,27 @@ end
 
 function RelativeRound:getConfig()
     return {
-        timing = GameUtils.difficultyToTime[self.diffculty]
+        roundTime = GameUtils.difficultyToTime[self.diffculty]
     }
+end
+
+function RelativeRound:checkForWin()
+    local lines = self.window.buffer:getGameLines()
+
+    print("RelativeRound:checkForWin", vim.inspect(lines))
+
+    local found = false
+    local idx = 1
+
+    while idx <= #lines and not found do
+        local line = lines[idx]
+        print("RelativeRound:checkForWin(", idx, "): LINE(", line, ") = ", string.match(line, "DELETE_ME"))
+        found = string.match(line, "DELETE_ME")
+
+        idx = idx + 1
+    end
+
+    return not found
 end
 
 function RelativeRound:render()
@@ -50,9 +69,13 @@ function RelativeRound:render()
         cursorIdx = math.random(1, deleteMeIdx - 1)
     end
 
-    lines[deleteMeIdx] = " DELETE ME"
+    lines[deleteMeIdx] = " DELETE_ME"
 
     return lines
+end
+
+function RelativeRound:name()
+    return "relative"
 end
 
 return RelativeRound
