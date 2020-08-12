@@ -39,26 +39,22 @@ end
 
 function RelativeRound:checkForWin()
     local lines = self.window.buffer:getGameLines()
-
-    print("RelativeRound:checkForWin", vim.inspect(lines))
-
     local found = false
     local idx = 1
 
     while idx <= #lines and not found do
         local line = lines[idx]
-        print("RelativeRound:checkForWin(", idx, "): LINE(", line, ") = ", string.match(line, "DELETE_ME"))
         found = string.match(line, "DELETE_ME")
 
         idx = idx + 1
     end
+    print("RelativeRound:checkForWin(", idx, "): ", found)
 
     return not found
 end
 
 function RelativeRound:render()
     local lines = GameUtils.createEmpty(20)
-
     local deleteMeIdx = math.random(1, 20)
     local goHigh = deleteMeIdx < 17 and math.random() > 0.5
 
@@ -71,7 +67,7 @@ function RelativeRound:render()
 
     lines[deleteMeIdx] = " DELETE_ME"
 
-    return lines
+    return lines, cursorIdx
 end
 
 function RelativeRound:name()

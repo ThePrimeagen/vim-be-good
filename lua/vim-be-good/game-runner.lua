@@ -84,6 +84,7 @@ function GameRunner:init()
 end
 
 function GameRunner:checkForWin()
+    print("GameRunner:checkForWin", self.round, self.running)
     if not self.round then
         return
     end
@@ -137,7 +138,14 @@ function GameRunner:run()
         "Round %d / %d", self.currentRound, self.config.roundCount))
 
     self.window.buffer:setInstructions(self.round.getInstructions())
-    self.window.buffer:render(self.round:render())
+    local lines, cursorIdx = self.round:render()
+    self.window.buffer:render(lines)
+
+    print("Setting current line to", cursorIdx)
+    if cursorIdx ~= nil then
+        vim.api.nvim_set_current_line(cursorIdx)
+    end
+    print("Setted current line to", cursorIdx)
 
     self.startTime = GameUtils.getTime()
 
