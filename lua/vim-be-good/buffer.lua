@@ -18,6 +18,7 @@ function Buffer:new(bufh, window)
         instructions = {},
         onChangeList = onChangeList,
         lastRendered = {},
+        lastRenderedInstruction = {},
     }
 
     self.__index = self
@@ -71,6 +72,7 @@ function Buffer:render(lines)
     local idx = 1
     local instructionLen = #self.instructions
     local lastRenderedLen = #self.lastRendered
+    local lastRenderedInstructionLen = #self.lastRenderedInstruction
 
     self:clear()
     self.lastRendered = lines
@@ -96,6 +98,7 @@ function Buffer:debugLine(line)
 end
 
 function Buffer:setInstructions(lines)
+    self.lastRenderedInstruction = self.instructions
     self.instructions = lines
 end
 
@@ -118,7 +121,7 @@ function Buffer:getGameLines()
 end
 
 function Buffer:clear()
-    local len = #self.instructions + 1 + (#self.lastRendered or 0)
+    local len = #self.lastRenderedInstruction + 1 + (#self.lastRendered or 0)
 
     vim.api.nvim_buf_set_lines(
         self.bufh, 0, len, false, createEmpty(len))
