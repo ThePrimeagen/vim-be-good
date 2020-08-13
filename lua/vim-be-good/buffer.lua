@@ -1,4 +1,5 @@
 local bind = require("vim-be-good.bind")
+local log = require("vim-be-good.log")
 
 local function createEmpty(count)
     local lines = {}
@@ -28,14 +29,13 @@ function Buffer:new(bufh, window)
 end
 
 function Buffer:close()
-    assert(false, "how did I get here?")
     vim.api.nvim_buf_detach(self.bufh)
 end
 
 function Buffer:_scheduledOnLine()
     local self = self
     if self == nil or self.onChangeList == nil then
-        print("Memory Leak...", self.bufh, self.window)
+        log.info("Memory Leak...", self.bufh, self.window)
         return
     end
 
@@ -45,11 +45,11 @@ function Buffer:_scheduledOnLine()
             fn, buf, changedtick, firstline, lastline, linedata, more)
 
         if not ok then
-            print("Buffer:_scheduledOnLine: is not ok", errMessage)
+            log.info("Buffer:_scheduledOnLine: is not ok", errMessage)
             ok, errMessage = pcall(function() self.window:close() end)
 
             if not ok then
-                print("AGAIN?????????", errMessage)
+                log.info("AGAIN?????????", errMessage)
             end
         end
     end

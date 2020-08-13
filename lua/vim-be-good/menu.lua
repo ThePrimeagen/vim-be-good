@@ -1,3 +1,4 @@
+local log = require("vim-be-good.log")
 local bind = require("vim-be-good.bind")
 local types = require("vim-be-good.types")
 local createEmpty = require("vim-be-good.game-utils").createEmpty
@@ -13,7 +14,7 @@ local gameHeader = {
 local difficultyHeader = {
     "",
     "Select a Difficulty (delete from the list to select)",
-    "Noob diffculty is endless so it must be quit with :q",
+    "Noob difficulty is endless so it must be quit with :q",
     "----------------------------------------------------",
 }
 
@@ -102,10 +103,11 @@ function Menu:onChange()
     if found then
         self.game = types.games[i]
 
+        log.info("Starting Game", self.game, self.difficulty)
         ok, msg = pcall(self.onResults, self.game, self.difficulty)
 
         if not ok then
-            print("Menu:onChange error", msg)
+            log.info("Menu:onChange error", msg)
         end
         return
     end

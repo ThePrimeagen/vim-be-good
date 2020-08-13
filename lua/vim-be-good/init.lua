@@ -16,10 +16,12 @@ local function menu()
     menu = Menu:new(windowHandler, function(game, difficulty)
         menu:close()
 
+        log.info("onResults", game, difficulty)
         local gameRunner = GameRunner:new({game}, difficulty, windowHandler)
+
         ok, msg = pcall(function() gameRunner:init() end, debug.traceback)
         if not ok then
-            print("Error: Menu:new callback", msg)
+            log.info("Error: Menu:new callback", msg)
         end
     end)
 

@@ -8,6 +8,8 @@
 
 -- User configuration section
 local default_config = {
+  should_inspect = false,
+
   -- Name of the plugin. Prepended to log messages
   plugin = 'VimBeGood',
 
@@ -72,7 +74,7 @@ log.new = function(config, standalone)
 
       if type(x) == "number" and config.float_precision then
         x = tostring(round(x, config.float_precision))
-      elseif type(x) == "table" then
+      elseif type(x) == "table" and config.should_inspect then
         x = vim.inspect(x)
       else
         x = tostring(x)

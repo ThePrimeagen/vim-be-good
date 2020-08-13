@@ -1,3 +1,4 @@
+local log = require("vim-be-good.log")
 local Buffer = require("vim-be-good.buffer")
 local WindowHandler = {}
 
@@ -41,7 +42,7 @@ function WindowHandler:close()
 
     self.winId = 0
 
-    print("window#close", buffer)
+    log.info("window#close", buffer)
     if self.buffer ~= nil then
         self.buffer:close()
     end

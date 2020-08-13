@@ -1,4 +1,5 @@
 local GameUtils = require("vim-be-good.game-utils")
+local log = require("vim-be-good.log")
 
 local randomOffset = {
     noob = 10,
@@ -15,12 +16,13 @@ local instructions = {
 }
 
 local RelativeRound = {}
-function RelativeRound:new(diffculty, window)
+function RelativeRound:new(difficulty, window)
+    log.info("New", difficulty, window)
     local round = {
         window = window,
-        difficulty = diffculty,
+        difficulty = difficulty,
         fixedOffset = vim.g["vim_be_good_delete_me_fixed_offset"],
-        randomOffset = vim.g["vim_be_good_delete_me_random_offset"] or randomOffset[diffculty],
+        randomOffset = vim.g["vim_be_good_delete_me_random_offset"] or randomOffset[difficulty],
     }
 
     self.__index = self
@@ -32,8 +34,9 @@ function RelativeRound:getInstructions()
 end
 
 function RelativeRound:getConfig()
+    log.info("getConfig", self.difficulty, GameUtils.difficultyToTime[self.difficulty])
     return {
-        roundTime = GameUtils.difficultyToTime[self.diffculty]
+        roundTime = GameUtils.difficultyToTime[self.difficulty]
     }
 end
 
@@ -48,7 +51,7 @@ function RelativeRound:checkForWin()
 
         idx = idx + 1
     end
-    print("RelativeRound:checkForWin(", idx, "): ", found)
+    log.info("RelativeRound:checkForWin(", idx, "): ", found)
 
     return not found
 end

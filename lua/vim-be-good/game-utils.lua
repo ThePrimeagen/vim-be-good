@@ -21,10 +21,10 @@ local function getTime()
     return vim.fn.reltimefloat(vim.fn.reltime())
 end
 
-local function getRoundCount(diffculty)
+local function getRoundCount(difficulty)
     local roundCount = vim.g["vim-be-good-round-count"] or 10
 
-    if diffculty == "noob" then
+    if difficulty == "noob" then
         roundCount = 100000
     end
 
