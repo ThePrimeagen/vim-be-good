@@ -30,7 +30,7 @@ local function getGame(game, difficulty, window)
 end
 
 -- games table, difficulty string
-function GameRunner:new(selectedGames, difficulty, window)
+function GameRunner:new(selectedGames, difficulty, window, onFinished)
     log.info("New", difficulty)
     local config = {
         difficulty = difficulty,
@@ -47,6 +47,7 @@ function GameRunner:new(selectedGames, difficulty, window)
         rounds = rounds,
         config = config,
         window = window,
+        onFinished = onFinished,
         results = {
             successes = 0,
             failures = 0,
@@ -60,7 +61,15 @@ function GameRunner:new(selectedGames, difficulty, window)
     local game = setmetatable(gameRunner, self)
 
     local function onChange()
+        if hasEverythingEnded then
+            if not self.ended then
+                self:close()
+            end
+            return
+        end
+
         log.info("onChange", game.state, states.playing)
+
         if game.state == states.playing then
             game:checkForWin()
         else
@@ -110,32 +119,39 @@ function GameRunner:checkForNext()
 
     local lines = self.window.buffer:getGameLines()
     local expectedLines, optionLine = self:renderEndGame()
-
-    if #lines == #expectedLines then
-        self.window.buffer:render(expectedLines)
-        return
-    end
-
     local idx = 0
     local found = false
+
     repeat
         idx = idx + 1
         found = lines[idx] ~= expectedLines[idx]
-    until idx == #lines and found == false
+    until idx == #lines or found
 
     if found == false then
-        self.window.buffer:render(expectedLines)
+        return
     end
+
     local item = expectedLines[idx]
 
+    log.info("GameRunner:checkForNext: compared", vim.inspect(lines), vim.inspect(expectedLines))
+    log.info("GameRunner:checkForNext: deleted line is", item,
+        item == endStates.menu,
+        item == endStates.replay,
+        item == endStates.quit)
+
+    local foundKey = nil
+    for k, v in pairs(endStates) do
+        log.info("pairs", k, v, item)
+        if item == v then
+            foundKey = k
+        end
+    end
+
     -- todo implement this correctly....
-    if item == endStates.menu then
-        self:close()
-    elseif item == endStates.replay then
-        self:close()
-    elseif item == endStates.quit then
-        self:close()
+    if foundKey then
+       self.onFinished(self, foundKey)
     else
+        log.info("GameRunner:checkForNext Some line was changed that is insignificant, rerendering")
         self.window.buffer:render(expectedLines)
     end
 end
@@ -173,7 +189,7 @@ function GameRunner:endRound(success)
 
     self.currentRound = self.currentRound + 1
     log.info("endRound", self.currentRound, self.config.roundCount)
-    if self.currentRound > 1 then
+    if self.currentRound > 1 then -- TODO: self.config.roundCount then
         self:endGame()
         return
     end
@@ -182,16 +198,9 @@ function GameRunner:endRound(success)
 end
 
 function GameRunner:close()
-
-    -- CLOSE IT ALL!!!
-    self.ended = true
+    log.info("GameRunner:close()", debug.traceback())
     self.window.buffer:removeListener(self.onChange)
-
-
-    -- TODO: we should probably have some sort of callback to the outside
-    -- that way a menu or close option can be done easily where as a replay
-    -- does not have to go through a bunch of nonsense
-    self.window:close()
+    self.ended = true
 end
 
 function GameRunner:renderEndGame()

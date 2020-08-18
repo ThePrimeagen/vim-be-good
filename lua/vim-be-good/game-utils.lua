@@ -8,6 +8,22 @@ local difficultyToTime = {
     ["tpope"] = 2000,
 }
 
+local function compareTable(a, b)
+    local found = true
+    local idx = 1
+
+    if #a ~= #b then
+        return false
+    end
+
+    while found and idx < #a do
+        found = a[idx] == b[idx]
+        idx = idx + 1
+    end
+
+    return found
+end
+
 local function createEmpty(count)
     local lines = {}
     for idx = 1, count, 1 do
@@ -35,6 +51,7 @@ return {
     difficultyToTime = difficultyToTime,
     getRoundCount = getRoundCount,
     createEmpty = createEmpty,
-    getTime = getTime
+    getTime = getTime,
+    compareTable = compareTable
 }
 

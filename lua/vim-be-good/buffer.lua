@@ -30,11 +30,12 @@ function Buffer:new(bufh, window)
 end
 
 function Buffer:close()
-    vim.api.nvim_buf_detach(self.bufh)
+    self.onChangeList = {}
+    -- TODO: Teejaay fix this
+    vim.fn.nvim_buf_detach(self.bufh)
 end
 
 function Buffer:_scheduledOnLine()
-    local self = self
     if self == nil or self.onChangeList == nil then
         log.info("Memory Leak...", self.bufh, self.window)
         return
@@ -47,7 +48,13 @@ function Buffer:_scheduledOnLine()
 
         if not ok then
             log.info("Buffer:_scheduledOnLine: is not ok", errMessage)
-            ok, errMessage = pcall(function() self.window:close() end)
+            ok, errMessage = pcall(function()
+                if endItAll then
+                    endItAll()
+                else
+                    self:close()
+                end
+            end)
 
             if not ok then
                 log.info("AGAIN?????????", errMessage)
@@ -57,7 +64,9 @@ function Buffer:_scheduledOnLine()
 end
 
 function Buffer:onLine(buf, changedtick, firstline, lastline, linedata, more)
-    vim.schedule(bind(self, "_scheduledOnLine"))
+    vim.schedule(function()
+        self:_scheduledOnLine(buf, changedtick, firstline, lastline, linedata, more)
+    end)
 end
 
 function Buffer:attach()
@@ -65,7 +74,6 @@ function Buffer:attach()
         on_lines = bind(self, "onLine")
     })
 end
-
 
 function Buffer:render(lines)
 
@@ -88,6 +96,7 @@ function Buffer:render(lines)
         idx = idx + instructionLen
     end
 
+    log.info("Buffer:Rendering")
     vim.api.nvim_buf_set_lines(self.bufh, idx, idx + #lines, false, lines)
 end
 
@@ -117,6 +126,8 @@ function Buffer:getGameLines()
     local lines = vim.api.nvim_buf_get_lines(
         self.bufh, startOffset, startOffset + len, false)
 
+    log.info("Buffer:getGameLines", startOffset, len, vim.inspect(lines))
+
     return lines
 end
 
@@ -143,6 +154,7 @@ function Buffer:removeListener(cb)
     end
 
     if found then
+        log.info("Buffer:removeListener removing listener")
         table.remove(self.onChangeList, idx)
     end
 end

@@ -42,8 +42,8 @@ function WindowHandler:close()
 
     self.winId = 0
 
-    log.info("window#close", buffer)
-    if self.buffer ~= nil then
+    log.info("window#close", debug.traceback())
+    if self.buffer then
         self.buffer:close()
     end
 
