@@ -9,6 +9,7 @@ local difficulty = {
 
 local games = {
     "relative",
+    "hjkl",
     "whackamole",
 }
 
