@@ -8,6 +8,7 @@ local difficulty = {
 }
 
 local games = {
+    "ci{",
     "relative",
 }
 
