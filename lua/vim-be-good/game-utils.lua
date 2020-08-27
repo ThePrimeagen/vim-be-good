@@ -92,9 +92,8 @@ end
 local function trimString(str)
     local startPtr = -1
     local endPtr = 1
-    local readPtr = 1
 
-    while readPtr <= #str do
+    for readPtr = 1, #str do
         if str:byte(readPtr) ~= spaceByte then
             if startPtr == -1 then
                 startPtr = readPtr
@@ -102,8 +101,6 @@ local function trimString(str)
 
             endPtr = readPtr
         end
-
-        readPtr = readPtr + 1
     end
 
     if startPtr == -1 then
