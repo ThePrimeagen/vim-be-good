@@ -20,8 +20,6 @@ function CiRound:new(difficulty, window)
     local round = {
         window = window,
         difficulty = difficulty,
-        randomWord = "",
-        ifStatement = false
     }
 
     self.__index = self
@@ -34,9 +32,13 @@ end
 
 function CiRound:getConfig()
     log.info("getConfig", self.difficulty, GameUtils.difficultyToTime[self.difficulty])
-    return {
-        roundTime = GameUtils.difficultyToTime[self.difficulty]
+    self.config = {
+        roundTime = GameUtils.difficultyToTime[self.difficulty],
+        ifStatement = math.random() > 0.5,
+        randomWord = GameUtils.getRandomWord(),
     }
+
+    return self.config
 end
 
 function CiRound:checkForWin()
@@ -45,8 +47,8 @@ function CiRound:checkForWin()
     local concatenated = table.concat(trimmed)
     local lowercased = concatenated:lower()
 
-    if self.ifStatement then
-        return lowercased == "if (" .. self.randomWord .. ") {bar}"
+    if self.config.ifStatement then
+        return lowercased == "if (" .. self.config.randomWord .. ") {bar}"
     end
 
     return lowercased == "[bar]"
@@ -56,8 +58,6 @@ function CiRound:render()
     local lines = GameUtils.createEmpty(gameLineCount)
     local insertionIndex = GameUtils.getRandomInsertionLocation(gameLineCount, 6, #instructions)
     local goHigh = insertionIndex < gameLineCount / 2 and math.random() > 0.5
-    self.ifStatement = math.random() > 0.5
-    self.randomWord = GameUtils.getRandomWord()
 
     local cursorIdx
     if goHigh then
@@ -66,8 +66,8 @@ function CiRound:render()
         cursorIdx = math.random(1, insertionIndex - 1)
     end
 
-    if self.ifStatement then
-        lines[insertionIndex] = "if (" .. self.randomWord .. ") {"
+    if self.config.ifStatement then
+        lines[insertionIndex] = "if (" .. self.config.randomWord .. ") {"
         lines[insertionIndex + 2] = "    if (" .. GameUtils.getRandomWord() .. ") { "
         lines[insertionIndex + 3] = "        " .. GameUtils.getRandomWord()
         lines[insertionIndex + 4] = "    }";
