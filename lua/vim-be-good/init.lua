@@ -3,16 +3,24 @@ local Menu = require("vim-be-good.menu");
 local GameRunner = require("vim-be-good.game-runner");
 local log = require("vim-be-good.log")
 
+local windowHandler
+
+local function onVimResize()
+    print("Testing onVimResize")
+    if windowHandler then
+        windowHandler:onResize()
+    end
+end
+
 local function menu()
     log.info("------------------ STARTING THE GAME -----------------------------")
     endItAll = nil
     hasEverythingEnded = false
 
-    local windowHandler = WindowHandler:new(6)
-    windowHandler:show()
-
     local menu
     local gameRunner
+    windowHandler = WindowHandler:new(6)
+    windowHandler:show()
 
     endItAll = function()
         if hasEverythingEnded then
@@ -83,7 +91,8 @@ local function menu()
 end
 
 return {
-    menu = menu
+    menu = menu,
+    onVimResize = onVimResize
 }
 
 

@@ -14,7 +14,7 @@ local default_config = {
   plugin = 'VimBeGood',
 
   -- Should print the output to neovim while running
-  use_console = true,
+  use_console = false,
 
   -- Should highlighting be used in console (using echohl)
   highlights = true,

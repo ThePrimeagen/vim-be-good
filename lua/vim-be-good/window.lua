@@ -4,8 +4,9 @@ local WindowHandler = {}
 
 local function generateConfig(padding)
     padding = padding or 6
-    local w = vim.fn.nvim_win_get_width(0)
-    local h = vim.fn.nvim_win_get_height(0)
+    local vimStats = vim.api.nvim_list_uis()[1]
+    local w = vimStats.width
+    local h = vimStats.height
 
     local halfPadding = math.floor(padding / 2)
     local width = w - padding
@@ -65,7 +66,9 @@ function WindowHandler:show()
 end
 
 function WindowHandler:onResize()
+    print("onResize before", vim.inspect(self.config))
     self.config = generateConfig(self.padding)
+    print("onResize", vim.inspect(self.config))
     self:show()
 end
 

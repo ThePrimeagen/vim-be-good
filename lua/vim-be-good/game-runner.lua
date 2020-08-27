@@ -189,7 +189,7 @@ function GameRunner:endRound(success)
 
     self.currentRound = self.currentRound + 1
     log.info("endRound", self.currentRound, self.config.roundCount)
-    if self.currentRound > 1 then -- TODO: self.config.roundCount then
+    if self.currentRound > self.config.roundCount then -- TODO: self.config.roundCount then
         self:endGame()
         return
     end

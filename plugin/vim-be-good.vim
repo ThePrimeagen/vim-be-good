@@ -6,6 +6,7 @@ endfun
 
 augroup VimBeGood
     autocmd!
+    autocmd VimResized * :lua require("vim-be-good").onVimResize()
 augroup END
 
 
