@@ -1,7 +1,7 @@
 local bind = require("vim-be-good.bind");
 local GameUtils = require("vim-be-good.game-utils");
 local RelativeRound = require("vim-be-good.games.relative");
-local CiRound = require("vim-be-good.ci");
+local CiRound = require("vim-be-good.games.ci");
 local log = require("vim-be-good.log");
 
 local endStates = {
