@@ -90,6 +90,8 @@ function HjklRound:render()
         idx = idx + 1
     end
 
+    cursorX = cursorX + #instructions
+
     return lines, cursorX, cursorY
 end
 
