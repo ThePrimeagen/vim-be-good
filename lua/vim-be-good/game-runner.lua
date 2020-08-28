@@ -1,5 +1,6 @@
 local bind = require("vim-be-good.bind");
 local GameUtils = require("vim-be-good.game-utils");
+local HjklRound = require("vim-be-good.games.hjkl");
 local RelativeRound = require("vim-be-good.games.relative");
 local HjklRound = require("vim-be-good.games.hjkl");
 local WhackAMoleRound = require("vim-be-good.games.whackamole");
