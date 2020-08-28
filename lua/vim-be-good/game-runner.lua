@@ -1,5 +1,6 @@
 local bind = require("vim-be-good.bind");
 local GameUtils = require("vim-be-good.game-utils");
+local HjklRound = require("vim-be-good.games.hjkl");
 local RelativeRound = require("vim-be-good.games.relative");
 local CiRound = require("vim-be-good.games.ci");
 local log = require("vim-be-good.log");
@@ -23,6 +24,10 @@ local games = {
     relative = function(difficulty, window)
         return RelativeRound:new(difficulty, window)
     end,
+  
+    hjkl = function(difficulty, window)
+        return HjklRound:new(difficulty, window)
+    end
 }
 
 local runningId = 0

@@ -10,6 +10,7 @@ local difficulty = {
 local games = {
     "ci{",
     "relative",
+    "hjkl",
 }
 
 return {
