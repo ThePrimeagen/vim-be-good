@@ -3,10 +3,10 @@ local log = require("vim-be-good.log")
 
 local boardSizeOptions = {
     noob = 3,
-    easy = 4,
-    medium = 5,
-    hard = 6,
-    nightmare = 8,
+    easy = 5,
+    medium = 7,
+    hard = 8,
+    nightmare = 9,
     tpope = 10
 }
 
@@ -60,30 +60,37 @@ end
 
 function HjklRound:render()
     local boardSize = boardSizeOptions[self.difficulty]
+    log.info("HjklRound:render: " .. boardSize)
     local lines = GameUtils.createEmpty(boardSize)
-
-    local cursorIdx = 0
 
     local xX = 0
     local xY = 0
-    local cX = 0
-    local cY = 0
+    local cursorX = 0
+    local cursorY = 0
 
-    while (xX == cX or xY == cY ) do
+    while (xX == cursorX or xY == cursorY ) do
         xX = self:getRandomNumber(boardSize)
         xY = self:getRandomNumber(boardSize)
-        cX = self:getRandomNumber(boardSize)
-        cY = self:getRandomNumber(boardSize-1)
+        cursorX = self:getRandomNumber(boardSize)
+        cursorY = self:getRandomNumber(boardSize)
     end
 
     local idx = 1
     while idx <= #lines do
-        lines[idx] = "    "
+        local line = lines[idx]
+        for i = 1, boardSize,1
+        do
+            if xX == idx and xY == i then
+                line = line .. "x"
+            else
+                line = line .. " "
+            end
+        end
+        lines[idx] = line
         idx = idx + 1
     end
-    lines[xY] = lines[xY].sub(1,xX)..'x'..lines[xY].sub(xX,4)
 
-    return lines, cursorIdx
+    return lines, cursorX, cursorY
 end
 
 function HjklRound:name()
