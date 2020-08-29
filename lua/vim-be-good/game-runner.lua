@@ -25,7 +25,7 @@ local games = {
     relative = function(difficulty, window)
         return RelativeRound:new(difficulty, window)
     end,
-  
+
     hjkl = function(difficulty, window)
         return HjklRound:new(difficulty, window)
     end,
