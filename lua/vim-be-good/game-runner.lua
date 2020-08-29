@@ -262,6 +262,10 @@ function GameRunner:run()
     cursorLine = cursorLine or 0
     cursorCol = cursorCol or 0
 
+    local instuctionLen = #self.round.getInstructions()
+    local curRoundLineLen = 1
+    cursorLine = cursorLine + curRoundLineLen + instuctionLen
+
     log.info("Setting current line to", cursorLine, cursorCol)
     if cursorLine > 0 then
         vim.api.nvim_win_set_cursor(self.winId, {cursorLine, cursorCol})
