@@ -73,7 +73,7 @@ function WhackAMoleRound:render()
 
     self.__winLine = winSentence
 
-    local cursorIdx = #instructions + 1
+    local cursorIdx =  1
 
     return lines, cursorIdx
 end
