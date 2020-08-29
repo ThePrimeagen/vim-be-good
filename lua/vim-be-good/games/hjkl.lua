@@ -13,6 +13,7 @@ local boardSizeOptions = {
 local instructions = {
     "Remove the x with using only h,j,k,l, and x. Remember, this is for you to be bettter.",
     "Using the arrow keys only makes you dumber. Trust me, I am a scientist",
+    "",
 }
 
 local HjklRound = {}
@@ -63,24 +64,26 @@ function HjklRound:render()
     log.info("HjklRound:render: " .. boardSize)
     local lines = GameUtils.createEmpty(boardSize)
 
-    local xX = 0
-    local xY = 0
-    local cursorX = 0
-    local cursorY = 0
+    local xCol = 1
+    local xLine = 1
+    local cursorCol = 1
+    local cursorLine = 1
 
-    while (xX == cursorX or xY == cursorY ) do
-        xX = self:getRandomNumber(boardSize)
-        xY = self:getRandomNumber(boardSize)
-        cursorX = self:getRandomNumber(boardSize)
-        cursorY = self:getRandomNumber(boardSize)
+    while (xLine == cursorLine or xCol == cursorCol ) do
+        xCol = self:getRandomNumber(boardSize)
+        xLine = self:getRandomNumber(boardSize)
+        cursorCol = self:getRandomNumber(boardSize)
+        cursorLine = self:getRandomNumber(boardSize)
     end
+    log.info("HjklRound:render      xLine: ", xLine,      "      xCol: ", xCol)
+    log.info("HjklRound:render cursorLine: ", cursorLine, " cursorCol: ", cursorCol)
 
     local idx = 1
     while idx <= #lines do
         local line = lines[idx]
         for i = 1, boardSize,1
         do
-            if xX == idx and xY == i then
+            if xLine == idx and xCol == i then
                 line = line .. "x"
             else
                 line = line .. " "
@@ -90,9 +93,7 @@ function HjklRound:render()
         idx = idx + 1
     end
 
-    cursorX = cursorX + #instructions
-
-    return lines, cursorX, cursorY
+    return lines, cursorLine, cursorCol
 end
 
 function HjklRound:name()
