@@ -8,6 +8,17 @@ local difficultyToTime = {
     ["tpope"] = 2000,
 }
 
+local extraSentences = {
+    "One is the best Prime Number",
+    "Brandon is the best One",
+    "I Twitch when I think about the Discord",
+    "My dog is also my dawg",
+    "The internet is an amazing place full of interesting facts",
+    "Did you know the internet crosses continental boundaries using a wire?!",
+    "I am out of interesting facts to type here",
+    "Others should contribute more sentences to be used in the game",
+}
+
 local extraWords = {
     "aar",
     "bar",
@@ -85,6 +96,10 @@ local function getRandomInsertionLocation(lineCount, textLines, topOffset)
     return math.random(topOffset, lineCount - textLines - topOffset)
 end
 
+local function getRandomSentence()
+    return extraSentences[math.random(#extraSentences)]
+end
+
 local function getRandomWord()
     return extraWords[math.random(#extraWords)]
 end
@@ -125,6 +140,7 @@ return {
     getRoundCount = getRoundCount,
     getRandomInsertionLocation = getRandomInsertionLocation,
     getRandomWord = getRandomWord,
+    getRandomSentence = getRandomSentence,
     createEmpty = createEmpty,
     getTime = getTime,
     compareTable = compareTable,

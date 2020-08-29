@@ -1,8 +1,9 @@
 local bind = require("vim-be-good.bind");
 local GameUtils = require("vim-be-good.game-utils");
-local HjklRound = require("vim-be-good.games.hjkl");
 local RelativeRound = require("vim-be-good.games.relative");
 local CiRound = require("vim-be-good.games.ci");
+local HjklRound = require("vim-be-good.games.hjkl");
+local WhackAMoleRound = require("vim-be-good.games.whackamole");
 local log = require("vim-be-good.log");
 
 local endStates = {
@@ -27,7 +28,10 @@ local games = {
   
     hjkl = function(difficulty, window)
         return HjklRound:new(difficulty, window)
-    end
+    end,
+    whackamole = function(difficulty, window)
+        return WhackAMoleRound:new(difficulty, window)
+    end,
 }
 
 local runningId = 0
@@ -267,6 +271,10 @@ function GameRunner:run()
 
     cursorLine = cursorLine or 0
     cursorCol = cursorCol or 0
+
+    local instuctionLen = #self.round.getInstructions()
+    local curRoundLineLen = 1
+    cursorLine = cursorLine + curRoundLineLen + instuctionLen
 
     log.info("Setting current line to", cursorLine, cursorCol)
     if cursorLine > 0 then

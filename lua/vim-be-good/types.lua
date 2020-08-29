@@ -11,6 +11,7 @@ local games = {
     "ci{",
     "relative",
     "hjkl",
+    "whackamole",
 }
 
 return {
