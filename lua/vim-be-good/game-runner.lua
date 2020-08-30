@@ -201,12 +201,12 @@ function GameRunner:endRound(success)
     table.insert(self.results.timings, endTime - self.startTime)
     table.insert(self.results.games, self.round:name())
 
-    self.currentRound = self.currentRound + 1
     log.info("endRound", self.currentRound, self.config.roundCount)
-    if self.currentRound > self.config.roundCount then -- TODO: self.config.roundCount then
+    if self.currentRound >= self.config.roundCount then -- TODO: self.config.roundCount then
         self:endGame()
         return
     end
+    self.currentRound = self.currentRound + 1
 
     vim.schedule_wrap(function() self:run() end)()
 end
@@ -232,8 +232,8 @@ function GameRunner:renderEndGame()
 
     -- TODO: Make this a bit better especially with random.
     table.insert(lines, string.format("%d / %d completed successfully", self.results.successes, self.config.roundCount))
-    table.insert(lines, string.format("Average %f.2", sum / self.config.roundCount))
-    table.insert(lines, string.format("Game Type %s", self.results.games[0]))
+    table.insert(lines, string.format("Average %.2f", sum / self.config.roundCount))
+    table.insert(lines, string.format("Game Type %s", self.results.games[1]))
 
     for idx = 1, 3 do
         table.insert(lines, "")
