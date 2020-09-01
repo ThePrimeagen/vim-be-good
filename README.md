@@ -9,28 +9,22 @@ and tunes https://www.youtube.com/watch?v=emOKaGi8u5U
 
 ## WARNING
 
--   Read Installation instructions carefully. There has been some confusion
-    around that.
 -   The code is a heaping pile of awfulness. It was developed live on Twitch,
     which means I did not carefully think through anything other than memes.
--   If you are looking to extend it I am about to do a refactor in the next
-    couple of weeks to improve the current codebase and make a simplier
-    contributor model.
+-   If you wish to create your own game, look at how relative is done.
+    Everything else should be straight forward, except for the parts that are
+    not.
 
 ## Difficulty
 
-The difficulty only works on a few games for now.
+The difficulty only works on a few games for now. Still a work in progress,
+if you have any ideas, please submit them either as tickets or as a PR.
 
 ## Ideas?
 
 Please submit a ticket for your idea!!!
 
 ## Options
-
-By default vim be good uses a floating buffer. If you wish to have it use the
-current buffer (only if its empty) set `vim_be_good_floating` to 0.
-
-`let g:vim_be_good_floating = 0`
 
 ### Games - relative
 
@@ -63,27 +57,7 @@ character's case to complete the round.
 Linux
 
 ```viml
-Plug 'ThePrimeagen/vim-be-good', {'do': './install.sh'}
-```
-
-Windows 10 - PowerShell
-Requirements:
-[Git for Windows BASH emulation](https://gitforwindows.org/)
-[NodeJs](https://nodejs.org/en/download/)
-
-```viml
-Plug 'ThePrimeagen/vim-be-good', {'do': '.\install.sh'}
-```
-
-2. Then execute `:UpdateRemotePlugins` to finish the installation process.
-
-If you run into any problems when running the `:UpdateRemotePlugins` run `:checkhealth` to check if your vim is node ready.
-
-3. If healthcheck fails node ready you need to install neovim.
-
-```
-# I am sorry for the global install
-npm install -g neovim
+Plug 'ThePrimeagen/vim-be-good'
 ```
 
 ## Playing the games.
@@ -105,26 +79,25 @@ options to change how it is played, the above help menu should include each game
 Please make an issue if you have a command you wish to practice and i'll make
 it into game!!
 
-## Live on Stream
-
-Everything you see here has been developed on stream at [ThePrimeagen](https://twitch.tv/ThePrimeagen).
-Stop by and troll away. Helpful troll hints would be to complement the size of my hands.
-
 ## Issues
 
 Please file an issue. But if you do, please run the logger first and paste in
 the input.
 
-`NVIM_NODE_LOG_FILE=nvim.log nvim` -- this should print out all the
-console.log's that come with vim-be-good. And it should give ThePrimeagen an
-idea of how to stop sucking
+To initialize the logger, add this to your vimrc
+
+```
+let g:vim_be_good_log_file = 1
+```
+
+to get the log file execute `:echo stdpath("data")` to find the path and then
+copy paste it into the issues.
 
 ## Contribute
 
 -   Fork
 -   Create a feature branch
 -   Make changes
--   Build `npm i && npm run build && nvim --headless -c ":UpdateRemotePlugins" -c ":qa"`
 -   Modify the configuration to use local build:
     `~/.config/nvim/init.vim`
 
@@ -134,5 +107,14 @@ idea of how to stop sucking
     call plug#end()
 ```
 
--   Check your new feature `NVIM_NODE_LOG_FILE=/tmp/nvim.log nvim +VimBeGood` (you can view logs with `less /tmp/nvim.log`)
+    You can also just use nvim --cmd "set rtp+=$(pwd)" . to set your current
+    run time path
+
 -   Make PR
+
+## Live on Stream
+
+Everything you see here has been developed on stream at [ThePrimeagen](https://twitch.tv/ThePrimeagen).
+Stop by and troll away. Helpful troll hints would be to complement the size of my hands.
+
+Big shoutouts to PolarMutex, Brandon CC (stands for credit card) and TEEEEEEEEEJ

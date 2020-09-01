@@ -94,12 +94,14 @@ function Menu:onChange()
     end
 
     local found, i, idx = getTableChanges(lines, gameHeader, 1)
+    log.info("Menu:onChange initial instructions", found, i, idx)
     if found then
         self:render()
         return
     end
 
     found, i, idx = getTableChanges(lines, types.games, idx)
+    log.info("Menu:onChange game changes", found, i, idx)
     if found then
         self.game = types.games[i]
 

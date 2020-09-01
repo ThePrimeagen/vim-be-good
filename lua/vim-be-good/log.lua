@@ -14,13 +14,13 @@ local default_config = {
   plugin = 'VimBeGood',
 
   -- Should print the output to neovim while running
-  use_console = false,
+  use_console = vim.g["vim_be_good_log_console"] or false,
 
   -- Should highlighting be used in console (using echohl)
   highlights = true,
 
   -- Should write to a file
-  use_file = true,
+  use_file = vim.g["vim_be_good_log_file"] or false,
 
   -- Any messages above this level will be logged.
   level = "trace",

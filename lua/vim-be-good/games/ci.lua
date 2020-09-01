@@ -51,11 +51,18 @@ function CiRound:checkForWin()
 
     log.info("CiRound:checkForWin", vim.inspect(lowercased))
 
+    winner = false
     if self.config.ifStatement then
-        return lowercased == "if (" .. self.config.randomWord .. ") {bar}"
+        winner = lowercased == "if (" .. self.config.randomWord .. ") {bar}"
+    else
+        winner = lowercased == "[bar]"
     end
 
-    return lowercased == "[bar]"
+    if winner then
+        vim.cmd("stopinsert")
+    end
+
+    return winner
 end
 
 function CiRound:render()

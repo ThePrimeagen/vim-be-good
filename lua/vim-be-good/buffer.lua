@@ -33,8 +33,8 @@ function Buffer:close()
     self.onChangeList = {}
     -- TODO: Teejaay fix this
 
-    if vim.fn.nvim_buf_detach then
-        vim.fn.nvim_buf_detach(self.bufh)
+    if vim.api.nvim_buf_detach then
+        vim.api.nvim_buf_detach(self.bufh)
     end
 end
 

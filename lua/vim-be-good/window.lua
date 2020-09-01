@@ -66,10 +66,22 @@ function WindowHandler:show()
 end
 
 function WindowHandler:onResize()
-    print("onResize before", vim.inspect(self.config))
-    self.config = generateConfig(self.padding)
-    print("onResize", vim.inspect(self.config))
-    self:show()
+    if not vim.api.nvim_win_is_valid(self.winId) then
+        return false
+    end
+
+    local ok, msg = pcall(function()
+        print("onResize before", vim.inspect(self.config))
+        self.config = generateConfig(self.padding)
+        print("onResize", vim.inspect(self.config))
+        self:show()
+    end)
+
+    if not ok then
+        log.info("WindowHandler:onResize", msg)
+    end
+
+    return ok
 end
 
 return WindowHandler

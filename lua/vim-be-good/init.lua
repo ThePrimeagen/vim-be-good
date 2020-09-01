@@ -8,7 +8,9 @@ local windowHandler
 local function onVimResize()
     print("Testing onVimResize")
     if windowHandler then
-        windowHandler:onResize()
+        if not windowHandler:onResize() then
+            windowHandler = nil
+        end
     end
 end
 
