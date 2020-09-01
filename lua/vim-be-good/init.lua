@@ -3,6 +3,8 @@ local Menu = require("vim-be-good.menu");
 local GameRunner = require("vim-be-good.game-runner");
 local log = require("vim-be-good.log")
 
+math.randomseed(os.time())
+
 local windowHandler
 
 local function onVimResize()
