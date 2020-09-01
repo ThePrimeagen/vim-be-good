@@ -4,6 +4,8 @@ fun! VimBeGood()
     lua require("vim-be-good").menu()
 endfun
 
+com! VimBeGood call VimBeGood()
+
 augroup VimBeGood
     autocmd!
     autocmd VimResized * :lua require("vim-be-good").onVimResize()
