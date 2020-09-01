@@ -4,6 +4,7 @@ local log = require("vim-be-good.log")
 local instructions = {
     "Use vim movements to locate the character with the arrow under it as ",
     "quickly as possible. Then invert the character's case to win.",
+    "",
 }
 
 local WhackAMoleRound = {}

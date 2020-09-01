@@ -12,11 +12,13 @@ local instructions = {
     "   item1,",
     "   item1,",
     "]",
+    "----------------------------------------------------------------------",
+    "",
 }
 
 local CiRound = {}
 function CiRound:new(difficulty, window)
-    log.info("New", difficulty, window)
+   log.info("New", difficulty, window)
     local round = {
         window = window,
         difficulty = difficulty,
