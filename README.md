@@ -118,3 +118,4 @@ Everything you see here has been developed on stream at [ThePrimeagen](https://t
 Stop by and troll away. Helpful troll hints would be to complement the size of my hands.
 
 Big shoutouts to PolarMutex, Brandon CC (stands for credit card) and TEEEEEEEEEJ
+@brandoncc @bryall @tjdevries
