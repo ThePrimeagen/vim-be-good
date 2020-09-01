@@ -56,8 +56,6 @@ character's case to complete the round.
 1. Use your favorite plugin manager to install! Only works on Nvim, the one true
    vim.
 
-Linux
-
 ```viml
 Plug 'ThePrimeagen/vim-be-good'
 ```
