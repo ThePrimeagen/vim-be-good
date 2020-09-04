@@ -60,6 +60,21 @@ character's case to complete the round.
 Plug 'ThePrimeagen/vim-be-good'
 ```
 
+### Docker
+
+If you would like, you can use docker to run the game. Doing this will
+automatically use the correct version of neovim for you.
+
+```bash
+docker run -it --rm brandoncc/vim-be-good
+```
+
+If you want to make sure you are playing the latest version of the game, use:
+
+```bash
+docker pull brandoncc/vim-be-good && docker run -it --rm brandoncc/vim-be-good
+```
+
 ## Playing the games.
 
 Before doing ANYTHING at all, make sure you are in an empty file. If the file
