@@ -68,7 +68,7 @@ game immediately when neovim starts.
 
 #### Stable image
 
-This image always runs the version of the game that was bundled when the image
+[This image](https://github.com/brandoncc/docker-vim-be-good/blob/master/stable/Dockerfile) always runs the version of the game that was bundled when the image
 was built. Images are generally built within one day of the main branch
 receiving new commits, but you won't get the new images unless you manually run
 `docker pull brandoncc/vim-be-good:stable` periodically.
@@ -79,7 +79,7 @@ docker run -it --rm brandoncc/vim-be-good:stable
 
 #### "Latest" image
 
-This image runs `:PlugUpdate` before running neovim. This adds about one second
+[This image](https://github.com/brandoncc/docker-vim-be-good/blob/master/latest/Dockerfile) runs `:PlugUpdate` before running neovim. This adds about one second
 to the startup time of the game. The trade-off is that you are always playing
 the latest version of the game, as long as your machine is able to access
 Github.com to pull it.
