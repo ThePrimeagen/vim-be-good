@@ -63,16 +63,29 @@ Plug 'ThePrimeagen/vim-be-good'
 ### Docker
 
 If you would like, you can use docker to run the game. Doing this will
-automatically use the correct version of neovim for you.
+automatically use the correct version of neovim for you, as well as run the
+game immediately when neovim starts.
+
+#### Stable image
+
+This image always runs the version of the game that was bundled when the image
+was built. Images are generally built within one day of the main branch
+receiving new commits, but you won't get the new images unless you manually run
+`docker pull brandoncc/vim-be-good:stable` periodically.
 
 ```bash
-docker run -it --rm brandoncc/vim-be-good
+docker run -it --rm brandoncc/vim-be-good:stable
 ```
 
-If you want to make sure you are playing the latest version of the game, use:
+#### "Latest" image
+
+This image runs `:PlugUpdate` before running neovim. This adds about one second
+to the startup time of the game. The trade-off is that you are always playing
+the latest version of the game, as long as your machine is able to access
+Github.com to pull it.
 
 ```bash
-docker pull brandoncc/vim-be-good && docker run -it --rm brandoncc/vim-be-good
+docker run -it --rm brandoncc/vim-be-good:latest
 ```
 
 ## Playing the games.
