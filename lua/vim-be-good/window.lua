@@ -2,31 +2,31 @@ local log = require("vim-be-good.log")
 local Buffer = require("vim-be-good.buffer")
 local WindowHandler = {}
 
-local function generateConfig(padding)
-    padding = padding or 6
+local function generateConfig(rowPadding, colPadding)
+    rowPadding = rowPadding or 6
+    colPadding = colPadding or 6
     local vimStats = vim.api.nvim_list_uis()[1]
     local w = vimStats.width
     local h = vimStats.height
 
-    local halfPadding = math.floor(padding / 2)
-    local width = w - padding
-    local row = halfPadding
-    local col = w - width
+    local rowHalfPadding = math.floor(rowPadding / 2)
+    local colHalfPadding = math.floor(colPadding / 2)
 
     return {
-        row = halfPadding,
-        col = halfPadding,
-        width = w - padding,
-        height = h - padding,
+        row = rowHalfPadding,
+        col = colHalfPadding,
+        width = w - colPadding,
+        height = h - rowPadding,
         relative = "editor",
     }
 end
 
-function WindowHandler:new(padding)
+function WindowHandler:new(rowPadding, colPadding)
 
     local newWindow = {
-        config = generateConfig(padding),
-        padding = padding,
+        config = generateConfig(rowPadding, colPadding),
+        rowPadding = rowPadding,
+        colPadding = colPadding,
         bufh = 0,
         buffer = nil,
         winId = 0,
@@ -72,7 +72,7 @@ function WindowHandler:onResize()
 
     local ok, msg = pcall(function()
         print("onResize before", vim.inspect(self.config))
-        self.config = generateConfig(self.padding)
+        self.config = generateConfig(self.rowPadding, self.colPadding)
         print("onResize", vim.inspect(self.config))
         self:show()
     end)
