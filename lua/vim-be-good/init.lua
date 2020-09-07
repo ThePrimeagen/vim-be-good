@@ -23,7 +23,9 @@ local function menu()
 
     local menu
     local gameRunner
-    windowHandler = WindowHandler:new(6)
+    local rowPadding = vim.g["vim_be_good_window_padding_row"] or 6
+    local colPadding = vim.g["vim_be_good_window_padding_col"] or 6
+    windowHandler = WindowHandler:new(rowPadding, colPadding)
     windowHandler:show()
 
     endItAll = function()
