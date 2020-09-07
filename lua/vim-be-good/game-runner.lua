@@ -6,6 +6,9 @@ local CiRound = require("vim-be-good.games.ci");
 local HjklRound = require("vim-be-good.games.hjkl");
 local WhackAMoleRound = require("vim-be-good.games.whackamole");
 local log = require("vim-be-good.log");
+local statistics = require("vim-be-good.statistics");
+
+Stats = statistics:new()
 
 local endStates = {
     menu = "Menu",
@@ -199,6 +202,7 @@ function GameRunner:checkForWin()
 end
 
 function GameRunner:endRound(success)
+    success = success or false
     local self = self
 
     self.running = false
@@ -209,9 +213,19 @@ function GameRunner:endRound(success)
     end
 
     local endTime = GameUtils.getTime()
-    table.insert(self.results.timings, endTime - self.startTime)
+    local totalTime = endTime - self.startTime
+    table.insert(self.results.timings, totalTime)
     table.insert(self.results.games, self.round:name())
 
+    local result = {
+        timestamp = vim.fn.localtime(),
+        roundNum = self.currentRound,
+        difficulty = self.round.difficulty,
+        roundName = self.round:name(),
+        success = success,
+        time = totalTime,
+    }
+    Stats:logResult(result)
     log.info("endRound", self.currentRound, self.config.roundCount)
     if self.currentRound >= self.config.roundCount then -- TODO: self.config.roundCount then
         self:endGame()
