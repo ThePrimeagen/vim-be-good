@@ -23,8 +23,8 @@ end
 function statistics:logResult(result)
     if self.saveStats then
         local fp = io.open(self.file, "a")
-        local str = string.format("%s,%s,%s,%s,%f\n",
-        result.timestamp, result.roundNum, result.difficulty, result.roundName, result.time)
+        local str = string.format("%s,%s,%s,%s,%s,%f\n",
+        result.timestamp, result.roundNum, result.difficulty, result.roundName, result.success, result.time)
         fp:write(str)
         fp:close()
     end

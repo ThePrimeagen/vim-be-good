@@ -202,6 +202,7 @@ function GameRunner:checkForWin()
 end
 
 function GameRunner:endRound(success)
+    success = success or false
     local self = self
 
     self.running = false
@@ -221,6 +222,7 @@ function GameRunner:endRound(success)
         roundNum = self.currentRound,
         difficulty = self.round.difficulty,
         roundName = self.round:name(),
+        success = success,
         time = totalTime,
     }
     Stats:logResult(result)
