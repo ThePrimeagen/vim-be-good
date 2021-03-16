@@ -38,7 +38,7 @@ end
 
 function WindowHandler:close()
     if self.winId ~= 0 then
-        vim.fn.nvim_win_close(self.winId, true)
+        vim.api.nvim_win_close(self.winId, true)
     end
 
     self.winId = 0
@@ -54,7 +54,7 @@ end
 
 function WindowHandler:show()
     if self.bufh == 0 then
-        self.bufh = vim.fn.nvim_create_buf(false, true)
+        self.bufh = vim.api.nvim_create_buf(false, true)
         self.buffer = Buffer:new(self.bufh, self)
     end
 
