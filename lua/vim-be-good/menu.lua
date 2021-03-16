@@ -1,7 +1,6 @@
 local log = require("vim-be-good.log")
 local bind = require("vim-be-good.bind")
 local types = require("vim-be-good.types")
-local createEmpty = require("vim-be-good.game-utils").createEmpty
 
 local Menu = {}
 
@@ -37,6 +36,12 @@ local credits = {
     "https://twitch.tv/ThePrimeagen",
 }
 
+local games = {}
+for k in pairs(types.games) do
+    table.insert(games, types.games[k]:name())
+end
+table.insert(games, "random")
+
 function Menu:new(window, onResults)
     local menuObj = {
         window = window,
@@ -47,7 +52,7 @@ function Menu:new(window, onResults)
         difficulty = types.difficulty[2],
 
         -- relative
-        game = types.games[1],
+        game = games[1],
     }
 
     window.buffer:clear()
@@ -63,7 +68,7 @@ function Menu:new(window, onResults)
 end
 
 local function getMenuLength()
-    return #types.games + #types.difficulty + #gameHeader +
+    return #games + #types.difficulty + #gameHeader +
         #difficultyHeader + #credits
 end
 
@@ -100,10 +105,10 @@ function Menu:onChange()
         return
     end
 
-    found, i, idx = getTableChanges(lines, types.games, idx)
+    found, i, idx = getTableChanges(lines, games, idx)
     log.info("Menu:onChange game changes", found, i, idx)
     if found then
-        self.game = types.games[i]
+        self.game = games[i]
 
         log.info("Starting Game", self.game, self.difficulty)
         ok, msg = pcall(self.onResults, self.game, self.difficulty)
@@ -143,8 +148,8 @@ function Menu:render()
         table.insert(lines, gameHeader[idx])
     end
 
-    for idx = 1, #types.games do
-        table.insert(lines, createMenuItem(types.games[idx], self.game))
+    for idx = 1, #games do
+        table.insert(lines, createMenuItem(games[idx], self.game))
     end
 
     for idx = 1, #difficultyHeader do

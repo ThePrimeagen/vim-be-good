@@ -1,10 +1,6 @@
 local bind = require("vim-be-good.bind");
 local types = require("vim-be-good.types");
 local GameUtils = require("vim-be-good.game-utils");
-local RelativeRound = require("vim-be-good.games.relative");
-local CiRound = require("vim-be-good.games.ci");
-local HjklRound = require("vim-be-good.games.hjkl");
-local WhackAMoleRound = require("vim-be-good.games.whackamole");
 local log = require("vim-be-good.log");
 local statistics = require("vim-be-good.statistics");
 
@@ -21,30 +17,13 @@ local states = {
     gameEnd = 2,
 }
 
-local games = {
-    ["ci{"] = function(difficulty, window)
-        return CiRound:new(difficulty, window)
-    end,
-
-    relative = function(difficulty, window)
-        return RelativeRound:new(difficulty, window)
-    end,
-
-    hjkl = function(difficulty, window)
-        return HjklRound:new(difficulty, window)
-    end,
-    whackamole = function(difficulty, window)
-        return WhackAMoleRound:new(difficulty, window)
-    end,
-}
-
 local runningId = 0
 
 local GameRunner = {}
 
 local function getGame(game, difficulty, window)
     log.info("getGame", game, difficulty, window)
-    return games[game](difficulty, window)
+    return types.games[game]:new(difficulty, window)
 end
 
 -- games table, difficulty string
@@ -60,8 +39,8 @@ function GameRunner:new(selectedGames, difficulty, window, onFinished)
 
     if selectedGames[1] == "random" then
         selectedGames = {}
-        for idx = 1, #types.games - 1 do
-            table.insert(selectedGames, types.games[idx])
+        for k in pairs(types.games) do
+            table.insert(selectedGames, k)
         end
         log.info("GameRunner:new - random selected", vim.inspect(selectedGames))
     end
