@@ -303,7 +303,7 @@ function GameRunner:run()
 
     log.info("Setting current line to", cursorLine, cursorCol)
     if cursorLine > 0 then
-        vim.api.nvim_win_set_cursor(self.winId, {cursorLine, cursorCol})
+        vim.api.nvim_win_set_cursor(0, {cursorLine, cursorCol})
     end
 
     self.startTime = GameUtils.getTime()
