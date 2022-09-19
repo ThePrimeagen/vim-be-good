@@ -2,6 +2,7 @@ local bind = require("vim-be-good.bind");
 local types = require("vim-be-good.types");
 local GameUtils = require("vim-be-good.game-utils");
 local RelativeRound = require("vim-be-good.games.relative");
+local WordRound = require("vim-be-good.games.words");
 local CiRound = require("vim-be-good.games.ci");
 local HjklRound = require("vim-be-good.games.hjkl");
 local WhackAMoleRound = require("vim-be-good.games.whackamole");
@@ -30,9 +31,14 @@ local games = {
         return RelativeRound:new(difficulty, window)
     end,
 
+    words = function(difficulty, window)
+        return WordRound:new(difficulty, window)
+    end,
+
     hjkl = function(difficulty, window)
         return HjklRound:new(difficulty, window)
     end,
+
     whackamole = function(difficulty, window)
         return WhackAMoleRound:new(difficulty, window)
     end,
@@ -203,7 +209,6 @@ end
 
 function GameRunner:endRound(success)
     success = success or false
-    local self = self
 
     self.running = false
     if success then
@@ -232,6 +237,10 @@ function GameRunner:endRound(success)
         return
     end
     self.currentRound = self.currentRound + 1
+
+    if not self.window:isValid() then
+        return
+    end
 
     vim.schedule_wrap(function() self:run() end)()
 end
@@ -284,6 +293,7 @@ end
 function GameRunner:run()
     local idx = math.random(1, #self.rounds)
     self.round = self.rounds[idx]
+
     local roundConfig = self.round:getConfig()
     log.info("RoundName:", self.round:name())
 

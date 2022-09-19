@@ -135,6 +135,13 @@ local function trimLines(lines)
     return trimmed
 end
 
+
+local function filterEmptyLines(lines)
+    return vim.tbl_filter(function(line)
+        return line ~= ""
+    end, lines)
+end
+
 return {
     difficultyToTime = difficultyToTime,
     getRoundCount = getRoundCount,
@@ -145,6 +152,7 @@ return {
     getTime = getTime,
     compareTable = compareTable,
     trimString = trimString,
-    trimLines = trimLines
+    trimLines = trimLines,
+    filterEmptyLines = filterEmptyLines,
 }
 
