@@ -52,6 +52,10 @@ function WindowHandler:close()
     self.buffer = nil
 end
 
+function WindowHandler:isValid()
+    return vim.api.nvim_win_is_valid(self.winId)
+end
+
 function WindowHandler:show()
     if self.bufh == 0 then
         self.bufh = vim.api.nvim_create_buf(false, true)
