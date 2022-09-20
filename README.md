@@ -28,13 +28,13 @@ Please submit a ticket for your idea!!!
 
 ### Games - relative
 
-By default vim be good returns random offset for game difficult above noob, if
-you with to set fixed offset set `vim_be_good_delete_me_offset` to desired
+By default vim be good returns random offset for game difficulty above noob, if
+you wish to set fixed offset set `vim_be_good_delete_me_offset` to desired
 value.
 
 `let g:vim_be_good_delete_me_offset = 35`
 
-## Instructions are at top of games.
+## Instructions are at the top of games.
 
 here too!
 
@@ -105,7 +105,7 @@ options to change how it is played, the above help menu should include each game
 ## Future Games
 
 Please make an issue if you have a command you wish to practice and i'll make
-it into game!!
+it into a game!!
 
 ## Issues
 
@@ -118,7 +118,7 @@ To initialize the logger, add this to your vimrc
 let g:vim_be_good_log_file = 1
 ```
 
-to get the log file execute `:echo stdpath("data")` to find the path and then
+to get the log file executed `:echo stdpath("data")` to find the path and then
 copy paste it into the issues.
 
 ## Contribute
@@ -145,5 +145,5 @@ copy paste it into the issues.
 Everything you see here has been developed on stream at [ThePrimeagen](https://twitch.tv/ThePrimeagen).
 Stop by and troll away. Helpful troll hints would be to complement the size of my hands.
 
-Big shoutouts to PolarMutex, Brandon CC (stands for credit card) and TEEEEEEEEEJ
+Big shout outs to PolarMutex, Brandon CC (stands for credit card) and TEEEEEEEEEJ
 @brandoncc @bryall @tjdevries
