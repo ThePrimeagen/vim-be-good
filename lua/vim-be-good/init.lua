@@ -8,7 +8,6 @@ math.randomseed(os.time())
 local windowHandler
 
 local function onVimResize()
-    print("Testing onVimResize")
     if windowHandler then
         if not windowHandler:onResize() then
             windowHandler = nil
