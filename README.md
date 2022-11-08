@@ -53,12 +53,16 @@ character's case to complete the round.
 
 ## MUST USE NEOVIM 5.x!!!!!!
 
-1. Use your favorite plugin manager to install! Only works on Nvim, the one true
-   vim.
+With a plugin manager: 
 
 ```viml
 Plug 'ThePrimeagen/vim-be-good'
 ```
+Without a plugin manager:
+```bash
+git clone https://github.com/ThePrimeagen/vim-be-good ~/.config/nvim/pack/foo/start/vim-be-good/
+```
+
 
 ### Docker
 
