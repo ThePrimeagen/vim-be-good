@@ -87,6 +87,15 @@ Github.com to pull it.
 ```bash
 docker run -it --rm brandoncc/vim-be-good:latest
 ```
+#### Build the image locally using the Containerfile
+
+```bash
+docker build -t vimbegood -f Containerfile .
+```
+or
+```bash
+podman build -t vimbegood -f Containerfile .
+```
 
 ## Playing the games.
 
