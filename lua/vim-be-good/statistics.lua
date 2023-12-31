@@ -20,6 +20,23 @@ function statistics:new(config)
     self.__index = self
     return setmetatable(stats, self)
 end
+function statistics:loadHighscore()
+    local out = io.open(self.file, 'r')
+
+    local fLines = {}
+    for l in out:lines() do
+        table.insert(fLines, l)
+    end
+
+    out:close()
+
+    local t = {}
+    t = {}
+    for k, v in string.gmatch(fLines[1], "(%w+):(%d+%.%d+)") do
+        t[k] = v
+    end
+    return t
+end
 
 function statistics:logHighscore(average,gameType)
     if self.saveStats then
@@ -33,16 +50,12 @@ function statistics:logHighscore(average,gameType)
         out:close()
 
         -- check if new highscore is lower then current highsocre
+        -- \\todo do not overwrite first line
+        -- \\todo check if game is already in highscore if not add it 
         local currHighscore = (string.match(fLines[1],gameType..":".."(%d+%.%d%d)"))
         if tonumber(currHighscore) > average then
             fLines[1] = string.gsub(fLines[1],gameType..":"..currHighscore,gameType..":"..string.format("%.2f",average))
         end
-
-        --local i,j = string.find(fLines[1], gameType..":".."(%d+%.%d%d)")
-        --print(string.sub(fLines[1],i,j))
-        --if currHighscore > average then
-        --    fLines[1] = string.gsub(fLines[1], gameType..":".."%d+%.%d%d" , gameType..":"..string.format("%.2f" , average))
-        --end
 
         local out = io.open(self.file, 'w')
         for _, l in ipairs(fLines) do

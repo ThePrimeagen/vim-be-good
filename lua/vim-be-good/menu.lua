@@ -2,6 +2,9 @@ local log = require("vim-be-good.log")
 local bind = require("vim-be-good.bind")
 local types = require("vim-be-good.types")
 local createEmpty = require("vim-be-good.game-utils").createEmpty
+local statistics = require("vim-be-good.statistics")
+
+
 
 local Menu = {}
 
@@ -37,7 +40,7 @@ local credits = {
     "https://twitch.tv/ThePrimeagen",
 }
 
-function Menu:new(window, onResults)
+function Menu:new(window, onResults, highscore)
     local menuObj = {
         window = window,
         buffer = window.buffer,
@@ -48,6 +51,8 @@ function Menu:new(window, onResults)
 
         -- relative
         game = types.games[1],
+
+        highscore = highscore,
     }
 
     window.buffer:clear()
@@ -144,7 +149,8 @@ function Menu:render()
     end
 
     for idx = 1, #types.games do
-        table.insert(lines, createMenuItem(types.games[idx], self.game))
+        local highscoreTab = Stats:loadHighscore()
+        table.insert(lines, createMenuItem(types.games[idx], self.game).." \t\t\t | " .. tostring(highscoreTab[types.games[idx]]) .. " sec")
     end
 
     for idx = 1, #difficultyHeader do
