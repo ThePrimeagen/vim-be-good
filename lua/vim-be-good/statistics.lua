@@ -33,8 +33,13 @@ function statistics:logHighscore(average,gameType)
         out:close()
 
         -- check if new highscore is lower then current highsocre
-        local i,j = string.find(fLines[1], gameType..":".."(%d+%.%d%d)")
-        print(string.sub(fLines[1],i,j))
+        local currHighscore = (string.match(fLines[1],gameType..":".."(%d+%.%d%d)"))
+        if tonumber(currHighscore) > average then
+            fLines[1] = string.gsub(fLines[1],gameType..":"..currHighscore,gameType..":"..string.format("%.2f",average))
+        end
+
+        --local i,j = string.find(fLines[1], gameType..":".."(%d+%.%d%d)")
+        --print(string.sub(fLines[1],i,j))
         --if currHighscore > average then
         --    fLines[1] = string.gsub(fLines[1], gameType..":".."%d+%.%d%d" , gameType..":"..string.format("%.2f" , average))
         --end
