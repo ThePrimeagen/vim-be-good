@@ -152,7 +152,7 @@ function Menu:render()
 
     for idx = 1, #types.games do
         log.info("save highscore ?", vim.g["vim_be_good_save_highscore"])
-        if vim.g["vim_be_good_save_highscore"] then
+        if vim.g["vim_be_good_save_highscore"] or false then
             if types.games[idx] == "random" then
                 table.insert(lines, createMenuItem(types.games[idx], self.game))
             else

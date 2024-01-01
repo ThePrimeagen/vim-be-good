@@ -23,6 +23,7 @@ function statistics:new(config)
 end
 
 function statistics:loadHighscore()
+    log.info("save highscore?",self.saveHighscore)
     if self.saveHighscore then
         local out = io.open(self.file, 'r')
 
@@ -43,7 +44,7 @@ function statistics:loadHighscore()
 end
 
 function statistics:logHighscore(average,gameType)
-    if self.saveStats then
+    if self.saveHighscore then
         local out = io.open(self.file, 'r')
 
         local fLines = {}
