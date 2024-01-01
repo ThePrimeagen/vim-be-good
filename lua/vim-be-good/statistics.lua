@@ -2,10 +2,7 @@ local log = require("vim-be-good.log")
 local types = require("vim-be-good.types")
 local default_config =  {
     plugin = 'VimBeGoodStats',
-    -- todo change back
-    -- set to true since i dont know how to enable stats via config 
-    save_statistics = true,
-
+    save_statistics = vim.g["vim_be_good_save_statistics"] or false,
 }
 
 local statistics = {}
