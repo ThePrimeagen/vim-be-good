@@ -54,9 +54,17 @@ function statistics:logHighscore(average,gameType)
 
         out:close()
 
-        -- check if new highscore is lower then current highsocre
-        -- \\todo do not overwrite first line
-        -- \\todo check if game is already in highscore if not add it 
+        -- TODO if gametype is no in list could cause a crash
+        -- this inits the line if its not present but does not account for new gameTypes
+        if string.find(fLines[1],":") == nil then
+            local highscoreLine = ""
+            for idx = 1, #types.games - 1 do
+                highscoreLine = highscoreLine .. types.games[idx] .. ":10.00,"
+            end
+            table.insert(fLines,1,highscoreLine)
+        end
+        --end
+
         local currHighscore = (string.match(fLines[1],gameType..":".."(%d+%.%d%d)"))
         if tonumber(currHighscore) > average then
             fLines[1] = string.gsub(fLines[1],gameType..":"..currHighscore,gameType..":"..string.format("%.2f",average))
@@ -65,7 +73,6 @@ function statistics:logHighscore(average,gameType)
         local out = io.open(self.file, 'w')
         for _, l in ipairs(fLines) do
             out:write(l.."\n")
-            -- out:write("\n") -- strage when I read the file break line should still be present  
         end
         out:close()
     end
