@@ -29,7 +29,7 @@ function statistics:loadHighscore()
 
     local t = {}
     t = {}
-    for k, v in string.gmatch(fLines[1], "(%w+):(%d+%.%d+)") do
+    for k, v in string.gmatch(fLines[1], "(%w+{*):(%d+%.%d+)") do
         t[k] = v
     end
     return t
@@ -56,8 +56,8 @@ function statistics:logHighscore(average,gameType)
 
         local out = io.open(self.file, 'w')
         for _, l in ipairs(fLines) do
-            out:write(l)
-            out:write("\n") -- strage bug that reading lines kills breakline plus concat line + \n also crashes
+            out:write(l.."\n")
+            -- out:write("\n") -- strage when I read the file break line should still be present  
         end
         out:close()
     end

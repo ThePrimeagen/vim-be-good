@@ -143,14 +143,19 @@ end
 function Menu:render()
     self.window.buffer:clearGameLines()
 
+    local highscoreTab = Stats:loadHighscore()
     local lines = { }
+
     for idx = 1, #gameHeader do
         table.insert(lines, gameHeader[idx])
     end
 
     for idx = 1, #types.games do
-        local highscoreTab = Stats:loadHighscore()
-        table.insert(lines, createMenuItem(types.games[idx], self.game).." \t\t\t | " .. tostring(highscoreTab[types.games[idx]]) .. " sec")
+        if types.games[idx] == "random" then
+            table.insert(lines, createMenuItem(types.games[idx], self.game))
+        else
+            table.insert(lines, createMenuItem(types.games[idx], self.game).." \t\t\t | " .. tostring(highscoreTab[types.games[idx]]) .. " sec")
+        end
     end
 
     for idx = 1, #difficultyHeader do
