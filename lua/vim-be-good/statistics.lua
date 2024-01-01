@@ -1,38 +1,45 @@
 local log = require("vim-be-good.log")
 local types = require("vim-be-good.types")
+
 local default_config =  {
     plugin = 'VimBeGoodStats',
     save_statistics = vim.g["vim_be_good_save_statistics"] or false,
+    save_highscore = vim.g["vim_be_good_save_highscore"] or false,
 }
 
 local statistics = {}
+
 function statistics:new(config)
     config = config or {}
     config = vim.tbl_deep_extend("force", default_config, config)
 
     local stats = {
         file = string.format('%s/%s.log', vim.api.nvim_call_function('stdpath', {'data'}), config.plugin),
-        saveStats = config.save_statistics
+        saveStats = config.save_statistics,
+        saveHighscore = config.save_highscore
     }
     self.__index = self
     return setmetatable(stats, self)
 end
+
 function statistics:loadHighscore()
-    local out = io.open(self.file, 'r')
+    if self.saveHighscore then
+        local out = io.open(self.file, 'r')
 
-    local fLines = {}
-    for l in out:lines() do
-        table.insert(fLines, l)
+        local fLines = {}
+        for l in out:lines() do
+            table.insert(fLines, l)
+        end
+
+        out:close()
+
+        local highscoreTable = {}
+        highscoreTable= {}
+        for k, v in string.gmatch(fLines[1], "(%w+{*):(%d+%.%d+)") do
+            highscoreTable[k] = v
+        end
+        return highscoreTable
     end
-
-    out:close()
-
-    local t = {}
-    t = {}
-    for k, v in string.gmatch(fLines[1], "(%w+{*):(%d+%.%d+)") do
-        t[k] = v
-    end
-    return t
 end
 
 function statistics:logHighscore(average,gameType)

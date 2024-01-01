@@ -151,10 +151,15 @@ function Menu:render()
     end
 
     for idx = 1, #types.games do
-        if types.games[idx] == "random" then
-            table.insert(lines, createMenuItem(types.games[idx], self.game))
+        log.info("save highscore ?", vim.g["vim_be_good_save_highscore"])
+        if vim.g["vim_be_good_save_highscore"] then
+            if types.games[idx] == "random" then
+                table.insert(lines, createMenuItem(types.games[idx], self.game))
+            else
+                table.insert(lines, createMenuItem(types.games[idx], self.game).." \t\t\t | " .. tostring(highscoreTab[types.games[idx]]) .. " sec")
+            end
         else
-            table.insert(lines, createMenuItem(types.games[idx], self.game).." \t\t\t | " .. tostring(highscoreTab[types.games[idx]]) .. " sec")
+            table.insert(lines, createMenuItem(types.games[idx], self.game))
         end
     end
 
