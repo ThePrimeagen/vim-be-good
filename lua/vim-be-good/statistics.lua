@@ -23,7 +23,6 @@ function statistics:new(config)
 end
 
 function statistics:loadHighscore()
-    log.info("save highscore?",self.saveHighscore)
     if self.saveHighscore then
         local out = io.open(self.file, 'r')
 
@@ -54,8 +53,7 @@ function statistics:logHighscore(average,gameType)
 
         out:close()
 
-        -- TODO if gametype is no in list could cause a crash
-        -- this inits the line if its not present but does not account for new gameTypes
+        -- this init-line if its not present add init line in statistics tab
         if string.find(fLines[1],":") == nil then
             local highscoreLine = ""
             for idx = 1, #types.games - 1 do
@@ -63,11 +61,15 @@ function statistics:logHighscore(average,gameType)
             end
             table.insert(fLines,1,highscoreLine)
         end
-        --end
 
         local currHighscore = (string.match(fLines[1],gameType..":".."(%d+%.%d%d)"))
-        if tonumber(currHighscore) > average then
-            fLines[1] = string.gsub(fLines[1],gameType..":"..currHighscore,gameType..":"..string.format("%.2f",average))
+        -- if game gets new gametypes then they are not in highscore line this could case a crash
+        if currHighscore == nil then
+            fLines[1] = fLines[1] .. "," .. gameType .. ":" .. string.format("%.2f",average)
+        else
+            if tonumber(currHighscore) > average then
+                fLines[1] = string.gsub(fLines[1],gameType..":"..currHighscore,gameType..":"..string.format("%.2f",average))
+            end
         end
 
         local out = io.open(self.file, 'w')
