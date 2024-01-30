@@ -3,9 +3,13 @@ local log = require("vim-be-good.log")
 local gameLineCount = 20
 
 local instructions = {
-    "Replace the outer container (if (...) { ... } or [ ... ]) with \"bar\"",
+    "Replace the content of the outer container, or the executable content of the if statement, with \"bar\"",
     "",
     "e.g.:",
+    "if (foo) {       if (foo) {",
+    "  qux        ->    bar",
+    "}                }",
+    "",
     "[                    [",
     "   item1,            bar",
     "   item1,       ->   ]",
