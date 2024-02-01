@@ -40,6 +40,7 @@ local extraSentences = {
     "I see what you mean as I am already running out of interesting things to say",
     "Teenage Dirtbag by Wheatus is an underappreciated song",
     "Others should contribute more sentences to be used in the game",
+    "Einstein? Newton? Pfft. Noobs. Tom, however, is a genius.",
 }
 
 local extraWords = {
