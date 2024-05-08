@@ -286,6 +286,34 @@ end
 function GameRunner:endGame()
     local lines = self:renderEndGame()
     self.state = states.gameEnd
+
+    local sum = 0
+    for idx = 1, #self.results.timings do
+        sum = sum + self.results.timings[idx]
+    end
+    local mean = sum / self.config.roundCount
+
+    local tmp = 0
+    for idx = 1, #self.results.timings do
+            tmp = tmp + (self.results.timings[idx] - mean)^2
+    end
+    local sstddev = (1/(self.config.roundCount - 1)*tmp)^(1/2)
+
+    table.sort(self.results.timings)
+    local min = self.results.timings[1]
+    local max = self.results.timings[#self.results.timings]
+
+    local result = {
+        timestamp = vim.fn.localtime(),
+        gameName = self.round:name(),
+        difficulty = self.round.difficulty,
+        successRate = self.results.successes / self.config.roundCount,
+        meanTime = mean,
+	sstdDevTime = sstddev,
+	minTime = min,
+	maxTime = max
+    }
+    Stats:logGameResult(result)
     self.window.buffer:setInstructions({})
     self.window.buffer:render(lines)
 end
