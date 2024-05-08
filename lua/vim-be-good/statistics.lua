@@ -13,7 +13,8 @@ function statistics:new(config)
     config = vim.tbl_deep_extend("force", default_config, config)
 
     local stats = {
-        file = string.format('%s/%s.log', vim.api.nvim_call_function('stdpath', {'data'}), config.plugin),
+        file = string.format('%s/%s_%s.log', vim.api.nvim_call_function('stdpath', {'data'}), config.plugin, "rounds"),
+        gameLogFile = string.format('%s/%s_%s.log', vim.api.nvim_call_function('stdpath', {'data'}), config.plugin, "games"),
         saveStats = config.save_statistics
     }
     self.__index = self
@@ -30,4 +31,13 @@ function statistics:logResult(result)
     end
 end
 
+function statistics:logGameResult(result)
+    if self.saveStats then
+        local fp = io.open(self.gameLogFile, "a")
+        local str = string.format("%s,%s,%s,%f,%f,%f,%f,%f\n",
+        result.timestamp, result.gameName, result.difficulty, result.successRate, result.meanTime, result.sstdDevTime, result.minTime, result.maxTime)
+        fp:write(str)
+        fp:close()
+    end
+end
 return statistics
