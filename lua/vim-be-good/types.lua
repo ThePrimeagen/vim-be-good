@@ -15,6 +15,7 @@ local games = {
     "whackamole",
     "random",
     "pdelete",
+    "insidepdelete",
 }
 
 return {

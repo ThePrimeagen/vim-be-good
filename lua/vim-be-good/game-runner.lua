@@ -7,6 +7,7 @@ local CiRound = require("vim-be-good.games.ci")
 local HjklRound = require("vim-be-good.games.hjkl")
 local WhackAMoleRound = require("vim-be-good.games.whackamole")
 local PDelete = require("vim-be-good.games.pdelete")
+local InsidePDelete = require("vim-be-good.games.insidepdelete")
 local log = require("vim-be-good.log")
 local statistics = require("vim-be-good.statistics")
 
@@ -46,6 +47,10 @@ local games = {
 
     pdelete = function(difficulty, window)
         return PDelete:new(difficulty, window)
+    end,
+
+    insidepdelete = function(difficulty, window)
+        return InsidePDelete:new(difficulty, window)
     end,
 }
 
