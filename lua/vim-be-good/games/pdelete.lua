@@ -11,8 +11,8 @@ local randomOffset = {
 }
 
 local instructions = {
-    "Test your ability to hop by relative line numbers",
-    'To win the game, delete the line that says "DELETE_ME"',
+    "Test your ability to hop by relative line numbers to the paragraph and then delete it",
+    "To win the game, delete the whole paragraph in one go. Use motions like (dip, dap, vipd, vapd)",
 }
 
 local PDelete = {}
@@ -47,7 +47,7 @@ function PDelete:checkForWin()
 
     while idx <= #lines and not found do
         local line = lines[idx]
-        found = string.match(line, "DELETE_ME")
+        found = string.match(line, "local paragraphText = 'delete this whole paragraph please!'")
 
         idx = idx + 1
     end
@@ -57,8 +57,9 @@ function PDelete:checkForWin()
 end
 
 function PDelete:render()
+    local paragraphLength = math.random(2, 5)
     local lines = GameUtils.createEmpty(20)
-    local deleteMeIdx = math.random(1, 20)
+    local deleteMeIdx = math.random(1, 20 - paragraphLength)
     local goHigh = deleteMeIdx < 17 and math.random() > 0.5
 
     local cursorIdx
@@ -68,7 +69,9 @@ function PDelete:render()
         cursorIdx = math.random(1, deleteMeIdx - 1)
     end
 
-    lines[deleteMeIdx] = " DELETE_ME"
+    for i = 0, paragraphLength - 1 do
+        lines[deleteMeIdx + i] = "local paragraphText = 'delete this whole paragraph please!'"
+    end
 
     return lines, cursorIdx
 end
