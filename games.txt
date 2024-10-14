@@ -1,0 +1,18 @@
+1. Combines relative jumping with k and j then selecting the paragraph with vip or vap and delete
+    
+    local x = 2000000
+    local x = 2000000
+    local x = 2000000
+    local x = 2000000
+
+2. Combines relative jumping with k and j then uses V relative k or j to then select the section between then delete
+
+- - - - - - - - - - - - 
+    local x = 2000000
+    local x = 2000000
+    local x = 2000000
+    local x = 2000000
+- - - - - - - - - - - - 
+
+
+3. 

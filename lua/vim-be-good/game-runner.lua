@@ -1,13 +1,14 @@
-local bind = require("vim-be-good.bind");
-local types = require("vim-be-good.types");
-local GameUtils = require("vim-be-good.game-utils");
-local RelativeRound = require("vim-be-good.games.relative");
-local WordRound = require("vim-be-good.games.words");
-local CiRound = require("vim-be-good.games.ci");
-local HjklRound = require("vim-be-good.games.hjkl");
-local WhackAMoleRound = require("vim-be-good.games.whackamole");
-local log = require("vim-be-good.log");
-local statistics = require("vim-be-good.statistics");
+local bind = require("vim-be-good.bind")
+local types = require("vim-be-good.types")
+local GameUtils = require("vim-be-good.game-utils")
+local RelativeRound = require("vim-be-good.games.relative")
+local WordRound = require("vim-be-good.games.words")
+local CiRound = require("vim-be-good.games.ci")
+local HjklRound = require("vim-be-good.games.hjkl")
+local WhackAMoleRound = require("vim-be-good.games.whackamole")
+local PDelete = require("vim-be-good.games.pdelete")
+local log = require("vim-be-good.log")
+local statistics = require("vim-be-good.statistics")
 
 Stats = statistics:new()
 
@@ -41,6 +42,10 @@ local games = {
 
     whackamole = function(difficulty, window)
         return WhackAMoleRound:new(difficulty, window)
+    end,
+
+    pdelete = function(difficulty, window)
+        return PDelete:new(difficulty, window)
     end,
 }
 
@@ -88,7 +93,7 @@ function GameRunner:new(selectedGames, difficulty, window, onFinished)
             timings = {},
             games = {},
         },
-        state = states.playing
+        state = states.playing,
     }
 
     self.__index = self
@@ -144,7 +149,9 @@ function GameRunner:init()
     vim.schedule(function()
         self.window.buffer:setInstructions({})
         self.window.buffer:clear()
-        self:countdown(3, function() self:run() end)
+        self:countdown(3, function()
+            self:run()
+        end)
     end)
 end
 
@@ -168,10 +175,13 @@ function GameRunner:checkForNext()
     local item = expectedLines[idx]
 
     log.info("GameRunner:checkForNext: compared", vim.inspect(lines), vim.inspect(expectedLines))
-    log.info("GameRunner:checkForNext: deleted line is", item,
+    log.info(
+        "GameRunner:checkForNext: deleted line is",
+        item,
         item == endStates.menu,
         item == endStates.replay,
-        item == endStates.quit)
+        item == endStates.quit
+    )
 
     local foundKey = nil
     for k, v in pairs(endStates) do
@@ -183,7 +193,7 @@ function GameRunner:checkForNext()
 
     -- todo implement this correctly....
     if foundKey then
-       self.onFinished(self, foundKey)
+        self.onFinished(self, foundKey)
     else
         log.info("GameRunner:checkForNext Some line was changed that is insignificant, rerendering")
         self.window.buffer:render(expectedLines)
@@ -242,7 +252,9 @@ function GameRunner:endRound(success)
         return
     end
 
-    vim.schedule_wrap(function() self:run() end)()
+    vim.schedule_wrap(function()
+        self:run()
+    end)()
 end
 
 function GameRunner:close()
@@ -252,8 +264,7 @@ function GameRunner:close()
 end
 
 function GameRunner:renderEndGame()
-    self.window.buffer:debugLine(string.format(
-        "Round %d / %d", self.currentRound, self.config.roundCount))
+    self.window.buffer:debugLine(string.format("Round %d / %d", self.currentRound, self.config.roundCount))
 
     local lines = {}
     local sum = 0
@@ -297,8 +308,7 @@ function GameRunner:run()
     local roundConfig = self.round:getConfig()
     log.info("RoundName:", self.round:name())
 
-    self.window.buffer:debugLine(string.format(
-        "Round %d / %d", self.currentRound, self.config.roundCount))
+    self.window.buffer:debugLine(string.format("Round %d / %d", self.currentRound, self.config.roundCount))
 
     self.window.buffer:setInstructions(self.round.getInstructions())
     local lines, cursorLine, cursorCol = self.round:render()
@@ -313,7 +323,7 @@ function GameRunner:run()
 
     log.info("Setting current line to", cursorLine, cursorCol)
     if cursorLine > 0 then
-        vim.api.nvim_win_set_cursor(0, {cursorLine, cursorCol})
+        vim.api.nvim_win_set_cursor(0, { cursorLine, cursorCol })
     end
 
     self.startTime = GameUtils.getTime()
@@ -334,8 +344,6 @@ function GameRunner:run()
 
         self:endRound()
     end, roundConfig.roundTime)
-
 end
 
 return GameRunner
-
