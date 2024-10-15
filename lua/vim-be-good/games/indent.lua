@@ -11,8 +11,13 @@ local randomOffset = {
 }
 
 local instructions = {
-    "Test your ability to hop by relative line numbers to the paragraph and then delete it inbetween the stars (asterisks)",
-    "To win the game, delete the whole paragraph in one go inbetween the stars (asterisks). Use motions like (Vkd, Vjd)",
+    "Test your ability by hopping to the paragraph and then add or remove indents to the paragraph inbetween the stars (asterisks)",
+    "To win the game, add or remove indents depending on if the paragraph has too little or too many.",
+    "Use motions like   V<  or  V> for a default vim keymap",
+    "MORE DETAILS:",
+    "you can use Visual Line mode (Shift-v) to select the first or last line of the paragraph, then move up or down with your vertical motions. j or k",
+    "SUGGESTION: i recommend learning how to hop using relative line numbers first",
+    "once you have the full paragraph selected. press < to delete indents or > to add indents",
 }
 
 local Indent = {}
