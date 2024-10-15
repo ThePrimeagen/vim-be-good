@@ -59,13 +59,13 @@ end
 
 function InsideDelete:render()
     local paragraphLength = math.random(2, 5)
-    local lines = GameUtils.createEmpty(20)
-    local deleteMeIdx = math.random(2, 20 - paragraphLength)
-    local goHigh = deleteMeIdx < 17 and math.random() > 0.5
+    local lines = GameUtils.createEmpty(20 + #instructions)
+    local deleteMeIdx = math.random(2, 20 + #instructions - paragraphLength)
+    local goHigh = deleteMeIdx < 17 + #instructions and math.random() > 0.5
 
     local cursorIdx
     if goHigh then
-        cursorIdx = math.random(deleteMeIdx + 1, 20)
+        cursorIdx = math.random(deleteMeIdx + 1, 20 + #instructions)
     else
         cursorIdx = math.random(1, deleteMeIdx - 1)
     end
