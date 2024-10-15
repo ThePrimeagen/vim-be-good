@@ -16,6 +16,7 @@ local games = {
     "random",
     "pdelete",
     "insidedelete",
+    "indent",
 }
 
 return {

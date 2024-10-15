@@ -8,6 +8,7 @@ local HjklRound = require("vim-be-good.games.hjkl")
 local WhackAMoleRound = require("vim-be-good.games.whackamole")
 local PDelete = require("vim-be-good.games.pdelete")
 local InsideDelete = require("vim-be-good.games.insidedelete")
+local Indent = require("vim-be-good.games.indent")
 local log = require("vim-be-good.log")
 local statistics = require("vim-be-good.statistics")
 
@@ -51,6 +52,10 @@ local games = {
 
     insidedelete = function(difficulty, window)
         return InsideDelete:new(difficulty, window)
+    end,
+
+    indent = function(difficulty, window)
+        return Indent:new(difficulty, window)
     end,
 }
 
