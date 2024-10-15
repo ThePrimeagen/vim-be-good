@@ -27,7 +27,6 @@ function Indent:new(difficulty, window)
     }
 
     self.__index = self
-
     return setmetatable(round, self)
 end
 
@@ -49,8 +48,18 @@ function Indent:checkForWin()
 
     while idx <= #lines and not found do
         local line = lines[idx]
-        found = string.match(line, "        local paragraphText = 'please help me! I have too many indents!'")
-
+        local winString
+        if numOfIndents == 0 then
+            winString = "\tlocal paragraphText = 'please help me! I don't have any indents!'"
+        else
+            winString = "\tlocal paragraphText = 'please help me! I have too many indents!'"
+        end
+        found = true
+        for i = 0, #lines, 1 do
+            if winString == lines[i] then
+                found = false
+            end
+        end
         idx = idx + 1
     end
     log.info("Indent:checkForWin(", idx, "): ", found)
@@ -59,6 +68,8 @@ function Indent:checkForWin()
 end
 
 function Indent:render()
+    local numberIndents = math.random(2) - 1
+    numOfIndents = numberIndents
     local paragraphLength = math.random(2, 5)
     local lines = GameUtils.createEmpty(20 + #instructions)
     local deleteMeIdx = math.random(2, 20 + #instructions - paragraphLength)
@@ -74,10 +85,10 @@ function Indent:render()
     local indentString
 
     lines[deleteMeIdx - 1] = "*************"
-    if false then
+    if numOfIndents == 0 then
         indentString = "local paragraphText = 'please help me! I don't have any indents!'"
     else
-        indentString = "        local paragraphText = 'please help me! I have too many indents!'"
+        indentString = "\t\tlocal paragraphText = 'please help me! I have too many indents!'"
     end
 
     for i = 0, paragraphLength - 1 do
