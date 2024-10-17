@@ -73,8 +73,8 @@ function Indent:checkForWin()
 end
 
 function Indent:render()
-    local numberIndents = math.random(2) - 1
-    numOfIndents = numberIndents
+    numOfIndents = math.random(2) - 1
+
     local paragraphLength = math.random(2, 5)
     local lines = GameUtils.createEmpty(20 + #instructions)
     local deleteMeIdx = math.random(2, 20 + #instructions - paragraphLength)

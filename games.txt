@@ -1,11 +1,11 @@
-1. Combines relative jumping with k and j then selecting the paragraph with vip or vap and delete
+1. Combines relative jumping with k and j then selecting the paragraph with vip or vap and delete --- DONE ---
     
     local x = 2000000
     local x = 2000000
     local x = 2000000
     local x = 2000000
 
-2. Combines relative jumping with k and j then uses V relative k or j to then select the section between then delete
+2. Combines relative jumping with k and j then uses V relative k or j to then select the section between then delete --- DONE ---
 
 - - - - - - - - - - - - 
         local x = 2000000
@@ -18,7 +18,7 @@
 3. Game that practices jumping to a paragraph, highlighting it, and then moving it with J or K to the necessary line
     this will of course use the remaps that allow you to move in V mode. 
 
-4. game that allows you to highlight a portion or the whole paragraph and indent it
+4. game that allows you to highlight a portion or the whole paragraph and indent it --- DONE ---
 
 
-5. 
+5. game where you see where your cursor is. go to the end of the line or begginning and type a  then DONE

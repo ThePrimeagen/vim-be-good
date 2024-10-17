@@ -17,6 +17,8 @@ local games = {
     "pdelete",
     "insidedelete",
     "indent",
+    -- "beforeandafter",
+    "letsmoveit",
 }
 
 return {

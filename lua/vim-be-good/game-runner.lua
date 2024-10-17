@@ -9,6 +9,8 @@ local WhackAMoleRound = require("vim-be-good.games.whackamole")
 local PDeleteRound = require("vim-be-good.games.pdelete")
 local InsideDeleteRound = require("vim-be-good.games.insidedelete")
 local IndentRound = require("vim-be-good.games.indent")
+local BeforeAndAfterRound = require("vim-be-good.games.beforeandafter")
+local LetsMoveItRound = require("vim-be-good.games.letsmoveit")
 local log = require("vim-be-good.log")
 local statistics = require("vim-be-good.statistics")
 
@@ -56,6 +58,14 @@ local games = {
 
     indent = function(difficulty, window)
         return IndentRound:new(difficulty, window)
+    end,
+
+    -- beforeandafter = function(difficulty, window)
+    --     return BeforeAndAfterRound:new(difficulty, window)
+    -- end,
+
+    letsmoveit = function(difficulty, window)
+        return LetsMoveItRound:new(difficulty, window)
     end,
 }
 
