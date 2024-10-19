@@ -26,6 +26,9 @@ function LetsMoveIt:new(difficulty, window)
     }
 
     self.__index = self
+    self.winIdx = 0
+    self.switchCheck = 0
+
     return setmetatable(round, self)
 end
 
@@ -44,13 +47,12 @@ function LetsMoveIt:checkForWin()
     local lines = self.window.buffer:getGameLines()
     local found = false
     local idx = 1
-
     while idx <= #lines and not found do
-        local line = lines[idx]
-        found =
-            string.match(line, "local paragraphText = 'delete this whole paragraph inside of the ********** please!'")
-
-        idx = idx + 1
+        found = true
+        if lines[self.winIdx] ~= lines[self.winIdx + 1] then
+            found = false
+            break
+        end
     end
     log.info("InsidePDelete:checkForWin(", idx, "): ", found)
 
@@ -58,25 +60,37 @@ function LetsMoveIt:checkForWin()
 end
 
 function LetsMoveIt:render()
-    local paragraphLength = math.random(2, 5)
-    local lines = GameUtils.createEmpty(20 + #instructions)
-    local deleteMeIdx = math.random(2, 20 + #instructions - paragraphLength)
-    local goHigh = deleteMeIdx < 17 + #instructions and math.random() > 0.5
+    local numOfLines = 20
+    self.winIdx = math.random(#instructions + 1, #instructions + numOfLines)
+
+    local paragraphLength = math.random(1, 3)
+    local paragraphIdxMin
+    local paragraphIdxMax
+    if self.winIdx > #instructions + numOfLines / 2 then
+        paragraphIdxMin = self.winIdx - 8 + #instructions
+        paragraphIdxMax = self.winIdx - 1 - paragraphLength
+    else
+        paragraphIdxMin = self.winIdx + 4
+        paragraphIdxMax = #instructions + numOfLines - 8 - paragraphLength
+    end
+    local lines = GameUtils.createEmpty(numOfLines + #instructions)
+    local paragraphIdx = math.random(paragraphIdxMin, paragraphIdxMax)
+    local goHigh = paragraphIdx < numOfLines - 3 + #instructions and math.random() > 0.5
 
     local cursorIdx
     if goHigh then
-        cursorIdx = math.random(deleteMeIdx + 1, 20 + #instructions)
+        cursorIdx = math.random(paragraphIdx + 1, numOfLines + #instructions)
     else
-        cursorIdx = math.random(1, deleteMeIdx - 1)
+        cursorIdx = math.random(1, paragraphIdx - 1)
     end
 
-    lines[deleteMeIdx - 1] = "***********************************************************************************"
-    for i = 0, paragraphLength - 1 do
-        lines[deleteMeIdx + i] = "local paragraphText = 'delete this whole paragraph inside of the ********** please!'"
+    lines[self.winIdx] = "***************************************"
+    lines[self.winIdx + 1] = "***************************************"
+
+    for i = 0, paragraphLength, 1 do
+        lines[paragraphIdx + i] = "Please move me inbetween the stars or asterisks to win!"
     end
 
-    lines[deleteMeIdx + paragraphLength] =
-        "***********************************************************************************"
     return lines, cursorIdx
 end
 
