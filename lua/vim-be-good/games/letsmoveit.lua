@@ -11,8 +11,13 @@ local randomOffset = {
 }
 
 local instructions = {
-    "Test your ability to hop by relative line numbers to the paragraph and then delete it inbetween the stars (asterisks)",
-    "To win the game, delete the whole paragraph in one go inbetween the stars (asterisks). Use motions like (Vkd, Vjd)",
+    "Test your ability by selecting the paragraph text and then move the paragraph inbetween the stars (asterisks)",
+    "This game will require that you set the remaps below. These work in visual (v), visual line (shift-V), and visual block (ctrl-v) modes.",
+    "vim.keymap.set('v', 'J', \":m '>+1<CR>gv=gv\")",
+    "vim.keymap.set('v', 'K', \":m '<-2<CR>gv=gv\")",
+    "add these to your keymaps.lua file or however you have your config setup.",
+    "Instructions: Highlight the paragraph using one of the visual modes, then press Shift K or J to move up or down respectively",
+    "You will win the round as soon as the game detects that the paragraph is inbetween the stars (asterisks)",
 }
 
 local LetsMoveIt = {}
@@ -54,7 +59,7 @@ function LetsMoveIt:checkForWin()
             break
         end
     end
-    log.info("InsidePDelete:checkForWin(", idx, "): ", found)
+    log.info("LetsMoveIt:checkForWin(", idx, "): ", found)
 
     return not found
 end
