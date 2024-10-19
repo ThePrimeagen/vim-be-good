@@ -14,10 +14,13 @@ local games = {
     "hjkl",
     "whackamole",
     "random",
+    "pdelete",
+    "indent",
+    -- "beforeandafter",
+    "letsmoveit",
 }
 
 return {
     difficulty = difficulty,
-    games = games
+    games = games,
 }
-
