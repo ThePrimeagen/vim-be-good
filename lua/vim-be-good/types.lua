@@ -15,7 +15,6 @@ local games = {
     "whackamole",
     "random",
     "pdelete",
-    "insidedelete",
     "indent",
     -- "beforeandafter",
     "letsmoveit",
