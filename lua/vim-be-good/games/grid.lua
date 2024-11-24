@@ -7,6 +7,7 @@ local SnakeGame = {}
 local Grid = {}
 
 function SnakeGame:new()
+    self.__index = self
     local scoreBuf = V.nvim_create_buf(false, true)
     local scoreWin = V.nvim_open_win(scoreBuf, false, {
         relative = 'win',
@@ -34,8 +35,17 @@ function SnakeGame:new()
         style = 'minimal',
         border = 'rounded',
     })
+    V.nvim_buf_set_option(gridBuf, 'modifiable', false)
 
     local gameGrid = Grid:new(gridBuf, width, height, '_')
+
+    -- When the game is closed (the grid), also close the Scores window.
+    V.nvim_create_autocmd({"WinClosed"}, {
+        pattern = { tostring(gridWin) },
+        callback = function(_)
+            self:shutdown()
+        end
+    })
 
     local newGame = {
         scoreWin = scoreWin,
@@ -44,16 +54,37 @@ function SnakeGame:new()
         gridWin = gridWin,
         grid = gameGrid,
     }
-    self.__index = self
-    return setmetatable(newGame, self)
+    self = setmetatable(newGame, self)
+    return self
 end
 
 function SnakeGame:render()
+    V.nvim_buf_set_option(self.gridBuf, 'modifiable', true)
     self.grid:render()
+    V.nvim_buf_set_option(self.gridBuf, 'modifiable', false)
+end
+
+function SnakeGame:shutdown()
+    self:reset()
+    V.nvim_win_close(self.scoreWin, true)
+end
+
+function SnakeGame:start()
+    self:reset()
     self.grid:clear('.')
-    self.grid:setChar(4,4,'S')
-    self.grid:render()
-    self.grid:render()
+    self.gameTimer = vim.loop.new_timer()
+    self.gameTimer:start(0, 1000, vim.schedule_wrap(function()
+        self.grid:setChar(math.random(width), math.random(height), 'S')
+        self:render()
+    end))
+end
+
+function SnakeGame:reset()
+    if self.gameTimer then
+        self.gameTimer:stop()
+        self.gameTimer:close()
+        self.gameTimer = nil
+    end
 end
 
 function Grid:new(bufNum, cols, rows, fillChar)
@@ -86,7 +117,7 @@ function Grid:clear(fillChar)
     self.lines = lines
 end
 
-function Grid:setChar(row, col, char)
+function Grid:setChar(col, row, char)
     row = row + 1
     col = col + 1
     if row > self.rows or col > self.cols then
@@ -110,8 +141,8 @@ function Grid:render()
     V.nvim_buf_set_text(self.buf, 0, 0, rows-1, maxCols, self.lines)
 end
 
--- local snakeGame = SnakeGame:new()
--- snakeGame:render()
+local snakeGame = SnakeGame:new()
+snakeGame:start()
 
 return SnakeGame
 -- V.nvim_buf_add_highlight(buf, 0, "snake", 0, 0, 1)
