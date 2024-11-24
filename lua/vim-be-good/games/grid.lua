@@ -14,10 +14,11 @@ function Snake:new(x, y, initialSize)
     self.__index = self
     local head = { x = math.floor(x), y = math.floor(y) }
     local newSnake = {
-        dir = STOPPED,
+        dir = RIGHT,
         head = {x = math.floor(x), y = math.floor(y)},
         body = {},
-        grow = false
+        grow = false,
+        dead = false,
     }
     if initialSize and initialSize > 1 then
         local lastBodyPart = head
@@ -31,7 +32,7 @@ function Snake:new(x, y, initialSize)
 end
 
 function Snake:setDir(dir)
-    if dir < UP or dir > RIGHT then
+    if self.dead or dir < UP or dir > RIGHT then
         return
     end
     local curDir = self.dir
@@ -92,15 +93,21 @@ local HeadChar = {
     [DOWN] = 'v',
     [LEFT] = '<',
     [RIGHT] = '>',
-    [STOPPED] = '*'
+    [STOPPED] = 'X',
 }
+local BodyChar = '*'
 
 function Snake:render(grid)
     local head = self.head
-    grid:setChar(head.x, head.y, HeadChar[self.dir])
     for _, body in pairs(self.body) do
-        grid:setChar(body.x, body.y, 'X')
+        grid:setChar(body.x, body.y, BodyChar)
     end
+    local charAtHead = grid:getChar(head.x, head.y)
+    if charAtHead == BodyChar then
+        self.dead = true
+        self.dir = STOPPED
+    end
+    grid:setChar(head.x, head.y, HeadChar[self.dir])
 end
 
 --- SnakeGame
@@ -254,6 +261,17 @@ function Grid:setChar(col, row, char)
     local line = self.lines[row]
     line = string.sub(line, 1, col-1) .. char .. string.sub(line, col+1)
     self.lines[row] = line
+end
+
+function Grid:getChar(col, row)
+    row = row + 1
+    col = col + 1
+    if row < 1 or col < 1 or row > self.rows or col > self.cols then
+        print("Out of bounds")
+        return nil
+    end
+    local line = self.lines[row]
+    return string.sub(line, col, col)
 end
 
 function Grid:render()
