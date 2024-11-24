@@ -6,6 +6,7 @@ local height = 20
 local SnakeGame = {}
 local Grid = {}
 
+--- SnakeGame
 function SnakeGame:new()
     self.__index = self
     local scoreBuf = V.nvim_create_buf(false, true)
@@ -36,6 +37,12 @@ function SnakeGame:new()
         border = 'rounded',
     })
     V.nvim_buf_set_option(gridBuf, 'modifiable', false)
+    -- Setup key press handlers for h,j,k,l
+    for _, key in pairs({'h','j','k','l'}) do
+        vim.keymap.set({'n'}, key, function ()
+            self:handleKeyPress(key)
+        end, { buffer = gridBuf })
+    end
 
     local gameGrid = Grid:new(gridBuf, width, height, '_')
 
@@ -64,13 +71,17 @@ function SnakeGame:render()
     V.nvim_buf_set_option(self.gridBuf, 'modifiable', false)
 end
 
+function SnakeGame:handleKeyPress(key)
+    print('Pressed: '..key)
+end
+
 function SnakeGame:shutdown()
-    self:reset()
+    self:cancelTimer()
     V.nvim_win_close(self.scoreWin, true)
 end
 
 function SnakeGame:start()
-    self:reset()
+    self:cancelTimer()
     self.grid:clear('.')
     self.gameTimer = vim.loop.new_timer()
     self.gameTimer:start(0, 1000, vim.schedule_wrap(function()
@@ -79,7 +90,7 @@ function SnakeGame:start()
     end))
 end
 
-function SnakeGame:reset()
+function SnakeGame:cancelTimer()
     if self.gameTimer then
         self.gameTimer:stop()
         self.gameTimer:close()
@@ -87,6 +98,7 @@ function SnakeGame:reset()
     end
 end
 
+--- Grid
 function Grid:new(bufNum, cols, rows, fillChar)
     if not fillChar then
        fillChar = ' '
