@@ -62,6 +62,7 @@ function Snake:tick(grid)
         if not self.grow then
            tail = table.remove(self.body)
         end
+        self.grow = false
         tail.x = head.x
         tail.y = head.y
         table.insert(self.body, 1, tail)
@@ -96,18 +97,22 @@ local HeadChar = {
     [STOPPED] = 'X',
 }
 local BodyChar = '*'
+local FoodChar = 'O'
 
-function Snake:render(grid)
-    local head = self.head
+function Snake:renderBody(grid)
     for _, body in pairs(self.body) do
         grid:setChar(body.x, body.y, BodyChar)
     end
-    local charAtHead = grid:getChar(head.x, head.y)
-    if charAtHead == BodyChar then
-        self.dead = true
-        self.dir = STOPPED
-    end
+end
+
+function Snake:renderHead(grid)
+    local head = self.head
     grid:setChar(head.x, head.y, HeadChar[self.dir])
+end
+
+function Snake:oops()
+    self.dead = true
+    self.dir = STOPPED
 end
 
 --- SnakeGame
@@ -180,9 +185,21 @@ function SnakeGame:render()
     self.snake:tick(self.grid)
     V.nvim_buf_set_option(self.gridBuf, 'modifiable', true)
     self.grid:clear('.')
-    self.snake:render(self.grid)
+    self.snake:renderBody(self.grid)
+    self:handleCollision()
+    self.snake:renderHead(self.grid)
     self.grid:render()
     V.nvim_buf_set_option(self.gridBuf, 'modifiable', false)
+end
+
+function SnakeGame:handleCollision()
+    local head = self.snake.head
+    local charAtHead = self.grid:getChar(head.x, head.y)
+    if charAtHead == BodyChar then
+        self.snake:oops()
+    elseif charAtHead == FoodChar then
+        self.snake:grow()
+    end
 end
 
 local KeyDirMap = {
@@ -255,7 +272,7 @@ end
 function Grid:setChar(col, row, char)
     row = row + 1
     col = col + 1
-    if row < 1 or col < 1 or row > self.rows or col > self.cols then
+    if row < 1 or col < 1 or row >= self.rows or col >= self.cols then
         return
     end
     local line = self.lines[row]
@@ -266,8 +283,8 @@ end
 function Grid:getChar(col, row)
     row = row + 1
     col = col + 1
-    if row < 1 or col < 1 or row > self.rows or col > self.cols then
-        print("Out of bounds")
+    if row < 1 or col < 1 or row >= self.rows or col >= self.cols then
+        print("Out of bounds: " .. col .. "," .. row)
         return nil
     end
     local line = self.lines[row]
@@ -291,4 +308,3 @@ local snakeGame = SnakeGame:new(60, 20)
 snakeGame:start()
 
 return SnakeGame
--- V.nvim_buf_add_highlight(buf, 0, "snake", 0, 0, 1)
