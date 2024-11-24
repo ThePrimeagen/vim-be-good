@@ -1,12 +1,14 @@
 local log = require("vim-be-good.log")
 local GameUtils = require("vim-be-good.game-utils")
+local SnakeGame = require("vim-be-good.games.grid")
 
 local Snake = {}
 
 function Snake:new(difficulty, window)
     local round = {
         window = window,
-        difficulty = difficulty
+        difficulty = difficulty,
+        snakeGame = SnakeGame:new()
     }
     self.__index = self
     return setmetatable(round, self)
