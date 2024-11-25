@@ -148,7 +148,7 @@ function Snake:oops()
 end
 
 --- SnakeGame
-function SnakeGame:new(width, height, difficultyLevel)
+function SnakeGame:new(width, height, difficultyLevel, endGameCallback)
     self.__index = self
     -- Center game UI in current window
     local curWinHeight = V.nvim_win_get_height(0)
@@ -214,6 +214,7 @@ function SnakeGame:new(width, height, difficultyLevel)
         score = 0,
         noWalls = difficultyLevel < 4,
         speed = SpeedLevel[difficultyLevel],  -- technically slowness
+        endGameCallback = endGameCallback
     }
     self = setmetatable(newGame, self)
     return self
@@ -239,8 +240,7 @@ function SnakeGame:handleCollision()
     local head = self.snake.head
     local charAtHead = self.grid:getChar(head.x, head.y)
     if hitWall or charAtHead == BodyChar then
-        self.snake:oops()
-        self:cancelTimer()
+        self:endGame()
     elseif charAtHead == FoodChar then
         self:consumeFood()
     end
@@ -285,6 +285,7 @@ function SnakeGame:updateScore()
 end
 
 function SnakeGame:shutdown()
+    self:endGame()
     self:reset()
     if self.scoreWin then
         V.nvim_win_close(self.scoreWin, true)
@@ -293,6 +294,14 @@ function SnakeGame:shutdown()
     if self.gridWin then
         V.nvim_win_close(self.gridWin, true)
         self.gridWin = nil
+    end
+end
+
+function SnakeGame:endGame()
+    self.snake:oops()
+    self:cancelTimer()
+    if self.endGameCallback then
+        vim.defer_fn(self.endGameCallback, 3000)
     end
 end
 

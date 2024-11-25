@@ -17,7 +17,8 @@ function Snake:new(difficulty, window)
     local round = {
         window = window,
         difficulty = difficulty,
-        difficultyLevel = getDifficultyLevel(difficulty)
+        difficultyLevel = getDifficultyLevel(difficulty),
+        endRoundCallback = nil
     }
     self.__index = self
     return setmetatable(round, self)
@@ -42,7 +43,9 @@ end
 function Snake:getConfig()
     log.info("getConfig", self.difficulty, GameUtils.difficultyToTime[self.difficulty])
     return {
-        roundTime = 100000
+        roundTime = 100000,
+        noCursor = true,
+        canEndRound = true,
     }
 end
 
@@ -55,11 +58,15 @@ function Snake:name()
     return 'snake'
 end
 
+function Snake:setEndRoundCallback(endRoundCallback)
+    self.endRoundCallback = endRoundCallback
+end
+
 function Snake:render()
     if self.snakeGame then
         self.snakeGame:shutdown()
     end
-    self.snakeGame = SnakeGame:new(35, 15, self.difficultyLevel)
+    self.snakeGame = SnakeGame:new(35, 15, self.difficultyLevel, self.endRoundCallback)
     local lines = {}
     local cursorIdx = 1
     self.snakeGame:start()

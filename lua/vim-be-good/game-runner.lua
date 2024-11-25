@@ -305,6 +305,9 @@ function GameRunner:run()
     self.window.buffer:debugLine(string.format(
         "Round %d / %d", self.currentRound, self.config.roundCount))
 
+    if roundConfig.canEndRound then
+        self.round:setEndRoundCallback(function() self:endRound() end)
+    end
     self.window.buffer:setInstructions(self.round.getInstructions())
     local lines, cursorLine, cursorCol = self.round:render()
     self.window.buffer:render(lines)
@@ -317,8 +320,8 @@ function GameRunner:run()
     cursorLine = cursorLine + curRoundLineLen + instuctionLen
 
     log.info("Setting current line to", cursorLine, cursorCol)
-    if cursorLine > 0 then
-        vim.api.nvim_win_set_cursor(0, {cursorLine, cursorCol})
+    if cursorLine > 0 and not roundConfig.noCursor then
+         vim.api.nvim_win_set_cursor(0, {cursorLine, cursorCol})
     end
 
     self.startTime = GameUtils.getTime()
