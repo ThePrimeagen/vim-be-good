@@ -10,6 +10,24 @@ local DOWN=2
 local LEFT=3
 local RIGHT=4
 
+local HeadChar = {
+    [UP] = '^',
+    [DOWN] = 'v',
+    [LEFT] = '<',
+    [RIGHT] = '>',
+    [STOPPED] = 'X',
+}
+local BodyChar = '*'
+local FoodChar = 'O'
+local GridChar = '.'
+
+local KeyDirMap = {
+    h = LEFT,
+    j = DOWN,
+    k = UP,
+    l = RIGHT
+}
+
 function Snake:new(x, y, initialSize)
     self.__index = self
     local head = { x = math.floor(x), y = math.floor(y) }
@@ -89,17 +107,6 @@ function Snake:tick(grid)
     end
 end
 
-local HeadChar = {
-    [UP] = '^',
-    [DOWN] = 'v',
-    [LEFT] = '<',
-    [RIGHT] = '>',
-    [STOPPED] = 'X',
-}
-local BodyChar = '*'
-local FoodChar = 'O'
-local GridChar = '.'
-
 function Snake:renderBody(grid)
     for _, body in pairs(self.body) do
         grid:setChar(body.x, body.y, BodyChar)
@@ -156,7 +163,7 @@ function SnakeGame:new(width, height)
     -- Setup key press handlers for h,j,k,l
     for _, key in pairs({'h','j','k','l'}) do
         vim.keymap.set({'n'}, key, function ()
-            self:handleKeyPress(key)
+            self.snake:setDir(KeyDirMap[key])
         end, { buffer = gridBuf })
     end
 
@@ -177,7 +184,8 @@ function SnakeGame:new(width, height)
         gridWin = gridWin,
         grid = gameGrid,
         food = {},
-        snake = Snake:new(width / 2, height / 2, 10)
+        snake = {}, -- Snake:new(width / 2, height / 2, 10),
+        score = 0,
     }
     self = setmetatable(newGame, self)
     return self
@@ -185,7 +193,7 @@ end
 
 function SnakeGame:render()
     self.snake:tick(self.grid)
-    V.nvim_buf_set_option(self.gridBuf, 'modifiable', true)
+
     self.grid:clear()
     -- First render the body, then handle collisions.
     self.snake:renderBody(self.grid)
@@ -195,7 +203,6 @@ function SnakeGame:render()
     self.snake:renderHead(self.grid)
     -- Draw buffer to screen.
     self.grid:render()
-    V.nvim_buf_set_option(self.gridBuf, 'modifiable', false)
     self:addFood()
 end
 
@@ -204,8 +211,9 @@ function SnakeGame:handleCollision()
     local charAtHead = self.grid:getChar(head.x, head.y)
     if charAtHead == BodyChar then
         self.snake:oops()
+        self:cancelTimer()
     elseif charAtHead == FoodChar then
-        self:consumeFood(head.x, head.y)
+        self:consumeFood()
     end
 end
 
@@ -227,35 +235,36 @@ function SnakeGame:addFood()
     end
 end
 
-function SnakeGame:consumeFood(x, y)
-    self.snake:grow()
+function SnakeGame:consumeFood()
     table.remove(self.food)
+    self.snake:grow()
+    self.score = self.score + 10
+    self:updateScore()
 end
 
-local KeyDirMap = {
-    h = LEFT,
-    j = DOWN,
-    k = UP,
-    l = RIGHT
-}
-
-function SnakeGame:handleKeyPress(key)
-    print('Pressed: '..key)
-    self.snake:setDir(KeyDirMap[key])
+function SnakeGame:updateScore()
+    V.nvim_buf_set_lines(self.scoreBuf, 0, -1, false, { "Score: "..self.score })
 end
 
 function SnakeGame:shutdown()
-    self:cancelTimer()
+    self:reset()
     V.nvim_win_close(self.scoreWin, true)
 end
 
 function SnakeGame:start()
-    self:cancelTimer()
-    self.grid:clear()
+    self:reset()
     self.gameTimer = vim.loop.new_timer()
     self.gameTimer:start(0, 100, vim.schedule_wrap(function()
         self:render()
     end))
+    self:updateScore()
+end
+
+function SnakeGame:reset()
+    self:cancelTimer()
+    self.score = 0
+    self.food = {}
+    self.snake = Snake:new(self.grid.width / 2, self.grid.height / 2, 3)
 end
 
 function SnakeGame:cancelTimer()
@@ -332,10 +341,12 @@ function Grid:render()
             maxCols = lineLen
         end
     end
+    V.nvim_buf_set_option(self.buf, 'modifiable', true)
     V.nvim_buf_set_text(self.buf, 0, 0, rows-1, maxCols, self.lines)
+    V.nvim_buf_set_option(self.buf, 'modifiable', false)
 end
 
-local snakeGame = SnakeGame:new(60, 20)
+local snakeGame = SnakeGame:new(35, 15)
 snakeGame:start()
 
 return SnakeGame
