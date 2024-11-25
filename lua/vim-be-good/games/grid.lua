@@ -28,7 +28,18 @@ local KeyDirMap = {
     l = RIGHT
 }
 
-function Snake:new(x, y, initialSize)
+-- Render loop speed for each difficulty level.
+-- Smaller values are faster.
+local SpeedLevel = {
+    [1] = 150,
+    [2] = 135,
+    [3] = 120,
+    [4] = 105,
+    [5] = 90,
+    [6] = 40,
+}
+
+function Snake:new(x, y, initialSize, noWalls)
     self.__index = self
     local head = { x = math.floor(x), y = math.floor(y) }
     local newSnake = {
@@ -37,6 +48,8 @@ function Snake:new(x, y, initialSize)
         body = {},
         shouldGrow = false,
         dead = false,
+        noWalls = noWalls,
+        hitWall = false,
     }
     if initialSize and initialSize > 1 then
         local lastBodyPart = head
@@ -97,14 +110,25 @@ function Snake:tick(grid)
     end
     -- Loop around if at edge of screen
     if head.x >= grid.width then
-        head.x = 0
+        self:handleWallHit(function () head.x = 0 end)
     elseif head.x < 0 then
-        head.x = grid.width
+        self:handleWallHit(function () head.x = grid.width end)
     elseif head.y >= grid.height then
-        head.y = 0
+        self:handleWallHit(function () head.y = 0 end)
     elseif head.y < 0 then
-        head.y = grid.height
+        self:handleWallHit(function () head.y = grid.height end)
+    else
+        self.hitWall = false
     end
+end
+
+function Snake:handleWallHit(noWallsCallback)
+    if self.noWalls then
+        -- If no walls, execute the callback, which loops the head
+        -- to the opposite edge
+        noWallsCallback()
+    end
+    self.hitWall = true
 end
 
 function Snake:renderBody(grid)
@@ -124,7 +148,7 @@ function Snake:oops()
 end
 
 --- SnakeGame
-function SnakeGame:new(width, height)
+function SnakeGame:new(width, height, difficultyLevel)
     self.__index = self
     -- Center game UI in current window
     local curWinHeight = V.nvim_win_get_height(0)
@@ -178,6 +202,7 @@ function SnakeGame:new(width, height)
         end
     })
 
+    print('Difficulty ' .. difficultyLevel)
     local newGame = {
         scoreWin = scoreWin,
         scoreBuf = scoreBuf,
@@ -187,6 +212,8 @@ function SnakeGame:new(width, height)
         food = {},
         snake = {},
         score = 0,
+        noWalls = difficultyLevel < 4,
+        speed = SpeedLevel[difficultyLevel],  -- technically slowness
     }
     self = setmetatable(newGame, self)
     return self
@@ -208,9 +235,10 @@ function SnakeGame:render()
 end
 
 function SnakeGame:handleCollision()
+    local hitWall = not self.noWalls and self.snake.hitWall
     local head = self.snake.head
     local charAtHead = self.grid:getChar(head.x, head.y)
-    if charAtHead == BodyChar then
+    if hitWall or charAtHead == BodyChar then
         self.snake:oops()
         self:cancelTimer()
     elseif charAtHead == FoodChar then
@@ -244,7 +272,16 @@ function SnakeGame:consumeFood()
 end
 
 function SnakeGame:updateScore()
-    V.nvim_buf_set_lines(self.scoreBuf, 0, -1, false, { "Score: "..self.score })
+    local walls = 'Walls:Y'
+    if self.noWalls then
+        walls = 'Walls:N'
+    end
+    local speedRange = SpeedLevel[1] - SpeedLevel[5]
+    local baseSpeedLevel = SpeedLevel[1] + 10
+    local speedFrac = math.ceil(100 * (baseSpeedLevel - self.speed) / speedRange)
+    local speed = tostring(speedFrac)..'%'
+    local status = walls..' | '..'Spd:'..speed..' | '..'Score: '..self.score
+    V.nvim_buf_set_lines(self.scoreBuf, 0, -1, false, { status })
 end
 
 function SnakeGame:shutdown()
@@ -262,7 +299,7 @@ end
 function SnakeGame:start()
     self:reset()
     self.gameTimer = vim.loop.new_timer()
-    self.gameTimer:start(0, 100, vim.schedule_wrap(function()
+    self.gameTimer:start(0, self.speed, vim.schedule_wrap(function()
         self:render()
     end))
     self:updateScore()
@@ -272,7 +309,7 @@ function SnakeGame:reset()
     self:cancelTimer()
     self.score = 0
     self.food = {}
-    self.snake = Snake:new(self.grid.width / 2, self.grid.height / 2, 3)
+    self.snake = Snake:new(self.grid.width / 2, self.grid.height / 2, 3, self.noWalls)
 end
 
 function SnakeGame:cancelTimer()
