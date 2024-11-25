@@ -1,6 +1,6 @@
 local log = require("vim-be-good.log")
 local GameUtils = require("vim-be-good.game-utils")
-local SnakeGame = require("vim-be-good.games.grid")
+local SnakeGame = require("vim-be-good.games.snakelib.snakegame")
 local T = require("vim-be-good.types")
 
 local Snake = {}
@@ -67,9 +67,9 @@ function Snake:render()
         self.snakeGame:shutdown()
     end
     self.snakeGame = SnakeGame:new(35, 15, self.difficultyLevel, self.endRoundCallback)
+    self.snakeGame:start()
     local lines = {}
     local cursorIdx = 1
-    self.snakeGame:start()
     return lines, cursorIdx
 end
 
