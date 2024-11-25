@@ -8,20 +8,31 @@ function Snake:new(difficulty, window)
     local round = {
         window = window,
         difficulty = difficulty,
-        snakeGame = SnakeGame:new()
     }
     self.__index = self
     return setmetatable(round, self)
 end
 
 function Snake:getInstructions()
-    return {'TODO'}
+    return {
+        '',
+        'Classic game of Snake.',
+        '',
+        '1. h,j,k,l to navigate',
+        '     h - move left',
+        '     j - move down',
+        '     k - move up ',
+        '     l - move right',
+        '2. Eat food (O) to grow',
+        '3. Don\'t eat yourself',
+        '4. In higher difficulties, walls kill',
+    }
 end
 
 function Snake:getConfig()
     log.info("getConfig", self.difficulty, GameUtils.difficultyToTime[self.difficulty])
     return {
-        roundTime = GameUtils.difficultyToTime[self.difficulty]
+        roundTime = 100000
     }
 end
 
@@ -35,8 +46,13 @@ function Snake:name()
 end
 
 function Snake:render()
-    local lines = {'123123123','123123'}
+    if self.snakeGame then
+        self.snakeGame:shutdown()
+    end
+    self.snakeGame = SnakeGame:new(35, 15)
+    local lines = {}
     local cursorIdx = 1
+    self.snakeGame:start()
     return lines, cursorIdx
 end
 

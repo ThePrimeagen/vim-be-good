@@ -173,6 +173,7 @@ function SnakeGame:new(width, height)
     V.nvim_create_autocmd({"WinClosed"}, {
         pattern = { tostring(gridWin) },
         callback = function(_)
+            self.gridWin = nil
             self:shutdown()
         end
     })
@@ -184,7 +185,7 @@ function SnakeGame:new(width, height)
         gridWin = gridWin,
         grid = gameGrid,
         food = {},
-        snake = {}, -- Snake:new(width / 2, height / 2, 10),
+        snake = {},
         score = 0,
     }
     self = setmetatable(newGame, self)
@@ -248,7 +249,14 @@ end
 
 function SnakeGame:shutdown()
     self:reset()
-    V.nvim_win_close(self.scoreWin, true)
+    if self.scoreWin then
+        V.nvim_win_close(self.scoreWin, true)
+        self.scoreWin = nil
+    end
+    if self.gridWin then
+        V.nvim_win_close(self.gridWin, true)
+        self.gridWin = nil
+    end
 end
 
 function SnakeGame:start()
@@ -346,7 +354,8 @@ function Grid:render()
     V.nvim_buf_set_option(self.buf, 'modifiable', false)
 end
 
-local snakeGame = SnakeGame:new(35, 15)
-snakeGame:start()
+-- Uncomment the next 2 lines to run the game by sourcing this file.
+-- local snakeGame = SnakeGame:new(35, 15)
+-- snakeGame:start()
 
 return SnakeGame

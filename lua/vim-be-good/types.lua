@@ -13,8 +13,8 @@ local games = {
     "relative",
     "hjkl",
     "whackamole",
-    "random",
     "snake",
+    "random",
 }
 
 return {
