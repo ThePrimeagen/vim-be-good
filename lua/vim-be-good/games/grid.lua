@@ -17,7 +17,7 @@ function Snake:new(x, y, initialSize)
         dir = RIGHT,
         head = {x = math.floor(x), y = math.floor(y)},
         body = {},
-        grow = false,
+        shouldGrow = false,
         dead = false,
     }
     if initialSize and initialSize > 1 then
@@ -47,7 +47,7 @@ function Snake:setDir(dir)
 end
 
 function Snake:grow()
-    self.grow = true
+    self.shouldGrow = true
 end
 
 function Snake:tick(grid)
@@ -59,10 +59,10 @@ function Snake:tick(grid)
     -- Move tail to current head
     if #self.body > 0 then
         local tail = {}
-        if not self.grow then
+        if not self.shouldGrow then
            tail = table.remove(self.body)
         end
-        self.grow = false
+        self.shouldGrow = false
         tail.x = head.x
         tail.y = head.y
         table.insert(self.body, 1, tail)
@@ -98,6 +98,7 @@ local HeadChar = {
 }
 local BodyChar = '*'
 local FoodChar = 'O'
+local GridChar = '.'
 
 function Snake:renderBody(grid)
     for _, body in pairs(self.body) do
@@ -159,7 +160,7 @@ function SnakeGame:new(width, height)
         end, { buffer = gridBuf })
     end
 
-    local gameGrid = Grid:new(gridBuf, width, height, '_')
+    local gameGrid = Grid:new(gridBuf, width, height, GridChar)
 
     -- When the game is closed (the grid), also close the Scores window.
     V.nvim_create_autocmd({"WinClosed"}, {
@@ -175,6 +176,7 @@ function SnakeGame:new(width, height)
         gridBuf = gridBuf,
         gridWin = gridWin,
         grid = gameGrid,
+        food = {},
         snake = Snake:new(width / 2, height / 2, 10)
     }
     self = setmetatable(newGame, self)
@@ -184,12 +186,17 @@ end
 function SnakeGame:render()
     self.snake:tick(self.grid)
     V.nvim_buf_set_option(self.gridBuf, 'modifiable', true)
-    self.grid:clear('.')
+    self.grid:clear()
+    -- First render the body, then handle collisions.
     self.snake:renderBody(self.grid)
+    self:renderFood()
     self:handleCollision()
+    -- Draw head after collisions are processed.
     self.snake:renderHead(self.grid)
+    -- Draw buffer to screen.
     self.grid:render()
     V.nvim_buf_set_option(self.gridBuf, 'modifiable', false)
+    self:addFood()
 end
 
 function SnakeGame:handleCollision()
@@ -198,8 +205,31 @@ function SnakeGame:handleCollision()
     if charAtHead == BodyChar then
         self.snake:oops()
     elseif charAtHead == FoodChar then
-        self.snake:grow()
+        self:consumeFood(head.x, head.y)
     end
+end
+
+function SnakeGame:renderFood()
+    for _, food in pairs(self.food) do
+        self.grid:setChar(food.x, food.y, FoodChar)
+    end
+end
+
+function SnakeGame:addFood()
+    if #self.food > 0 then
+        return
+    end
+    local x = math.random(self.grid.width)
+    local y = math.random(self.grid.height)
+    local char = self.grid:getChar(x, y)
+    if char == GridChar then
+       table.insert(self.food, {x = x, y = y})
+    end
+end
+
+function SnakeGame:consumeFood(x, y)
+    self.snake:grow()
+    table.remove(self.food)
 end
 
 local KeyDirMap = {
@@ -221,7 +251,7 @@ end
 
 function SnakeGame:start()
     self:cancelTimer()
-    self.grid:clear('.')
+    self.grid:clear()
     self.gameTimer = vim.loop.new_timer()
     self.gameTimer:start(0, 100, vim.schedule_wrap(function()
         self:render()
@@ -240,7 +270,7 @@ end
 function Grid:new(bufNum, cols, rows, fillChar)
     self.__index = self
     if not fillChar then
-       fillChar = ' '
+       fillChar = GridChar
     end
     local lines = {}
     for _ = 1, rows do
@@ -272,7 +302,8 @@ end
 function Grid:setChar(col, row, char)
     row = row + 1
     col = col + 1
-    if row < 1 or col < 1 or row >= self.rows or col >= self.cols then
+    if row < 1 or col < 1 or row > self.rows or col > self.cols then
+        print("setChar ("..char..") out of bounds: " .. col .. "," .. row)
         return
     end
     local line = self.lines[row]
@@ -283,8 +314,8 @@ end
 function Grid:getChar(col, row)
     row = row + 1
     col = col + 1
-    if row < 1 or col < 1 or row >= self.rows or col >= self.cols then
-        print("Out of bounds: " .. col .. "," .. row)
+    if row < 1 or col < 1 or row > self.rows or col > self.cols then
+        print("getChar out of bounds: " .. col .. "," .. row)
         return nil
     end
     local line = self.lines[row]
