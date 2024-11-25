@@ -286,7 +286,6 @@ end
 
 function SnakeGame:shutdown()
     self:endGame()
-    self:reset()
     if self.scoreWin then
         V.nvim_win_close(self.scoreWin, true)
         self.scoreWin = nil
@@ -306,7 +305,10 @@ function SnakeGame:endGame()
 end
 
 function SnakeGame:start()
-    self:reset()
+    self:cancelTimer()
+    self.score = 0
+    self.food = {}
+    self.snake = Snake:new(self.grid.width / 2, self.grid.height / 2, 3, self.noWalls)
     self.gameTimer = vim.loop.new_timer()
     self.gameTimer:start(0, self.speed, vim.schedule_wrap(function()
         self:render()
@@ -315,7 +317,6 @@ function SnakeGame:start()
 end
 
 function SnakeGame:reset()
-    self:cancelTimer()
     self.score = 0
     self.food = {}
     self.snake = Snake:new(self.grid.width / 2, self.grid.height / 2, 3, self.noWalls)
