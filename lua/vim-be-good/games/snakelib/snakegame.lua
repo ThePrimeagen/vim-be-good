@@ -16,7 +16,11 @@ local SpeedLevel = {
     [6] = 40,
 }
 
---- SnakeGame
+-- Main entry point of the Snake Game. Handles core business logic.
+-- @param width integer: the width of the snake window
+-- @param height integer: the height of the snake window
+-- @param difficultyLevel integer: value between 1 and 6
+-- @param endGameCallback function: the function to be called when the game ends
 function SnakeGame:new(width, height, difficultyLevel, endGameCallback)
     self.__index = self
     -- Center game UI in current window
@@ -89,6 +93,20 @@ function SnakeGame:new(width, height, difficultyLevel, endGameCallback)
     return self
 end
 
+-- Starts the game, including the game loop.
+function SnakeGame:start()
+    self:cancelTimer()
+    self.score = 0
+    self.food = {}
+    self.snake = Snake:new(self.grid.width / 2, self.grid.height / 2, 3, self.noWalls)
+    self.gameTimer = vim.loop.new_timer()
+    self.gameTimer:start(0, self.speed, vim.schedule_wrap(function()
+        self:render()
+    end))
+    self:updateScore()
+end
+
+-- Computes the next game state and draws it to screen.
 function SnakeGame:render()
     self.snake:tick(self.grid)
 
@@ -104,6 +122,7 @@ function SnakeGame:render()
     self:addFood()
 end
 
+-- Handles any collisions and updates game state.
 function SnakeGame:handleCollision()
     local hitWall = not self.noWalls and self.snake.hitWall
     local head = self.snake.head
@@ -115,12 +134,14 @@ function SnakeGame:handleCollision()
     end
 end
 
+-- Renders the food on the grid.
 function SnakeGame:renderFood()
     for _, food in pairs(self.food) do
         self.grid:setChar(food.x, food.y, C.FoodChar)
     end
 end
 
+-- Adds food if there is none of the map.
 function SnakeGame:addFood()
     if #self.food > 0 then
         return
@@ -133,6 +154,7 @@ function SnakeGame:addFood()
     end
 end
 
+-- Remove food from the map and instructs the snake to grow.
 function SnakeGame:consumeFood()
     table.remove(self.food)
     self.snake:grow()
@@ -140,6 +162,7 @@ function SnakeGame:consumeFood()
     self:updateScore()
 end
 
+-- Draws the HUD in the HUD window with the score.
 function SnakeGame:updateScore()
     local walls = 'Walls:Y'
     if self.noWalls then
@@ -153,6 +176,7 @@ function SnakeGame:updateScore()
     V.nvim_buf_set_lines(self.scoreBuf, 0, -1, false, { status })
 end
 
+-- Shuts down the game and closes its windows.
 function SnakeGame:shutdown()
     self:endGame()
     if self.scoreWin then
@@ -165,6 +189,7 @@ function SnakeGame:shutdown()
     end
 end
 
+-- Stops the game and calls the end game callback.
 function SnakeGame:endGame()
     self.snake:oops()
     self:cancelTimer()
@@ -173,18 +198,7 @@ function SnakeGame:endGame()
     end
 end
 
-function SnakeGame:start()
-    self:cancelTimer()
-    self.score = 0
-    self.food = {}
-    self.snake = Snake:new(self.grid.width / 2, self.grid.height / 2, 3, self.noWalls)
-    self.gameTimer = vim.loop.new_timer()
-    self.gameTimer:start(0, self.speed, vim.schedule_wrap(function()
-        self:render()
-    end))
-    self:updateScore()
-end
-
+-- Cancels the time and frees its resources.
 function SnakeGame:cancelTimer()
     if self.gameTimer then
         self.gameTimer:stop()

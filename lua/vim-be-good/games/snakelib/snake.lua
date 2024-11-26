@@ -9,6 +9,12 @@ local DOWN = Dir.DOWN
 local LEFT = Dir.LEFT
 local RIGHT = Dir.RIGHT
 
+-- Represents the snake object (consists of a head and a body).
+-- @param x integer: the x coordinate of the head
+-- @param y integer: the y coordinate of the head
+-- @param initialSize integer: the initial size of the body
+-- @param noWalls boolean: if true, then the snake loops
+--        around when it hits a wall
 function Snake:new(x, y, initialSize, noWalls)
     self.__index = self
     local head = { x = math.floor(x), y = math.floor(y) }
@@ -32,6 +38,10 @@ function Snake:new(x, y, initialSize, noWalls)
     return setmetatable(newSnake, self)
 end
 
+-- Sets the direction of the snake.
+-- Snakes can't reverse their direction, so not all
+-- combinations are valid.
+-- @param dir Direction: one of the direction enums
 function Snake:setDir(dir)
     if self.dead or dir < UP or dir > RIGHT then
         return
@@ -47,10 +57,15 @@ function Snake:setDir(dir)
     self.dir = dir
 end
 
+-- Notifies that snake that it should grow its body
+-- length by 1. Called when it eats food.
 function Snake:grow()
     self.shouldGrow = true
 end
 
+-- Moves the snake in its current direction, and updates its
+-- internal state. Takes into account walls, growth, etc.
+-- @param grid Grid: the grid object that the snake can move it
 function Snake:tick(grid)
     local head = self.head
     local dir = self.dir
@@ -92,6 +107,7 @@ function Snake:tick(grid)
     end
 end
 
+-- Handles collision with walls
 function Snake:handleWallHit(noWallsCallback)
     if self.noWalls then
         -- If no walls, execute the callback, which loops the head
@@ -101,18 +117,21 @@ function Snake:handleWallHit(noWallsCallback)
     self.hitWall = true
 end
 
+-- Draws the snake on the provided grid.
 function Snake:renderBody(grid)
     for _, body in pairs(self.body) do
         grid:setChar(body.x, body.y, C.BodyChar)
     end
 end
 
+-- Draws the snake's head on the provide grid.
 function Snake:renderHead(grid)
     local head = self.head
     print(vim.inspect(head))
     grid:setChar(head.x, head.y, C.HeadChar[self.dir])
 end
 
+-- Called when the snake has met an untimely demise.
 function Snake:oops()
     self.dead = true
     self.dir = STOPPED

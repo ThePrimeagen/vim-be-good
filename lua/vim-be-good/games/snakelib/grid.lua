@@ -4,7 +4,12 @@ local log = require("vim-be-good.log")
 
 local Grid = {}
 
---- Grid
+-- Class the represents a textual rendering grid.
+-- @param bufNum integer: the underlying vim buffer to use
+-- @param cols integer: the number of columns (width)
+-- @param rows integer: the number of rows (height)
+-- @param fillChar string: the default character to use
+--        when clearing the grid
 function Grid:new(bufNum, cols, rows, fillChar)
     self.__index = self
     if not fillChar then
@@ -26,6 +31,8 @@ function Grid:new(bufNum, cols, rows, fillChar)
     return setmetatable(newGrid, self)
 end
 
+-- Clears the grid using the given @param fillChar, or the
+-- default fillChar if none is provided
 function Grid:clear(fillChar)
     if not fillChar then
         fillChar = self.fillChar
@@ -37,6 +44,7 @@ function Grid:clear(fillChar)
     self.lines = lines
 end
 
+-- Sets the character at the given position to @param char
 function Grid:setChar(col, row, char)
     row = row + 1
     col = col + 1
@@ -49,6 +57,7 @@ function Grid:setChar(col, row, char)
     self.lines[row] = line
 end
 
+-- Returns the character at the given position.
 function Grid:getChar(col, row)
     row = row + 1
     col = col + 1
@@ -60,6 +69,8 @@ function Grid:getChar(col, row)
     return string.sub(line, col, col)
 end
 
+-- Draws the grid to the text buffer associated with the grid.
+-- The buffer is marked non-modifiable at the end of the render.
 function Grid:render()
     local currentLines = V.nvim_buf_get_lines(self.buf, 0, -1, false)
     local rows = #currentLines
