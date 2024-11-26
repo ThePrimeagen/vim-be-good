@@ -37,13 +37,14 @@ function Snake:getInstructions()
         '2. Eat food (O) to grow',
         '3. Don\'t eat yourself',
         '4. In higher difficulties, walls kill',
+        '5. Snake speed scales with difficulty',
     }
 end
 
 function Snake:getConfig()
     log.info("getConfig", self.difficulty, GameUtils.difficultyToTime[self.difficulty])
     return {
-        roundTime = 100000,
+        roundTime = 1000000,
         noCursor = true,
         canEndRound = true,
     }
@@ -64,7 +65,7 @@ end
 
 function Snake:render()
     if self.snakeGame then
-        self.snakeGame:shutdown()
+        self.snakeGame:shutdown(nil)
     end
     self.snakeGame = SnakeGame:new(35, 15, self.difficultyLevel, self.endRoundCallback)
     self.snakeGame:start()

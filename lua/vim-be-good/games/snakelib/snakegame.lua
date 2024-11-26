@@ -71,7 +71,7 @@ function SnakeGame:new(width, height, difficultyLevel, endGameCallback)
         pattern = { tostring(gridWin) },
         callback = function(_)
             self.gridWin = nil
-            self:shutdown()
+            self:shutdown(self.endGameCallback)
         end
     })
 
@@ -106,6 +106,22 @@ function SnakeGame:start()
     self:updateScore()
 end
 
+-- Shuts down the game and closes its windows. Optionally also call a callback.
+function SnakeGame:shutdown(callback)
+    self:cancelTimer()
+    if self.scoreWin then
+        V.nvim_win_close(self.scoreWin, true)
+        self.scoreWin = nil
+    end
+    if self.gridWin then
+        V.nvim_win_close(self.gridWin, true)
+        self.gridWin = nil
+    end
+    if callback then
+        callback()
+    end
+end
+
 -- Computes the next game state and draws it to screen.
 function SnakeGame:render()
     self.snake:tick(self.grid)
@@ -128,7 +144,7 @@ function SnakeGame:handleCollision()
     local head = self.snake.head
     local charAtHead = self.grid:getChar(head.x, head.y)
     if hitWall or charAtHead == C.BodyChar then
-        self:endGame()
+        self:handleSnakeDied()
     elseif charAtHead == C.FoodChar then
         self:consumeFood()
     end
@@ -176,26 +192,12 @@ function SnakeGame:updateScore()
     V.nvim_buf_set_lines(self.scoreBuf, 0, -1, false, { status })
 end
 
--- Shuts down the game and closes its windows.
-function SnakeGame:shutdown()
-    self:endGame()
-    if self.scoreWin then
-        V.nvim_win_close(self.scoreWin, true)
-        self.scoreWin = nil
-    end
-    if self.gridWin then
-        V.nvim_win_close(self.gridWin, true)
-        self.gridWin = nil
-    end
-end
-
--- Stops the game and calls the end game callback.
-function SnakeGame:endGame()
+-- Snake is dead. Stop the game and calls the end game callback.
+function SnakeGame:handleSnakeDied()
     self.snake:oops()
     self:cancelTimer()
-    if self.endGameCallback then
-        vim.defer_fn(self.endGameCallback, 3000)
-    end
+    -- After 3s, close the game and call the end game callback
+    vim.defer_fn(function() self:shutdown(self.endGameCallback) end, 3000)
 end
 
 -- Cancels the time and frees its resources.
