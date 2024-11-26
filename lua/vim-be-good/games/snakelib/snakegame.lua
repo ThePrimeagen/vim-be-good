@@ -75,7 +75,6 @@ function SnakeGame:new(width, height, difficultyLevel, endGameCallback)
         end
     })
 
-    print('Difficulty ' .. difficultyLevel)
     local newGame = {
         scoreWin = scoreWin,
         scoreBuf = scoreBuf,

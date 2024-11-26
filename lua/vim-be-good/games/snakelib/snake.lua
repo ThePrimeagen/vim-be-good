@@ -127,7 +127,6 @@ end
 -- Draws the snake's head on the provide grid.
 function Snake:renderHead(grid)
     local head = self.head
-    print(vim.inspect(head))
     grid:setChar(head.x, head.y, C.HeadChar[self.dir])
 end
 
