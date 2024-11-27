@@ -69,9 +69,7 @@ function Snake:render()
     end
     self.snakeGame = SnakeGame:new(35, 15, self.difficultyLevel, self.endRoundCallback)
     self.snakeGame:start()
-    local lines = {}
-    local cursorIdx = 1
-    return lines, cursorIdx
+    return {''}, 1
 end
 
 return Snake
