@@ -6,6 +6,7 @@ local WordRound = require("vim-be-good.games.words");
 local CiRound = require("vim-be-good.games.ci");
 local HjklRound = require("vim-be-good.games.hjkl");
 local WhackAMoleRound = require("vim-be-good.games.whackamole");
+local Snake = require("vim-be-good.games.snake");
 local log = require("vim-be-good.log");
 local statistics = require("vim-be-good.statistics");
 
@@ -41,6 +42,10 @@ local games = {
 
     whackamole = function(difficulty, window)
         return WhackAMoleRound:new(difficulty, window)
+    end,
+
+    snake = function(difficulty, window)
+        return Snake:new(difficulty, window)
     end,
 }
 
@@ -300,6 +305,9 @@ function GameRunner:run()
     self.window.buffer:debugLine(string.format(
         "Round %d / %d", self.currentRound, self.config.roundCount))
 
+    if roundConfig.canEndRound then
+        self.round:setEndRoundCallback(function() self:endRound() end)
+    end
     self.window.buffer:setInstructions(self.round.getInstructions())
     local lines, cursorLine, cursorCol = self.round:render()
     self.window.buffer:render(lines)
@@ -312,8 +320,8 @@ function GameRunner:run()
     cursorLine = cursorLine + curRoundLineLen + instuctionLen
 
     log.info("Setting current line to", cursorLine, cursorCol)
-    if cursorLine > 0 then
-        vim.api.nvim_win_set_cursor(0, {cursorLine, cursorCol})
+    if cursorLine > 0 and not roundConfig.noCursor then
+         vim.api.nvim_win_set_cursor(0, {cursorLine, cursorCol})
     end
 
     self.startTime = GameUtils.getTime()
