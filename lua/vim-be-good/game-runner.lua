@@ -269,7 +269,9 @@ function GameRunner:renderEndGame()
 
     self.ended = true
 
+    Stats:logHighscore(sum/self.config.roundCount , self.results.games[1])
     -- TODO: Make this a bit better especially with random.
+    -- print to screen within table 
     table.insert(lines, string.format("%d / %d completed successfully", self.results.successes, self.config.roundCount))
     table.insert(lines, string.format("Average %.2f", sum / self.config.roundCount))
     table.insert(lines, string.format("Game Type %s", self.results.games[1]))
