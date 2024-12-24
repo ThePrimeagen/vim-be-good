@@ -63,9 +63,9 @@ function RelativeRound:render()
 
     local cursorIdx
     if goHigh then
-        cursorIdx = math.random(deleteMeIdx + 1, 20)
+        cursorIdx = math.random(deleteMeIdx + 2, 20)
     else
-        cursorIdx = math.random(1, deleteMeIdx - 1)
+        cursorIdx = math.random(1, deleteMeIdx - 2)
     end
 
     lines[deleteMeIdx] = " DELETE_ME"
