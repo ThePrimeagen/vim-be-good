@@ -47,6 +47,7 @@ function Snake:getConfig()
         roundTime = 1000000,
         noCursor = true,
         canEndRound = true,
+        isStandalone = true,
     }
 end
 

@@ -61,9 +61,16 @@ end
 -- games table, difficulty string
 function GameRunner:new(selectedGames, difficulty, window, onFinished)
     log.info("New", difficulty)
+    
+    local isStandaloneGame = false
+    if selectedGames[1] ~= "random" then
+        local testGame = getGame(selectedGames[1], difficulty, window)
+        isStandaloneGame = testGame:getConfig().isStandalone or false
+    end
+    
     local config = {
         difficulty = difficulty,
-        roundCount = GameUtils.getRoundCount(difficulty),
+        roundCount = isStandaloneGame and 1 or GameUtils.getRoundCount(difficulty),
     }
 
     local rounds = {}
@@ -212,30 +219,46 @@ function GameRunner:checkForWin()
     self:endRound(true)
 end
 
-function GameRunner:endRound(success)
+function GameRunner:endRound(success, score)
     success = success or false
+    score = score or 0
 
     self.running = false
-    if success then
-        self.results.successes = self.results.successes + 1
+    
+    local roundConfig = self.round:getConfig()
+    
+    if not roundConfig.isStandalone then
+        if success then
+            self.results.successes = self.results.successes + 1
+        else
+            self.results.failures = self.results.failures + 1
+        end
+
+        local endTime = GameUtils.getTime()
+        local totalTime = endTime - self.startTime
+        table.insert(self.results.timings, totalTime)
+        table.insert(self.results.games, self.round:name())
+
+        local result = {
+            timestamp = vim.fn.localtime(),
+            roundNum = self.currentRound,
+            difficulty = self.round.difficulty,
+            roundName = self.round:name(),
+            success = success,
+            time = totalTime,
+        }
+        Stats:logResult(result)
     else
-        self.results.failures = self.results.failures + 1
+        self.results.score = score
+        local result = {
+            timestamp = vim.fn.localtime(),
+            difficulty = self.round.difficulty,
+            roundName = self.round:name(),
+            score = score,
+        }
+        Stats:logResult(result)
     end
 
-    local endTime = GameUtils.getTime()
-    local totalTime = endTime - self.startTime
-    table.insert(self.results.timings, totalTime)
-    table.insert(self.results.games, self.round:name())
-
-    local result = {
-        timestamp = vim.fn.localtime(),
-        roundNum = self.currentRound,
-        difficulty = self.round.difficulty,
-        roundName = self.round:name(),
-        success = success,
-        time = totalTime,
-    }
-    Stats:logResult(result)
     log.info("endRound", self.currentRound, self.config.roundCount)
     if self.currentRound >= self.config.roundCount then -- TODO: self.config.roundCount then
         self:endGame()
@@ -270,9 +293,16 @@ function GameRunner:renderEndGame()
     self.ended = true
 
     -- TODO: Make this a bit better especially with random.
-    table.insert(lines, string.format("%d / %d completed successfully", self.results.successes, self.config.roundCount))
-    table.insert(lines, string.format("Average %.2f", sum / self.config.roundCount))
-    table.insert(lines, string.format("Game Type %s", self.results.games[1]))
+    if self.round and self.round:getConfig().isStandalone then
+        table.insert(lines, "Game finished!")
+        if self.results.score then
+            table.insert(lines, string.format("Score: %d", self.results.score))
+        end
+    else
+        table.insert(lines, string.format("%d / %d completed successfully", self.results.successes, self.config.roundCount))
+        table.insert(lines, string.format("Average %.2f", sum / self.config.roundCount))
+        table.insert(lines, string.format("Game Type %s", self.results.games[1]))
+    end
 
     for idx = 1, 3 do
         table.insert(lines, "")
@@ -306,7 +336,7 @@ function GameRunner:run()
         "Round %d / %d", self.currentRound, self.config.roundCount))
 
     if roundConfig.canEndRound then
-        self.round:setEndRoundCallback(function() self:endRound() end)
+        self.round:setEndRoundCallback(function(score) self:endRound(true, score) end)
     end
     self.window.buffer:setInstructions(self.round.getInstructions())
     local lines, cursorLine, cursorCol = self.round:render()
@@ -330,19 +360,20 @@ function GameRunner:run()
     local currentId = runningId
     self.running = true
 
-    log.info("defer_fn", roundConfig.roundTime)
-    vim.defer_fn(function()
-        if self.state == states.gameEnd then
-            return
-        end
-        log.info("Deferred?", currentId, runningId)
-        if currentId < runningId then
-            return
-        end
+    if roundConfig.roundTime then
+        log.info("defer_fn", roundConfig.roundTime)
+        vim.defer_fn(function()
+            if self.state == states.gameEnd then
+                return
+            end
+            log.info("Deferred?", currentId, runningId)
+            if currentId < runningId then
+                return
+            end
 
-        self:endRound()
-    end, roundConfig.roundTime)
-
+            self:endRound()
+        end, roundConfig.roundTime)
+    end
 end
 
 return GameRunner
