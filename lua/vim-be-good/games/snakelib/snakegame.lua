@@ -196,7 +196,13 @@ function SnakeGame:handleSnakeDied()
     self.snake:oops()
     self:cancelTimer()
     -- After 3s, close the game and call the end game callback
-    vim.defer_fn(function() self:shutdown(self.endGameCallback) end, 3000)
+    vim.defer_fn(function()
+        self:shutdown(function()
+            if self.endGameCallback then
+                self.endGameCallback(self.score)
+            end
+        end)
+    end, 3000)
 end
 
 -- Cancels the time and frees its resources.
