@@ -101,6 +101,10 @@ function Buffer:render(lines)
 
     log.info("Buffer:Rendering")
     vim.api.nvim_buf_set_lines(self.bufh, idx, idx + #lines, false, lines)
+
+    -- Drop lines left over from a longer previous render (e.g. ci{ before
+    -- returning to the menu), otherwise line-count checks miss deletions
+    vim.api.nvim_buf_set_lines(self.bufh, idx + #lines, -1, false, {})
 end
 
 function Buffer:debugLine(line)

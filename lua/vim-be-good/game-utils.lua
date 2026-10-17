@@ -112,11 +112,13 @@ local function getRoundCount(difficulty)
     return roundCount
 end
 
+-- Random 1-based start line for a block of textLines lines that fits within
+-- lineCount lines, leaving the first topOffset lines free
 local function getRandomInsertionLocation(lineCount, textLines, topOffset)
     textLines = textLines or 1
     topOffset = topOffset or 0
 
-    return math.random(topOffset, lineCount - textLines - topOffset)
+    return math.random(topOffset + 1, lineCount - textLines + 1)
 end
 
 local function getRandomSentence()
