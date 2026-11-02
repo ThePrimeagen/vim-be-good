@@ -261,6 +261,12 @@ function GameRunner:close()
     if self.window.buffer then
         self.window.buffer:removeListener(self.onChange)
     end
+    -- Rounds that own extra windows or timers (snake) clean them up here.
+    for _, round in ipairs(self.rounds) do
+        if round.close then
+            round:close()
+        end
+    end
     self.ended = true
 end
 

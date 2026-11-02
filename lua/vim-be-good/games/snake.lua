@@ -63,6 +63,14 @@ function Snake:setEndRoundCallback(endRoundCallback)
     self.endRoundCallback = endRoundCallback
 end
 
+-- Closes the snake windows and stops its timer without ending the round.
+function Snake:close()
+    if self.snakeGame then
+        self.snakeGame:shutdown(nil)
+        self.snakeGame = nil
+    end
+end
+
 function Snake:render()
     if self.snakeGame then
         self.snakeGame:shutdown(nil)
