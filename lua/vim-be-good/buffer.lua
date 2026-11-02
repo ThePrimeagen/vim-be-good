@@ -31,11 +31,7 @@ end
 
 function Buffer:close()
     self.onChangeList = {}
-    -- TODO: Teejaay fix this
-
-    if vim.api.nvim_buf_detach then
-        vim.api.nvim_buf_detach(self.bufh)
-    end
+    self.closed = true
 end
 
 function Buffer:_scheduledOnLine()
@@ -67,6 +63,9 @@ function Buffer:_scheduledOnLine()
 end
 
 function Buffer:onLine(buf, changedtick, firstline, lastline, linedata, more)
+    if self.closed then
+        return true -- detaches the nvim_buf_attach handler
+    end
     vim.schedule(function()
         self:_scheduledOnLine(buf, changedtick, firstline, lastline, linedata, more)
     end)

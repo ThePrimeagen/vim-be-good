@@ -20,6 +20,7 @@ function Snake:new(x, y, initialSize, noWalls)
     local head = { x = math.floor(x), y = math.floor(y) }
     local newSnake = {
         dir = RIGHT,
+        lastMovedDir = RIGHT,
         head = {x = math.floor(x), y = math.floor(y)},
         body = {},
         shouldGrow = false,
@@ -46,7 +47,9 @@ function Snake:setDir(dir)
     if self.dead or dir < UP or dir > RIGHT then
         return
     end
-    local curDir = self.dir
+    -- Compare against the direction of the last actual move, so two quick
+    -- key presses within one tick can't turn the snake back into itself.
+    local curDir = self.lastMovedDir
     -- Snakes can't reverse
     if curDir == LEFT and dir == RIGHT or
         curDir == RIGHT and dir == LEFT or
@@ -72,6 +75,7 @@ function Snake:tick(grid)
     if dir == STOPPED then
         return
     end
+    self.lastMovedDir = dir
     -- Move tail to current head
     if #self.body > 0 then
         local tail = {}
@@ -97,11 +101,11 @@ function Snake:tick(grid)
     if head.x >= grid.width then
         self:handleWallHit(function () head.x = 0 end)
     elseif head.x < 0 then
-        self:handleWallHit(function () head.x = grid.width end)
+        self:handleWallHit(function () head.x = grid.width - 1 end)
     elseif head.y >= grid.height then
         self:handleWallHit(function () head.y = 0 end)
     elseif head.y < 0 then
-        self:handleWallHit(function () head.y = grid.height end)
+        self:handleWallHit(function () head.y = grid.height - 1 end)
     else
         self.hitWall = false
     end

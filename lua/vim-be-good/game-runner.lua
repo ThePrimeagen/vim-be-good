@@ -101,8 +101,8 @@ function GameRunner:new(selectedGames, difficulty, window, onFinished)
 
     local function onChange()
         if hasEverythingEnded then
-            if not self.ended then
-                self:close()
+            if not game.ended then
+                game:close()
             end
             return
         end
@@ -123,6 +123,9 @@ end
 
 function GameRunner:countdown(count, cb)
     local self = self
+    if self.ended or not self.window:isValid() then
+        return
+    end
     ok, msg = pcall(function()
         if count > 0 then
             local str = string.format("Game Starts in %d", count)
@@ -213,6 +216,9 @@ function GameRunner:checkForWin()
 end
 
 function GameRunner:endRound(success)
+    if self.ended or not self.running then
+        return
+    end
     success = success or false
 
     self.running = false
@@ -252,7 +258,9 @@ end
 
 function GameRunner:close()
     log.info("GameRunner:close()", debug.traceback())
-    self.window.buffer:removeListener(self.onChange)
+    if self.window.buffer then
+        self.window.buffer:removeListener(self.onChange)
+    end
     self.ended = true
 end
 
@@ -296,6 +304,9 @@ function GameRunner:endGame()
 end
 
 function GameRunner:run()
+    if self.ended or not self.window:isValid() then
+        return
+    end
     local idx = math.random(1, #self.rounds)
     self.round = self.rounds[idx]
 
@@ -321,7 +332,7 @@ function GameRunner:run()
 
     log.info("Setting current line to", cursorLine, cursorCol)
     if cursorLine > 0 and not roundConfig.noCursor then
-         vim.api.nvim_win_set_cursor(0, {cursorLine, cursorCol})
+         vim.api.nvim_win_set_cursor(self.window.winId, {cursorLine, cursorCol})
     end
 
     self.startTime = GameUtils.getTime()
@@ -332,7 +343,7 @@ function GameRunner:run()
 
     log.info("defer_fn", roundConfig.roundTime)
     vim.defer_fn(function()
-        if self.state == states.gameEnd then
+        if self.ended or self.state == states.gameEnd then
             return
         end
         log.info("Deferred?", currentId, runningId)

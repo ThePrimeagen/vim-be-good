@@ -48,7 +48,8 @@ function WhackAMoleRound:render()
     local chosenLocation = 0
     while not foundLocation do
         local location = math.random(1, string.len(sentence))
-        if sentence:sub(location,location) ~= " " then
+        -- Only letters: toggling case on punctuation would leave the line unchanged.
+        if sentence:sub(location,location):match("%a") then
             chosenLocation = location
             foundLocation = true
         end

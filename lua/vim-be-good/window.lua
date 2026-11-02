@@ -15,8 +15,8 @@ local function generateConfig(rowPadding, colPadding)
     return {
         row = rowHalfPadding,
         col = colHalfPadding,
-        width = w - colPadding,
-        height = h - rowPadding,
+        width = math.max(1, w - colPadding),
+        height = math.max(1, h - rowPadding),
         relative = "editor",
     }
 end
@@ -37,7 +37,7 @@ function WindowHandler:new(rowPadding, colPadding)
 end
 
 function WindowHandler:close()
-    if self.winId ~= 0 then
+    if self.winId ~= 0 and vim.api.nvim_win_is_valid(self.winId) then
         vim.api.nvim_win_close(self.winId, true)
     end
 
@@ -53,7 +53,8 @@ function WindowHandler:close()
 end
 
 function WindowHandler:isValid()
-    return vim.api.nvim_win_is_valid(self.winId)
+    -- winId 0 means "no window"; nvim_win_is_valid(0) would test the current window.
+    return self.winId ~= 0 and vim.api.nvim_win_is_valid(self.winId)
 end
 
 function WindowHandler:show()
@@ -75,9 +76,7 @@ function WindowHandler:onResize()
     end
 
     local ok, msg = pcall(function()
-        print("onResize before", vim.inspect(self.config))
         self.config = generateConfig(self.rowPadding, self.colPadding)
-        print("onResize", vim.inspect(self.config))
         self:show()
     end)
 
