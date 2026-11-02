@@ -21,7 +21,8 @@ local SpeedLevel = {
 -- @param height integer: the height of the snake window
 -- @param difficultyLevel integer: value between 1 and 6
 -- @param endGameCallback function: the function to be called when the game ends
-function SnakeGame:new(width, height, difficultyLevel, endGameCallback)
+-- @param quitCallback function: called when the player closes the grid window
+function SnakeGame:new(width, height, difficultyLevel, endGameCallback, quitCallback)
     self.__index = self
     -- Center game UI in current window
     local curWinHeight = V.nvim_win_get_height(0)
@@ -66,12 +67,21 @@ function SnakeGame:new(width, height, difficultyLevel, endGameCallback)
 
     local gameGrid = Grid:new(gridBuf, width, height, C.GridChar)
 
-    -- When the game is closed (the grid), also close the Scores window.
+    -- When the player closes the grid (e.g. :q), close the Scores window too
+    -- and quit, rather than counting it as a lost round. Closes made by
+    -- shutdown itself are ignored.
     V.nvim_create_autocmd({"WinClosed"}, {
         pattern = { tostring(gridWin) },
+        once = true,
         callback = function(_)
+            if self.isShutdown then
+                return
+            end
             self.gridWin = nil
-            self:shutdown(self.endGameCallback)
+            self:shutdown(nil)
+            if self.quitCallback then
+                vim.schedule(self.quitCallback)
+            end
         end
     })
 
@@ -86,7 +96,8 @@ function SnakeGame:new(width, height, difficultyLevel, endGameCallback)
         score = 0,
         noWalls = difficultyLevel < 4,
         speed = SpeedLevel[difficultyLevel],  -- technically slowness
-        endGameCallback = endGameCallback
+        endGameCallback = endGameCallback,
+        quitCallback = quitCallback,
     }
     self = setmetatable(newGame, self)
     return self
@@ -107,15 +118,21 @@ end
 
 -- Shuts down the game and closes its windows. Optionally also call a callback.
 function SnakeGame:shutdown(callback)
+    -- Closing gridWin fires the WinClosed autocmd, which calls shutdown again;
+    -- the death timer may also fire after a manual close. Only run once.
+    if self.isShutdown then
+        return
+    end
+    self.isShutdown = true
     self:cancelTimer()
-    if self.scoreWin then
+    if self.scoreWin and V.nvim_win_is_valid(self.scoreWin) then
         V.nvim_win_close(self.scoreWin, true)
-        self.scoreWin = nil
     end
-    if self.gridWin then
+    self.scoreWin = nil
+    if self.gridWin and V.nvim_win_is_valid(self.gridWin) then
         V.nvim_win_close(self.gridWin, true)
-        self.gridWin = nil
     end
+    self.gridWin = nil
     if callback then
         callback()
     end
@@ -161,8 +178,8 @@ function SnakeGame:addFood()
     if #self.food > 0 then
         return
     end
-    local x = math.random(self.grid.width)
-    local y = math.random(self.grid.height)
+    local x = math.random(0, self.grid.width - 1)
+    local y = math.random(0, self.grid.height - 1)
     local char = self.grid:getChar(x, y)
     if char == C.GridChar then
        table.insert(self.food, {x = x, y = y})

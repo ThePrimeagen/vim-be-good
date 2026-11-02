@@ -63,11 +63,21 @@ function Snake:setEndRoundCallback(endRoundCallback)
     self.endRoundCallback = endRoundCallback
 end
 
+-- Closes the snake windows and stops its timer without ending the round.
+function Snake:close()
+    if self.snakeGame then
+        self.snakeGame:shutdown(nil)
+        self.snakeGame = nil
+    end
+end
+
 function Snake:render()
     if self.snakeGame then
         self.snakeGame:shutdown(nil)
     end
-    self.snakeGame = SnakeGame:new(35, 15, self.difficultyLevel, self.endRoundCallback)
+    -- Closing the snake grid quits the session by closing the game window.
+    local quit = function() self.window:close() end
+    self.snakeGame = SnakeGame:new(35, 15, self.difficultyLevel, self.endRoundCallback, quit)
     self.snakeGame:start()
     return {''}, 1
 end

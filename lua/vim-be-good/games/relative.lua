@@ -59,7 +59,8 @@ end
 function RelativeRound:render()
     local lines = GameUtils.createEmpty(20)
     local deleteMeIdx = math.random(1, 20)
-    local goHigh = deleteMeIdx < 17 and math.random() > 0.5
+    -- DELETE_ME on line 1 leaves no line above it for the cursor.
+    local goHigh = deleteMeIdx == 1 or (deleteMeIdx < 17 and math.random() > 0.5)
 
     local cursorIdx
     if goHigh then

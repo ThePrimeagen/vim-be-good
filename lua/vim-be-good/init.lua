@@ -17,6 +17,10 @@ end
 
 local function menu()
     log.info("------------------ STARTING THE GAME -----------------------------")
+    -- A previous session may still be open; tear it down before starting a new one.
+    if endItAll and not hasEverythingEnded then
+        endItAll()
+    end
     endItAll = nil
     hasEverythingEnded = false
 
@@ -35,20 +39,37 @@ local function menu()
         log.info("endItAll", debug.traceback())
         hasEverythingEnded = true
 
-        if windowHandler then
-            windowHandler:close()
-            windowHandler = nil
+        -- Close the game runner first: it needs the window's buffer to detach.
+        if gameRunner ~= nil then
+            gameRunner:close()
+            gameRunner = nil
         end
         if menu ~= nil then
             menu:close()
             menu = nil
         end
-
-        if gameRunner ~= nil then
-            gameRunner:close()
-            gameRunner = nil
+        if windowHandler then
+            windowHandler:close()
+            windowHandler = nil
         end
     end
+
+    -- Closing the game window directly (:q, <C-w>c) must end the session,
+    -- otherwise timers keep running against whatever window is current.
+    local sessionEnd = endItAll
+    vim.api.nvim_create_autocmd("WinClosed", {
+        pattern = tostring(windowHandler.winId),
+        once = true,
+        callback = function()
+            vim.schedule(function()
+                -- Only if this session is still the current one; a newer
+                -- :VimBeGood owns the global flags by now.
+                if endItAll == sessionEnd then
+                    sessionEnd()
+                end
+            end)
+        end,
+    })
 
     local onGameFinish
     local onMenuSelect
@@ -82,7 +103,7 @@ local function menu()
         menu:close()
 
         log.info("onResults", gameString, difficulty)
-        local gameRunner = GameRunner:new({gameString}, difficulty, windowHandler, function(game, nextState)
+        gameRunner = GameRunner:new({gameString}, difficulty, windowHandler, function(game, nextState)
             onGameFinish(gameString, difficulty, game, nextState)
         end)
 
